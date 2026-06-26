@@ -1,216 +1,225 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
+import { supabase } from '../lib/supabase'
 
-const INITIAL_RAFFLES = [
-  { id: 1, title: '2025-26 Topps Basketball Hobby Box',       type: 'Rifa',  priceNum: 15, price: '$15',      total: 100, sold: 73, date: '2026-06-30T21:00:00', img: 'https://images.unsplash.com/photo-1546519638405-a9f9f1c9d0b3?w=600&q=80', prize: 'Hobby Box sellada Topps NBA',            sport: 'NBA',     soldOut: false },
-  { id: 2, title: 'Group Break · Panini Prizm NFL 2025',       type: 'Break', priceNum: 35, price: '$35/spot', total: 32,  sold: 28, date: '2026-07-02T20:00:00', img: 'https://images.unsplash.com/photo-1566577739112-5180d4bf9390?w=600&q=80', prize: 'Cartas de tu equipo NFL',                 sport: 'NFL',     soldOut: false },
-  { id: 3, title: 'Rifa · Cooper Flagg Topps Now RC Auto',     type: 'Rifa',  priceNum: 25, price: '$25',      total: 50,  sold: 12, date: '2026-07-05T22:00:00', img: 'https://images.unsplash.com/photo-1504450758481-7338eba7524a?w=600&q=80', prize: 'RC Auto PSA 9 garantizado',              sport: 'NBA',     soldOut: false },
-  { id: 4, title: 'Group Break · Topps Chrome Baseball Jumbo', type: 'Break', priceNum: 45, price: '$45/spot', total: 30,  sold: 30, date: '2026-06-28T19:00:00', img: 'https://images.unsplash.com/photo-1540747913346-19212a4b423e?w=600&q=80', prize: 'Cartas de tu equipo MLB',                 sport: 'MLB',     soldOut: true  },
-  { id: 5, title: 'Rifa · Mewtwo ex SAR PSA 10 (SV151)',       type: 'Rifa',  priceNum: 10, price: '$10',      total: 200, sold: 89, date: '2026-07-08T21:00:00', img: 'https://images.unsplash.com/photo-1613771404784-3a5686aa2be3?w=600&q=80', prize: 'Mewtwo ex Special Art Rare PSA 10',     sport: 'Pokémon', soldOut: false },
-  { id: 6, title: 'Group Break · One Piece OP09 Box',          type: 'Break', priceNum: 20, price: '$20/spot', total: 20,  sold: 11, date: '2026-07-10T20:00:00', img: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=600&q=80', prize: 'Cartas de tu personaje One Piece',       sport: 'One Piece', soldOut: false },
+type Raffle = {
+  id: number
+  title: string
+  sport: string
+  prize: string
+  price_per_ticket: number
+  max_tickets: number
+  sold_tickets: number
+  ends_at: string
+  image: string
+  highlight: string
+}
+
+const RAFFLES: Raffle[] = [
+  {
+    id: 1,
+    title:             'Wembanyama RC PSA 10',
+    sport:             'NBA',
+    prize:             'Victor Wembanyama 2023-24 Topps Chrome Prizm RC — PSA 10',
+    price_per_ticket:  5,
+    max_tickets:       100,
+    sold_tickets:      67,
+    ends_at:           new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
+    image:             'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=600&q=90&auto=format',
+    highlight:         'Valor estimado $800 USD',
+  },
+  {
+    id: 2,
+    title:             'Messi Topps Chrome Auto /50',
+    sport:             'Soccer',
+    prize:             'Lionel Messi 2022 Topps Chrome Autógrafo On-Card /50',
+    price_per_ticket:  10,
+    max_tickets:       50,
+    sold_tickets:      23,
+    ends_at:           new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+    image:             'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=600&q=90&auto=format',
+    highlight:         'Firmado en carta · /50',
+  },
+  {
+    id: 3,
+    title:             'Pikachu Illustration Rare PSA 9',
+    sport:             'Pokémon',
+    prize:             'Pikachu with Grey Felt Hat 151 Illustration Rare — PSA 9',
+    price_per_ticket:  3,
+    max_tickets:       200,
+    sold_tickets:      145,
+    ends_at:           new Date(Date.now() + 22 * 60 * 60 * 1000).toISOString(),
+    image:             'https://images.unsplash.com/photo-1613771404784-3a5686aa2be3?w=600&q=90&auto=format',
+    highlight:         'Slabbed PSA 9',
+  },
+  {
+    id: 4,
+    title:             'Patrick Mahomes RPA /25',
+    sport:             'NFL',
+    prize:             'Patrick Mahomes 2017 Panini National Treasures RPA /25',
+    price_per_ticket:  25,
+    max_tickets:       30,
+    sold_tickets:      8,
+    ends_at:           new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(),
+    image:             'https://images.unsplash.com/photo-1560272564-c83b66b1ad12?w=600&q=90&auto=format',
+    highlight:         'Valor ~$3,500 USD',
+  },
 ]
 
-const PAST = [
-  { title: 'Rifa Lamine Yamal RC Blue Refractor /150', winner: '@YamalFan_MX',       prize: '$1,800',          date: 'Jun 22' },
-  { title: 'Break Prizm NFL 2024',                     winner: '@NFLBreaker',         prize: 'Cartas Chiefs 🏆', date: 'Jun 18' },
-  { title: 'Rifa Ohtani Bowman Chrome PSA 10',         winner: '@BaseballCollector',  prize: '$3,200',          date: 'Jun 12' },
-  { title: 'Group Break Pokémon 151 Japonés',          winner: '@PokeCollector_GDL', prize: 'Mewtwo SAR 🃏',   date: 'Jun 8' },
-]
-
-// Countdown hook
-function useCountdown(targetDate: string) {
-  const getTimeLeft = () => {
-    const diff = new Date(targetDate).getTime() - Date.now()
-    if (diff <= 0) return { d: 0, h: 0, m: 0, s: 0, expired: true }
-    const d = Math.floor(diff / 86400000)
-    const h = Math.floor((diff % 86400000) / 3600000)
-    const m = Math.floor((diff % 3600000) / 60000)
-    const s = Math.floor((diff % 60000) / 1000)
-    return { d, h, m, s, expired: false }
-  }
-  const [time, setTime] = useState(getTimeLeft)
+function useCountdown(endsAt: string) {
+  const [text, setText] = useState('')
   useEffect(() => {
-    const i = setInterval(() => setTime(getTimeLeft()), 1000)
-    return () => clearInterval(i)
-  }, [targetDate])
-  return time
+    const tick = () => {
+      const diff = new Date(endsAt).getTime() - Date.now()
+      if (diff <= 0) { setText('Terminada'); return }
+      const d = Math.floor(diff / 86400000)
+      const h = Math.floor((diff % 86400000) / 3600000)
+      const m = Math.floor((diff % 3600000) / 60000)
+      const s = Math.floor((diff % 60000) / 1000)
+      setText(d > 0 ? `${d}d ${h}h ${m}m` : `${h}h ${m}m ${s}s`)
+    }
+    tick()
+    const id = setInterval(tick, 1000)
+    return () => clearInterval(id)
+  }, [endsAt])
+  return text
 }
 
-function Countdown({ date }: { date: string }) {
-  const { d, h, m, s, expired } = useCountdown(date)
-  if (expired) return <span className="text-red-400 font-bold text-xs">¡Sorteando ahora!</span>
-  return (
-    <div className="flex gap-1 items-center">
-      {d > 0 && <><span className="text-white font-black text-sm">{d}d</span><span className="text-gray-600 text-xs">:</span></>}
-      <span className="text-white font-black text-sm">{String(h).padStart(2,'0')}h</span>
-      <span className="text-gray-600 text-xs">:</span>
-      <span className="text-white font-black text-sm">{String(m).padStart(2,'0')}m</span>
-      <span className="text-gray-600 text-xs">:</span>
-      <span className="text-amber-400 font-black text-sm">{String(s).padStart(2,'0')}s</span>
-    </div>
-  )
-}
-
-function RaffleCard({ raffle }: { raffle: typeof INITIAL_RAFFLES[0] }) {
-  const [qty, setQty]         = useState(1)
-  const [joined, setJoined]   = useState(false)
-  const [spots, setSpots]     = useState(raffle.sold)
-  const pct = Math.round((spots / raffle.total) * 100)
-  const isBreak = raffle.type === 'Break'
-
-  const handleJoin = () => {
-    setSpots((s) => Math.min(s + qty, raffle.total))
-    setJoined(true)
-  }
+function RaffleCard({ raffle, onEnter, entered, loading }: {
+  raffle: Raffle
+  onEnter: () => void
+  entered: boolean
+  loading: boolean
+}) {
+  const countdown = useCountdown(raffle.ends_at)
+  const pct = Math.min(100, Math.round((raffle.sold_tickets / raffle.max_tickets) * 100))
+  const isUrgent = new Date(raffle.ends_at).getTime() - Date.now() < 24 * 60 * 60 * 1000
 
   return (
-    <div className={`group bg-[#111] border rounded-2xl overflow-hidden transition-all ${raffle.soldOut ? 'border-white/5 opacity-60' : joined ? 'border-amber-500/40' : 'border-white/5 hover:border-amber-500/30 hover:shadow-[0_20px_40px_rgba(245,158,11,0.08)] hover:-translate-y-1'}`}>
-      <div className="relative h-44 overflow-hidden">
-        <img src={raffle.img} alt={raffle.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#111] to-transparent" />
-        <div className={`absolute top-3 left-3 text-[10px] font-black px-2 py-0.5 rounded-full uppercase ${raffle.type === 'Rifa' ? 'bg-amber-500 text-black' : 'bg-purple-600 text-white'}`}>
-          {raffle.type}
-        </div>
-        <div className="absolute top-3 right-3 bg-black/70 backdrop-blur text-[10px] font-bold px-2 py-0.5 rounded-lg text-amber-400 border border-amber-500/20">
+    <div className="bg-[#111] border border-white/5 hover:border-amber-500/20 rounded-2xl overflow-hidden transition-all group">
+      <div className="aspect-video overflow-hidden relative">
+        <img src={raffle.image} alt={raffle.title}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#111] via-[#111]/20 to-transparent" />
+        <div className="absolute top-3 left-3 bg-black/70 backdrop-blur text-white text-xs font-bold px-2.5 py-1 rounded-lg">
           {raffle.sport}
         </div>
-        {raffle.soldOut && (
-          <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-            <span className="bg-red-600 text-white font-black px-4 py-2 rounded-xl text-sm">AGOTADO</span>
-          </div>
-        )}
-        {joined && !raffle.soldOut && (
-          <div className="absolute inset-0 bg-amber-500/10 flex items-center justify-center">
-            <span className="bg-amber-500 text-black font-black px-4 py-2 rounded-xl text-sm">✓ INSCRITO</span>
-          </div>
-        )}
+        <div className={`absolute top-3 right-3 flex items-center gap-1.5 backdrop-blur px-2.5 py-1 rounded-lg ${isUrgent ? 'bg-red-500/80' : 'bg-black/70'}`}>
+          {isUrgent && <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />}
+          <span className="text-white text-xs font-bold">{countdown}</span>
+        </div>
+        <div className="absolute bottom-3 left-3 bg-amber-500/90 text-black text-xs font-black px-2.5 py-1 rounded-lg">
+          {raffle.highlight}
+        </div>
       </div>
-
-      <div className="p-4 space-y-3">
-        <div>
-          <h3 className="text-white font-bold text-sm leading-snug">{raffle.title}</h3>
-          <p className="text-amber-500 text-xs font-bold mt-0.5">🏆 {raffle.prize}</p>
-        </div>
-
-        {/* Progress */}
-        <div>
-          <div className="flex justify-between text-[10px] text-gray-600 mb-1">
-            <span>{spots}/{raffle.total} {isBreak ? 'spots' : 'tickets'}</span>
-            <span className={pct >= 90 ? 'text-red-400 font-bold' : ''}>{pct}% {pct >= 90 ? '🔥' : ''}</span>
+      <div className="p-4">
+        <h3 className="text-white font-black text-base mb-1">{raffle.title}</h3>
+        <p className="text-gray-500 text-xs mb-4 leading-relaxed">{raffle.prize}</p>
+        <div className="mb-4">
+          <div className="flex justify-between text-xs mb-1.5">
+            <span className="text-gray-500">{raffle.sold_tickets} / {raffle.max_tickets} boletos</span>
+            <span className={`font-bold ${pct >= 80 ? 'text-red-400' : 'text-amber-400'}`}>{pct}% vendido</span>
           </div>
-          <div className="h-1.5 bg-[#1a1a1a] rounded-full overflow-hidden">
-            <div className="h-full bg-gradient-to-r from-amber-500 to-amber-400 rounded-full transition-all duration-500" style={{ width: `${pct}%` }} />
+          <div className="w-full bg-[#1a1a1a] rounded-full h-1.5">
+            <div className={`h-1.5 rounded-full transition-all ${pct >= 80 ? 'bg-red-500' : 'bg-amber-500'}`} style={{ width: `${pct}%` }} />
           </div>
         </div>
-
-        {/* Countdown */}
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-gray-600 text-[10px] uppercase tracking-wide mb-0.5">Sorteo en</p>
-            <Countdown date={raffle.date} />
+            <p className="text-gray-500 text-[10px]">Por boleto</p>
+            <p className="text-amber-400 font-black text-xl">${raffle.price_per_ticket} <span className="text-sm">USD</span></p>
           </div>
-          <div className="text-right">
-            <p className="text-gray-600 text-[10px]">Precio</p>
-            <p className="text-white font-black text-base">{raffle.price}</p>
-          </div>
+          <button onClick={onEnter} disabled={entered || loading || countdown === 'Terminada'}
+            className={`font-black px-5 py-2.5 rounded-xl text-sm transition-all ${
+              entered
+                ? 'bg-green-500/20 border border-green-500/30 text-green-400 cursor-default'
+                : countdown === 'Terminada'
+                ? 'bg-gray-500/20 border border-gray-500/20 text-gray-500 cursor-default'
+                : loading
+                ? 'bg-amber-500/50 text-black cursor-wait'
+                : 'bg-amber-500 hover:bg-amber-400 text-black'
+            }`}>
+            {loading ? '...' : entered ? '✓ Inscrito' : countdown === 'Terminada' ? 'Terminada' : 'Participar'}
+          </button>
         </div>
-
-        {/* Action */}
-        {!raffle.soldOut && !joined && (
-          <div className="flex items-center gap-2 pt-1">
-            {!isBreak && (
-              <div className="flex items-center gap-1 bg-[#1a1a1a] border border-white/10 rounded-lg">
-                <button onClick={() => setQty((q) => Math.max(1, q - 1))} className="px-2.5 py-1.5 text-gray-400 hover:text-white transition-colors text-sm font-bold">−</button>
-                <span className="px-2 text-white font-bold text-sm min-w-[24px] text-center">{qty}</span>
-                <button onClick={() => setQty((q) => Math.min(10, q + 1))} className="px-2.5 py-1.5 text-gray-400 hover:text-white transition-colors text-sm font-bold">+</button>
-              </div>
-            )}
-            <button onClick={handleJoin} className="flex-1 bg-amber-500 hover:bg-amber-400 text-black font-black py-2 rounded-lg text-xs transition-all hover:scale-105 text-center">
-              {isBreak ? 'Elegir spot' : `Participar · $${raffle.priceNum * qty}`}
-            </button>
-          </div>
-        )}
-        {joined && !raffle.soldOut && (
-          <div className="flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 rounded-lg px-3 py-2">
-            <span className="text-amber-400 text-xs font-bold">✓ {isBreak ? 'Spot reservado' : `${qty} ticket${qty>1?'s':''} · $${raffle.priceNum * qty}`}</span>
-            <button onClick={() => setJoined(false)} className="ml-auto text-gray-600 hover:text-gray-400 text-[10px]">Cancelar</button>
-          </div>
-        )}
       </div>
     </div>
   )
 }
 
 export default function Raffles() {
-  const [filter, setFilter] = useState('Todos')
-  const types = ['Todos', 'Rifa', 'Break']
-  const filtered = filter === 'Todos' ? INITIAL_RAFFLES : INITIAL_RAFFLES.filter((r) => r.type === filter)
+  const { user } = useAuth()
+  const navigate = useNavigate()
+  const [enteredIds, setEnteredIds] = useState<Set<number>>(new Set())
+  const [loadingId, setLoadingId]   = useState<number | null>(null)
+
+  useEffect(() => {
+    if (!user) return
+    supabase.from('raffle_entries').select('raffle_id').eq('user_id', user.id)
+      .then(({ data }) => { if (data) setEnteredIds(new Set(data.map(e => e.raffle_id))) })
+  }, [user])
+
+  const handleEnter = useCallback(async (raffle: Raffle) => {
+    if (!user) { navigate('/login', { state: { from: '/raffles' } }); return }
+    if (enteredIds.has(raffle.id)) return
+    setLoadingId(raffle.id)
+    const { error } = await supabase.from('raffle_entries').insert({
+      user_id:     user.id,
+      raffle_id:   raffle.id,
+      raffle_name: raffle.title,
+    })
+    if (!error) setEnteredIds(prev => new Set([...prev, raffle.id]))
+    setLoadingId(null)
+  }, [user, navigate, enteredIds])
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] pt-20 pb-16 px-6">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-[#0a0a0a] pt-24 pb-16 px-4">
+      <div className="max-w-5xl mx-auto">
 
-        {/* Header */}
-        <div className="mb-10">
-          <p className="text-amber-500 text-xs font-bold uppercase tracking-widest mb-2">PullStack</p>
-          <h1 className="text-4xl font-black text-white mb-2">Rifas & Breaks</h1>
-          <p className="text-gray-500 text-sm">Participa y gana cartas y cajas exclusivas · Sorteos en vivo cada semana</p>
+        <div className="mb-8">
+          <h1 className="text-white text-3xl font-black mb-2">Rifas & Breaks</h1>
+          <p className="text-gray-400">Gana cartas premium. Ganadores anunciados en vivo con randomizer verificable y grabado.</p>
         </div>
 
-        {/* Cómo funciona */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10 bg-[#111] border border-white/5 rounded-2xl p-6">
-          {[
-            { step: '01', icon: '🎟️', title: 'Elige y participa',   desc: 'Compra tickets para rifas o elige tu equipo en group breaks. Cantidad mínima: 1.' },
-            { step: '02', icon: '🔒', title: 'Pago seguro',          desc: 'Procesado con Stripe. Tu dinero está retenido hasta el sorteo en vivo.' },
-            { step: '03', icon: '🏆', title: 'Sorteo & envío',       desc: 'Sorteo transparente en vivo. Las cartas se envían en 48h con seguro y rastreo.' },
-          ].map((s) => (
-            <div key={s.step} className="flex gap-4">
-              <div className="text-4xl font-black text-amber-500/20 leading-none shrink-0">{s.step}</div>
-              <div>
-                <div className="text-lg mb-1">{s.icon}</div>
-                <div className="text-white font-bold text-sm mb-1">{s.title}</div>
-                <div className="text-gray-500 text-xs leading-relaxed">{s.desc}</div>
-              </div>
-            </div>
+        {!user && (
+          <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 mb-6 flex items-center justify-between gap-4">
+            <p className="text-amber-300 text-sm font-medium">Inicia sesión para participar en rifas</p>
+            <button onClick={() => navigate('/login')}
+              className="bg-amber-500 hover:bg-amber-400 text-black font-black px-4 py-2 rounded-xl text-sm transition-all shrink-0">
+              Iniciar sesión
+            </button>
+          </div>
+        )}
+
+        {user && enteredIds.size > 0 && (
+          <div className="bg-green-500/10 border border-green-500/20 rounded-2xl p-4 mb-6">
+            <p className="text-green-400 text-sm font-bold">✓ Estás inscrito en {enteredIds.size} rifa{enteredIds.size > 1 ? 's' : ''}. El ganador se anunciará en live.</p>
+          </div>
+        )}
+
+        <div className="grid sm:grid-cols-2 gap-5 mb-8">
+          {RAFFLES.map(r => (
+            <RaffleCard
+              key={r.id}
+              raffle={r}
+              onEnter={() => handleEnter(r)}
+              entered={enteredIds.has(r.id)}
+              loading={loadingId === r.id}
+            />
           ))}
         </div>
 
-        {/* Filtros */}
-        <div className="flex items-center gap-3 mb-6">
-          <h2 className="text-xl font-black text-white">Activos ahora</h2>
-          <div className="flex gap-2 ml-auto">
-            {types.map((t) => (
-              <button key={t} onClick={() => setFilter(t)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${filter === t ? 'bg-amber-500 text-black' : 'bg-[#111] border border-white/10 text-gray-400 hover:border-amber-500/30 hover:text-amber-400'}`}>
-                {t}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-14">
-          {filtered.map((r) => <RaffleCard key={r.id} raffle={r} />)}
-        </div>
-
-        {/* Ganadores */}
-        <div>
-          <h2 className="text-xl font-black text-white mb-5">Ganadores recientes 🏆</h2>
-          <div className="bg-[#111] border border-white/5 rounded-2xl divide-y divide-white/5">
-            {PAST.map((p, i) => (
-              <div key={i} className="flex items-center gap-4 p-4">
-                <div className="w-8 h-8 bg-amber-500/10 border border-amber-500/20 rounded-full flex items-center justify-center text-amber-400 font-black text-sm shrink-0">
-                  {i + 1}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-white font-bold text-sm truncate">{p.title}</div>
-                  <div className="text-gray-500 text-xs">{p.date}</div>
-                </div>
-                <div className="text-center shrink-0">
-                  <div className="text-amber-400 font-black text-sm">{p.winner}</div>
-                  <div className="text-gray-600 text-xs">{p.prize}</div>
-                </div>
-                <div className="text-2xl shrink-0">🏆</div>
-              </div>
-            ))}
+        <div className="bg-[#111] border border-white/5 rounded-2xl p-6">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>
+              <h3 className="text-white font-bold text-lg mb-1">¿Tienes una carta para rifar?</h3>
+              <p className="text-gray-500 text-sm">Abrimos rifas a vendedores verificados. Comisión de solo 5%. Sin riesgo de no-shows.</p>
+            </div>
+            <a href="/messages"
+              className="bg-[#1a1a1a] border border-white/10 hover:border-amber-500/30 text-gray-300 hover:text-amber-400 font-bold px-5 py-2.5 rounded-xl text-sm transition-all whitespace-nowrap">
+              Contactar para listar →
+            </a>
           </div>
         </div>
       </div>

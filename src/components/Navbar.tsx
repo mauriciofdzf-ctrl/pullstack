@@ -25,9 +25,10 @@ export default function Navbar() {
   const links = [
     { to: '/marketplace', label: 'Explorador' },
     { to: '/aprende',     label: 'Aprende' },
-    { to: '/live',        label: 'En Vivo',    live: true },
+    { to: '/grading',     label: 'Grading',   grading: true },
+    { to: '/live',        label: 'En Vivo',   live: true },
     { to: '/community',   label: 'Comunidad' },
-    { to: '/raffles',     label: 'Rifas & Breaks' },
+    { to: '/raffles',     label: 'Rifas' },
     { to: '/messages',    label: 'Mensajes' },
   ]
 
@@ -67,7 +68,13 @@ export default function Navbar() {
             {links.map((link) => (
               <Link key={link.to} to={link.to}
                 className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                  isActive(link.to) ? 'bg-amber-500/10 text-amber-400' : 'text-gray-400 hover:text-white hover:bg-white/5'
+                  link.grading
+                    ? isActive(link.to)
+                      ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                      : 'text-amber-400 hover:bg-amber-500/10 border border-amber-500/20'
+                    : isActive(link.to)
+                    ? 'bg-amber-500/10 text-amber-400'
+                    : 'text-gray-400 hover:text-white hover:bg-white/5'
                 }`}>
                 {link.live && <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />}
                 {link.label}

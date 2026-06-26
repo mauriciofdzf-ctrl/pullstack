@@ -17,12 +17,6 @@ function getColor(str: string) {
 }
 
 
-const ACTIVITY = [
-  { type: 'bid',     desc: 'Pujaste en Topps Basketball Hobby Box',          time: 'hace 2h',   amount: '$380' },
-  { type: 'raffle',  desc: 'Compraste 3 tickets — Rifa Cooper Flagg RC Auto', time: 'hace 1d',   amount: '$75' },
-  { type: 'market',  desc: 'Guardaste en favoritos: Lamine Yamal Refractor',  time: 'hace 2d',   amount: null },
-  { type: 'comment', desc: 'Comentaste en la comunidad: "Esa Prizm está 🔥"', time: 'hace 3d',   amount: null },
-]
 
 export default function Profile() {
   const { user, profile, signOut, refreshProfile } = useAuth()
@@ -37,12 +31,36 @@ export default function Profile() {
   const [avatarUrl, setAvatarUrl]     = useState(profile?.avatar_url || '')
   const [avatarSaving, setAvatarSaving] = useState(false)
   const [avatarPreviewError, setAvatarPreviewError] = useState(false)
+  const [stats, setStats] = useState({ cartas: 0, compras: 0, rifas: 0 })
+  const [recentActivity, setRecentActivity] = useState<{ icon: string; desc: string; time: string; amount?: string }[]>([])
 
   useEffect(() => {
     setDisplayName(profile?.display_name || '')
     setBio(profile?.bio || '')
     setAvatarUrl(profile?.avatar_url || '')
   }, [profile])
+
+  useEffect(() => {
+    if (!user) return
+    Promise.all([
+      supabase.from('collection_items').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
+      supabase.from('orders').select('id, total, created_at, items', { count: 'exact' }).eq('user_id', user.id).order('created_at', { ascending: false }).limit(5),
+      supabase.from('raffle_entries').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
+    ]).then(([colRes, ordRes, rafRes]) => {
+      setStats({
+        cartas:  colRes.count  || 0,
+        compras: ordRes.count  || 0,
+        rifas:   rafRes.count  || 0,
+      })
+      const activity = (ordRes.data || []).map(o => ({
+        icon:   '🛒',
+        desc:   `Compra completada · ${Array.isArray(o.items) ? o.items.length : 1} ítem(s)`,
+        time:   new Date(o.created_at).toLocaleDateString('es', { day: 'numeric', month: 'short' }),
+        amount: o.total,
+      }))
+      setRecentActivity(activity)
+    })
+  }, [user])
 
   const handleSaveAvatar = async () => {
     if (!user) return
@@ -147,7 +165,7 @@ export default function Profile() {
 
             {/* Stats row */}
             <div className="flex gap-6 mt-4 pt-4 border-t border-white/5">
-              {[{ n: 0, label: 'Cartas' }, { n: 0, label: 'Compras' }, { n: 0, label: 'Rifas' }].map((s) => (
+              {[{ n: stats.cartas, label: 'Cartas' }, { n: stats.compras, label: 'Compras' }, { n: stats.rifas, label: 'Rifas' }].map((s) => (
                 <div key={s.label}>
                   <div className="text-white font-black text-xl">{s.n}</div>
                   <div className="text-gray-600 text-xs">{s.label}</div>
@@ -176,18 +194,24 @@ export default function Profile() {
         {/* Activity */}
         {activeTab === 'activity' && (
           <div className="bg-[#111] border border-white/5 rounded-2xl divide-y divide-white/5">
-            {ACTIVITY.map((a, i) => (
-              <div key={i} className="flex items-center gap-4 p-4">
-                <div className="w-9 h-9 rounded-xl bg-[#1a1a1a] flex items-center justify-center text-lg shrink-0">
-                  {a.type === 'bid' ? '🔥' : a.type === 'raffle' ? '🎟️' : a.type === 'market' ? '❤️' : '💬'}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-white text-sm">{a.desc}</p>
-                  <p className="text-gray-600 text-xs mt-0.5">{a.time}</p>
-                </div>
-                {a.amount && <span className="text-amber-400 font-black text-sm shrink-0">{a.amount}</span>}
+            {recentActivity.length === 0 ? (
+              <div className="p-8 text-center">
+                <div className="text-3xl mb-3">📋</div>
+                <p className="text-white font-bold mb-1">Sin actividad aún</p>
+                <p className="text-gray-500 text-sm">Tus compras y movimientos aparecerán aquí.</p>
               </div>
-            ))}
+            ) : (
+              recentActivity.map((a, i) => (
+                <div key={i} className="flex items-center gap-4 p-4">
+                  <div className="w-9 h-9 rounded-xl bg-[#1a1a1a] flex items-center justify-center text-lg shrink-0">{a.icon}</div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white text-sm">{a.desc}</p>
+                    <p className="text-gray-600 text-xs mt-0.5">{a.time}</p>
+                  </div>
+                  {a.amount && <span className="text-amber-400 font-black text-sm shrink-0">{a.amount}</span>}
+                </div>
+              ))
+            )}
           </div>
         )}
 
