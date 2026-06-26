@@ -80,6 +80,7 @@ function NewListingInline({ user, profile, onCreated }: {
   })
   const [imageFile,    setImageFile]    = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [isDragging,   setIsDragging]   = useState(false)
   const [loading,      setLoading]      = useState(false)
   const [uploading,    setUploading]    = useState(false)
   const [error,        setError]        = useState('')
@@ -87,11 +88,26 @@ function NewListingInline({ user, profile, onCreated }: {
 
   const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }))
 
-  const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+  const processFile = (file: File) => {
+    if (!file.type.startsWith('image/')) { setError('Solo se aceptan imágenes'); return }
     if (file.size > 8 * 1024 * 1024) { setError('Máx. 8MB'); return }
     setError(''); setImageFile(file); setImagePreview(URL.createObjectURL(file))
+  }
+
+  const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) processFile(file)
+    e.target.value = ''
+  }
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault(); setIsDragging(false)
+    const file = e.dataTransfer.files[0]
+    if (file) processFile(file)
+  }
+  const handleDragOver = (e: React.DragEvent) => { e.preventDefault(); setIsDragging(true) }
+  const handleDragLeave = (e: React.DragEvent) => {
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) setIsDragging(false)
   }
 
   const submit = async () => {
@@ -177,16 +193,36 @@ function NewListingInline({ user, profile, onCreated }: {
             <div className="absolute bottom-2 right-2 bg-green-500/90 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">✓ Lista</div>
           </div>
         ) : (
-          <label className="flex items-center gap-3 h-14 border border-dashed border-white/10 rounded-xl cursor-pointer hover:border-violet-500/30 hover:bg-violet-600/3 px-4 transition-all group">
-            <svg className="w-5 h-5 text-gray-600 group-hover:text-violet-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-            <div>
-              <p className="text-gray-400 text-sm font-medium group-hover:text-gray-300 transition-colors">Agregar foto 📷</p>
-              <p className="text-gray-600 text-[10px]">JPG · PNG · WEBP — máx. 8MB</p>
-            </div>
+          <div
+            onDragOver={handleDragOver}
+            onDragEnter={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            onClick={() => fileRef.current?.click()}
+            className={`relative flex items-center justify-center h-20 border-2 border-dashed rounded-xl cursor-pointer select-none transition-all ${
+              isDragging
+                ? 'border-violet-500 bg-violet-500/10 scale-[1.01]'
+                : 'border-white/15 hover:border-violet-500/40 hover:bg-violet-600/5'
+            }`}
+          >
+            {isDragging ? (
+              <div className="flex items-center gap-2 pointer-events-none">
+                <span className="text-2xl">📸</span>
+                <p className="text-violet-400 font-black text-sm">Suelta aquí</p>
+              </div>
+            ) : (
+              <div className="flex items-center gap-3 px-4">
+                <svg className="w-5 h-5 text-gray-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <div>
+                  <p className="text-gray-300 text-sm font-bold">Arrastra foto o haz clic</p>
+                  <p className="text-gray-600 text-[10px]">JPG · PNG · WEBP · máx. 8MB</p>
+                </div>
+              </div>
+            )}
             <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleImage} />
-          </label>
+          </div>
         )}
       </div>
 

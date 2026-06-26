@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getImages, type ImageKey } from '../lib/imageConfig'
 import CartDrawer, { type CartEntry } from '../components/CartDrawer'
@@ -155,20 +155,37 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
   })
   const [imageFile,    setImageFile]    = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [isDragging,   setIsDragging]   = useState(false)
   const [uploading,    setUploading]    = useState(false)
   const [loading,      setLoading]      = useState(false)
   const [error,        setError]        = useState('')
   const [done,         setDone]         = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }))
 
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+  const processFile = (file: File) => {
+    if (!file.type.startsWith('image/')) { setError('Solo se aceptan imágenes (JPG, PNG, WEBP)'); return }
     if (file.size > 8 * 1024 * 1024) { setError('La imagen no puede superar 8MB'); return }
     setError('')
     setImageFile(file)
     setImagePreview(URL.createObjectURL(file))
+  }
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) processFile(file)
+    e.target.value = ''
+  }
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault(); setIsDragging(false)
+    const file = e.dataTransfer.files[0]
+    if (file) processFile(file)
+  }
+  const handleDragOver = (e: React.DragEvent) => { e.preventDefault(); setIsDragging(true) }
+  const handleDragLeave = (e: React.DragEvent) => {
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) setIsDragging(false)
   }
 
   const removeImage = () => {
@@ -281,14 +298,35 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
                     <div className="absolute bottom-2 right-2 bg-green-500/90 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">✓ Lista</div>
                   </div>
                 ) : (
-                  <label className="flex flex-col items-center justify-center h-36 border-2 border-dashed border-white/10 rounded-xl cursor-pointer hover:border-violet-500/40 hover:bg-violet-600/3 transition-all group">
-                    <svg className="w-8 h-8 text-gray-600 group-hover:text-violet-400 transition-colors mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    <p className="text-gray-500 text-sm group-hover:text-gray-300 transition-colors font-medium">Agregar foto del artículo</p>
-                    <p className="text-gray-600 text-[11px] mt-0.5">JPG · PNG · WEBP — máx. 8MB</p>
-                    <input type="file" accept="image/*" className="hidden" onChange={handleImageSelect} />
-                  </label>
+                  <div
+                    onDragOver={handleDragOver}
+                    onDragEnter={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                    onClick={() => fileInputRef.current?.click()}
+                    className={`relative flex flex-col items-center justify-center h-40 border-2 border-dashed rounded-xl cursor-pointer select-none transition-all ${
+                      isDragging
+                        ? 'border-violet-500 bg-violet-500/10 scale-[1.02]'
+                        : 'border-white/15 hover:border-violet-500/50 hover:bg-violet-600/5'
+                    }`}
+                  >
+                    {isDragging ? (
+                      <div className="flex flex-col items-center pointer-events-none">
+                        <span className="text-4xl mb-2">📸</span>
+                        <p className="text-violet-400 font-black text-sm">Suelta aquí</p>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center">
+                        <svg className="w-9 h-9 text-gray-600 mb-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <p className="text-gray-300 font-bold text-sm">Arrastra tu foto aquí</p>
+                        <p className="text-gray-600 text-[11px] mt-0.5">o haz clic para seleccionar</p>
+                        <p className="text-gray-700 text-[10px] mt-1.5 border border-white/8 rounded-full px-3 py-0.5">JPG · PNG · WEBP · máx. 8MB</p>
+                      </div>
+                    )}
+                    <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageSelect} />
+                  </div>
                 )}
               </div>
 
