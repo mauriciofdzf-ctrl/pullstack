@@ -60,12 +60,12 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center px-4">
+    <div className="min-h-screen bg-[#06060f] flex items-center justify-center px-4">
       <div className="w-full max-w-md">
 
         <div className="text-center mb-10">
           <Link to="/" className="inline-flex items-center gap-2.5 mb-6">
-            <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-amber-600 rounded-xl flex items-center justify-center shadow-lg shadow-amber-500/30">
+            <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-fuchsia-600 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/30">
               <span className="text-black font-black text-base">PS</span>
             </div>
             <span className="text-white font-black text-2xl">PullStack</span>
@@ -74,26 +74,26 @@ export default function Login() {
           <p className="text-gray-500 text-sm">Inicia sesión para continuar en la plataforma</p>
         </div>
 
-        <div className="bg-[#111] border border-white/5 rounded-2xl p-8 space-y-5">
+        <div className="bg-[#0e0e1e] border border-white/5 rounded-2xl p-8 space-y-5">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-gray-400 text-sm font-medium mb-1.5">Email</label>
               <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required
                 placeholder="tu@email.com"
-                className="w-full bg-[#1a1a1a] border border-white/10 text-white placeholder-gray-600 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-amber-500/50 transition-colors" />
+                className="w-full bg-[#161628] border border-white/10 text-white placeholder-gray-600 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-violet-500/50 transition-colors" />
             </div>
 
             <div>
               <div className="flex justify-between items-center mb-1.5">
                 <label className="text-gray-400 text-sm font-medium">Contraseña</label>
                 <button type="button" onClick={handleForgotPassword}
-                  className={`text-xs font-bold transition-colors ${resetSent ? 'text-green-400' : 'text-amber-500 hover:text-amber-400'}`}>
+                  className={`text-xs font-bold transition-colors ${resetSent ? 'text-green-400' : 'text-violet-400 hover:text-violet-400'}`}>
                   {resetSent ? '✓ Link enviado — revisa tu email' : '¿Olvidaste tu contraseña?'}
                 </button>
               </div>
               <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required
                 placeholder="••••••••"
-                className="w-full bg-[#1a1a1a] border border-white/10 text-white placeholder-gray-600 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-amber-500/50 transition-colors" />
+                className="w-full bg-[#161628] border border-white/10 text-white placeholder-gray-600 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-violet-500/50 transition-colors" />
             </div>
 
             {error && (
@@ -101,7 +101,7 @@ export default function Login() {
                 <p className="text-red-400 text-sm">{error}</p>
                 {errorType === 'confirm' && (
                   <button type="button" onClick={handleResendConfirmation}
-                    className={`text-xs font-bold transition-colors ${resendSent ? 'text-green-400' : 'text-amber-400 hover:text-amber-300 underline'}`}>
+                    className={`text-xs font-bold transition-colors ${resendSent ? 'text-green-400' : 'text-violet-400 hover:text-amber-300 underline'}`}>
                     {resendSent ? '✓ Email reenviado' : 'Reenviar email de confirmación →'}
                   </button>
                 )}
@@ -109,7 +109,7 @@ export default function Login() {
             )}
 
             <button type="submit" disabled={loading}
-              className="w-full bg-amber-500 hover:bg-amber-400 text-black font-black py-3 rounded-xl transition-all hover:shadow-lg hover:shadow-amber-500/20 disabled:opacity-60 flex items-center justify-center gap-2">
+              className="w-full bg-violet-600 hover:bg-violet-500 text-white font-black py-3 rounded-xl transition-all hover:shadow-lg hover:shadow-violet-500/20 disabled:opacity-60 flex items-center justify-center gap-2">
               {loading && <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />}
               Iniciar sesión
             </button>
@@ -125,7 +125,7 @@ export default function Login() {
 
         <p className="text-center text-gray-600 text-sm mt-6">
           ¿No tienes cuenta?{' '}
-          <Link to="/register" className="text-amber-500 hover:text-amber-400 font-bold transition-colors">Crear cuenta gratis</Link>
+          <Link to="/register" className="text-violet-400 hover:text-violet-400 font-bold transition-colors">Crear cuenta gratis</Link>
         </p>
       </div>
     </div>

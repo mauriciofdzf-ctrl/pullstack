@@ -47,24 +47,24 @@ export default function Shop() {
   const filtered = PRODUCTS.filter((p) => cat === 'Todos' || p.cat === cat)
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] pt-20 pb-16 px-6">
+    <div className="min-h-screen bg-[#06060f] pt-20 pb-16 px-6">
       <div className="max-w-7xl mx-auto">
 
         {/* Header */}
         <div className="flex items-start justify-between mb-10">
           <div>
-            <p className="text-amber-500 text-xs font-bold uppercase tracking-widest mb-2">PullStack</p>
+            <p className="text-violet-400 text-xs font-bold uppercase tracking-widest mb-2">PullStack</p>
             <h1 className="text-4xl font-black text-white mb-1">Tienda Oficial</h1>
             <p className="text-gray-500 text-sm">Cajas selladas · Pokémon TCG · One Piece TCG · Accesorios · Envío seguro LATAM</p>
           </div>
           <div className="relative shrink-0">
-            <button className="bg-[#111] border border-white/10 text-white p-3 rounded-xl hover:border-amber-500/30 transition-colors">
+            <button className="bg-[#0e0e1e] border border-white/10 text-white p-3 rounded-xl hover:border-violet-500/30 transition-colors">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
               </svg>
             </button>
             {cart.length > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 bg-amber-500 text-black text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center">
+              <span className="absolute -top-1.5 -right-1.5 bg-violet-600 text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center">
                 {cart.length}
               </span>
             )}
@@ -72,8 +72,8 @@ export default function Shop() {
         </div>
 
         {/* Aviso Topps */}
-        <div className="bg-amber-500/5 border border-amber-500/20 rounded-xl p-4 mb-8 flex items-start gap-3">
-          <span className="text-amber-400 text-xl shrink-0">ℹ️</span>
+        <div className="bg-violet-600/5 border border-violet-500/20 rounded-xl p-4 mb-8 flex items-start gap-3">
+          <span className="text-violet-400 text-xl shrink-0">ℹ️</span>
           <div>
             <p className="text-amber-300 text-sm font-bold">Topps tiene licencia exclusiva NBA desde 2025-26</p>
             <p className="text-gray-500 text-xs mt-0.5">Las cajas NBA 2025-26 son de Topps, no Panini. Panini sigue siendo el proveedor oficial de NFL.</p>
@@ -84,7 +84,7 @@ export default function Shop() {
         <div className="flex gap-2 mb-8 flex-wrap">
           {CATS.map((c) => (
             <button key={c} onClick={() => setCat(c)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${cat === c ? 'bg-amber-500 text-black' : 'bg-[#111] border border-white/10 text-gray-400 hover:border-amber-500/30 hover:text-amber-400'}`}>
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${cat === c ? 'bg-violet-600 text-white' : 'bg-[#0e0e1e] border border-white/10 text-gray-400 hover:border-violet-500/30 hover:text-violet-400'}`}>
               {c}
             </button>
           ))}
@@ -96,13 +96,13 @@ export default function Shop() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {filtered.map((p, i) => (
             <div key={i}
-              className="group bg-[#111] border border-white/5 hover:border-amber-500/30 rounded-2xl overflow-hidden transition-all hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(245,158,11,0.08)]">
+              className="group bg-[#0e0e1e] border border-white/5 hover:border-violet-500/30 rounded-2xl overflow-hidden transition-all hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(139,92,246,0.15)]">
               <div className="relative h-52 overflow-hidden">
                 <img src={p.img} alt={`${p.cat} — ${p.name}`}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#111] via-black/20 to-transparent" />
                 {p.badge && (
-                  <div className={`absolute top-3 left-3 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider ${p.badge.includes('🔥') || p.badge.includes('🏆') ? 'bg-red-600 text-white' : p.badge.includes('🌍') ? 'bg-blue-600 text-white' : 'bg-amber-500 text-black'}`}>
+                  <div className={`absolute top-3 left-3 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider ${p.badge.includes('🔥') || p.badge.includes('🏆') ? 'bg-red-600 text-white' : p.badge.includes('🌍') ? 'bg-blue-600 text-white' : 'bg-violet-600 text-white'}`}>
                     {p.badge}
                   </div>
                 )}
@@ -111,7 +111,7 @@ export default function Shop() {
                     ¡Solo {p.stock}!
                   </div>
                 )}
-                <div className="absolute bottom-3 left-3 bg-black/70 backdrop-blur text-amber-400 text-[10px] font-bold px-2 py-0.5 rounded-lg">
+                <div className="absolute bottom-3 left-3 bg-black/70 backdrop-blur text-violet-400 text-[10px] font-bold px-2 py-0.5 rounded-lg">
                   {p.cat}
                 </div>
               </div>
@@ -123,7 +123,7 @@ export default function Shop() {
                 <div className="flex items-center justify-between">
                   <div className="text-white font-black text-xl">{p.price}</div>
                   <button onClick={() => setCart((c) => [...c, p.name])}
-                    className="bg-amber-500/10 hover:bg-amber-500 border border-amber-500/30 hover:border-amber-500 text-amber-400 hover:text-black font-bold py-2 px-3 rounded-lg text-xs transition-all">
+                    className="bg-violet-500/10 hover:bg-violet-600 border border-violet-500/30 hover:border-violet-500 text-violet-400 hover:text-black font-bold py-2 px-3 rounded-lg text-xs transition-all">
                     + Carrito
                   </button>
                 </div>
@@ -139,7 +139,7 @@ export default function Shop() {
             { icon: '🛡️', title: 'Sellados 100% Auténticos', sub: 'Verificados antes de enviar' },
             { icon: '💳', title: 'Pago con Stripe', sub: 'Tarjeta, OXXO y transferencia' },
           ].map((b, i) => (
-            <div key={i} className="bg-[#111] border border-white/5 rounded-xl p-4 flex items-center gap-3">
+            <div key={i} className="bg-[#0e0e1e] border border-white/5 rounded-xl p-4 flex items-center gap-3">
               <span className="text-3xl">{b.icon}</span>
               <div>
                 <p className="text-white font-bold text-sm">{b.title}</p>

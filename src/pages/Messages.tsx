@@ -71,13 +71,13 @@ export default function Messages() {
   }
 
   if (!user) return (
-    <div className="min-h-screen bg-[#0a0a0a] pt-24 pb-16 px-4 flex items-center justify-center">
+    <div className="min-h-screen bg-[#06060f] pt-24 pb-16 px-4 flex items-center justify-center">
       <div className="text-center">
         <div className="text-5xl mb-4">💬</div>
         <h2 className="text-white text-2xl font-black mb-2">Mensajes</h2>
         <p className="text-gray-400 text-sm mb-6">Inicia sesión para chatear con el equipo de PullStack</p>
         <button onClick={() => navigate('/login', { state: { from: '/messages' } })}
-          className="bg-amber-500 hover:bg-amber-400 text-black font-black px-6 py-2.5 rounded-xl transition-all">
+          className="bg-violet-600 hover:bg-violet-500 text-white font-black px-6 py-2.5 rounded-xl transition-all">
           Iniciar sesión
         </button>
       </div>
@@ -85,12 +85,12 @@ export default function Messages() {
   )
 
   return (
-    <div className="bg-[#0a0a0a] pt-16" style={{ height: '100dvh', display: 'flex', flexDirection: 'column' }}>
+    <div className="bg-[#06060f] pt-16" style={{ height: '100dvh', display: 'flex', flexDirection: 'column' }}>
       <div className="max-w-2xl mx-auto w-full flex flex-col flex-1 min-h-0 px-4">
 
         {/* Chat header */}
         <div className="flex items-center gap-3 py-4 border-b border-white/5 shrink-0">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-lg shadow-amber-500/20">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-600 flex items-center justify-center shadow-lg shadow-violet-500/20">
             <span className="text-black font-black text-sm">PS</span>
           </div>
           <div className="flex-1">
@@ -101,7 +101,7 @@ export default function Messages() {
             </div>
           </div>
           <a href="/grading"
-            className="bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-amber-500/20 transition-all">
+            className="bg-violet-500/10 border border-violet-500/20 text-violet-400 text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-violet-500/20 transition-all">
             Grading →
           </a>
         </div>
@@ -112,14 +112,14 @@ export default function Messages() {
           {msgs.map(m => (
             <div key={m.id} className={`flex ${m.from_admin ? 'justify-start' : 'justify-end'}`}>
               {m.from_admin && (
-                <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-black font-black text-[10px] mr-2 shrink-0 mt-0.5">
+                <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-600 flex items-center justify-center text-black font-black text-[10px] mr-2 shrink-0 mt-0.5">
                   PS
                 </div>
               )}
               <div className={`max-w-xs lg:max-w-sm px-4 py-3 rounded-2xl text-sm leading-relaxed ${
                 m.from_admin
-                  ? 'bg-[#1a1a1a] border border-white/5 text-gray-300 rounded-tl-md'
-                  : 'bg-amber-500 text-black font-medium rounded-tr-md'
+                  ? 'bg-[#161628] border border-white/5 text-gray-300 rounded-tl-md'
+                  : 'bg-violet-600 text-white font-medium rounded-tr-md'
               }`}>
                 {m.content}
               </div>
@@ -135,7 +135,7 @@ export default function Messages() {
             <div className="flex flex-wrap gap-2">
               {QUICK.map(q => (
                 <button key={q} onClick={() => setInput(q)}
-                  className="bg-[#1a1a1a] border border-white/10 hover:border-amber-500/30 text-gray-400 hover:text-amber-400 text-xs px-3 py-1.5 rounded-lg transition-all">
+                  className="bg-[#161628] border border-white/10 hover:border-violet-500/30 text-gray-400 hover:text-violet-400 text-xs px-3 py-1.5 rounded-lg transition-all">
                   {q}
                 </button>
               ))}
@@ -151,10 +151,10 @@ export default function Messages() {
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() } }}
               placeholder="Escribe tu mensaje..."
-              className="flex-1 bg-[#1a1a1a] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-500/50 transition-colors"
+              className="flex-1 bg-[#161628] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-violet-500/50 transition-colors"
             />
             <button onClick={send} disabled={!input.trim() || sending}
-              className="bg-amber-500 hover:bg-amber-400 disabled:opacity-40 text-black font-black px-4 py-2.5 rounded-xl transition-all">
+              className="bg-violet-600 hover:bg-violet-500 disabled:opacity-40 text-black font-black px-4 py-2.5 rounded-xl transition-all">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
               </svg>

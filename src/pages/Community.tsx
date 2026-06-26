@@ -22,12 +22,12 @@ const SPORT_COLORS: Record<string, string> = {
   Soccer:     'text-blue-400   bg-blue-500/10   border-blue-500/20',
   MLB:        'text-red-400    bg-red-500/10    border-red-500/20',
   'Pokémon':  'text-yellow-400 bg-yellow-500/10 border-yellow-500/20',
-  'One Piece':'text-amber-400  bg-amber-500/10  border-amber-500/20',
+  'One Piece':'text-violet-400  bg-violet-500/10  border-violet-500/20',
   General:    'text-gray-400   bg-gray-500/10   border-gray-500/20',
 }
 
 const AVATAR_COLORS = [
-  'from-amber-500 to-orange-600',
+  'from-violet-500 to-fuchsia-700',
   'from-purple-500 to-pink-600',
   'from-blue-500 to-cyan-600',
   'from-green-500 to-teal-600',
@@ -99,7 +99,7 @@ export default function Community() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] pt-24 pb-16 px-4">
+    <div className="min-h-screen bg-[#06060f] pt-24 pb-16 px-4">
       <div className="max-w-3xl mx-auto">
 
         {/* Header */}
@@ -110,12 +110,12 @@ export default function Community() {
           </div>
           {user ? (
             <button onClick={() => setShowForm(!showForm)}
-              className="bg-amber-500 hover:bg-amber-400 text-black font-black px-4 py-2.5 rounded-xl text-sm transition-all">
+              className="bg-violet-600 hover:bg-violet-500 text-white font-black px-4 py-2.5 rounded-xl text-sm transition-all">
               + Publicar
             </button>
           ) : (
             <button onClick={() => navigate('/login')}
-              className="bg-[#111] border border-white/10 hover:border-amber-500/30 text-gray-300 font-bold px-4 py-2.5 rounded-xl text-sm transition-all">
+              className="bg-[#0e0e1e] border border-white/10 hover:border-violet-500/30 text-gray-300 font-bold px-4 py-2.5 rounded-xl text-sm transition-all">
               Iniciar sesión
             </button>
           )}
@@ -123,25 +123,25 @@ export default function Community() {
 
         {/* New post form */}
         {showForm && user && (
-          <div className="bg-[#111] border border-amber-500/20 rounded-2xl p-5 mb-6 animate-in fade-in duration-200">
+          <div className="bg-[#0e0e1e] border border-violet-500/20 rounded-2xl p-5 mb-6 animate-in fade-in duration-200">
             <h3 className="text-white font-bold mb-4">Nueva publicación</h3>
             <input value={title} onChange={e => setTitle(e.target.value)}
               placeholder="Título *"
-              className="w-full bg-[#1a1a1a] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm mb-3 focus:outline-none focus:border-amber-500/50 transition-colors" />
+              className="w-full bg-[#161628] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm mb-3 focus:outline-none focus:border-violet-500/50 transition-colors" />
             <textarea value={body} onChange={e => setBody(e.target.value)}
               placeholder="Descripción, preguntas, pulls del día... (opcional)"
               rows={3}
-              className="w-full bg-[#1a1a1a] border border-white/10 text-white rounded-xl px-4 py-3 text-sm mb-3 focus:outline-none focus:border-amber-500/50 resize-none transition-colors" />
+              className="w-full bg-[#161628] border border-white/10 text-white rounded-xl px-4 py-3 text-sm mb-3 focus:outline-none focus:border-violet-500/50 resize-none transition-colors" />
             <div className="flex items-center gap-3 flex-wrap">
               <select value={sport} onChange={e => setSport(e.target.value)}
-                className="bg-[#1a1a1a] border border-white/10 text-white rounded-xl px-3 py-2 text-sm focus:outline-none">
+                className="bg-[#161628] border border-white/10 text-white rounded-xl px-3 py-2 text-sm focus:outline-none">
                 {SPORTS.filter(s => s !== 'Todos').map(s => <option key={s}>{s}</option>)}
               </select>
               <div className="flex-1" />
               <button onClick={() => setShowForm(false)}
                 className="text-gray-500 hover:text-white text-sm transition-colors">Cancelar</button>
               <button onClick={submitPost} disabled={submitting || !title.trim()}
-                className="bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-black font-black px-4 py-2 rounded-xl text-sm transition-all">
+                className="bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-black font-black px-4 py-2 rounded-xl text-sm transition-all">
                 {submitting ? 'Publicando...' : 'Publicar'}
               </button>
             </div>
@@ -149,10 +149,10 @@ export default function Community() {
         )}
 
         {!user && (
-          <div className="bg-[#111] border border-white/5 rounded-2xl p-5 mb-6 flex items-center justify-between gap-4">
+          <div className="bg-[#0e0e1e] border border-white/5 rounded-2xl p-5 mb-6 flex items-center justify-between gap-4">
             <p className="text-gray-400 text-sm">Inicia sesión para publicar y darle like a posts</p>
             <button onClick={() => navigate('/login')}
-              className="bg-amber-500 hover:bg-amber-400 text-black font-black px-4 py-2 rounded-xl text-sm whitespace-nowrap transition-all">
+              className="bg-violet-600 hover:bg-violet-500 text-white font-black px-4 py-2 rounded-xl text-sm whitespace-nowrap transition-all">
               Iniciar sesión
             </button>
           </div>
@@ -164,8 +164,8 @@ export default function Community() {
             <button key={s} onClick={() => setFilter(s)}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap border transition-all ${
                 filter === s
-                  ? 'bg-amber-500/20 text-amber-400 border-amber-500/40'
-                  : 'bg-[#111] border-white/5 text-gray-400 hover:text-white hover:border-white/10'
+                  ? 'bg-violet-500/20 text-violet-400 border-violet-500/40'
+                  : 'bg-[#0e0e1e] border-white/5 text-gray-400 hover:text-white hover:border-white/10'
               }`}>
               {s}
             </button>
@@ -176,7 +176,7 @@ export default function Community() {
         {loading ? (
           <div className="flex items-center justify-center py-20 text-gray-600 text-sm">Cargando...</div>
         ) : posts.length === 0 ? (
-          <div className="bg-[#111] border border-white/5 rounded-2xl p-12 text-center">
+          <div className="bg-[#0e0e1e] border border-white/5 rounded-2xl p-12 text-center">
             <div className="text-4xl mb-3">💬</div>
             <h3 className="text-white font-bold mb-1">Sin publicaciones aún</h3>
             <p className="text-gray-500 text-sm">Sé el primero en publicar en esta categoría.</p>
@@ -184,7 +184,7 @@ export default function Community() {
         ) : (
           <div className="space-y-4">
             {posts.map(p => (
-              <div key={p.id} className="bg-[#111] border border-white/5 hover:border-white/10 rounded-2xl p-5 transition-all">
+              <div key={p.id} className="bg-[#0e0e1e] border border-white/5 hover:border-white/10 rounded-2xl p-5 transition-all">
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div className="flex items-center gap-2.5">
                     <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${getColor(p.user_id)} flex items-center justify-center text-white font-black text-xs shrink-0`}>

@@ -221,11 +221,11 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={e => e.target === e.currentTarget && onClose()}>
-      <div className="w-full max-w-lg bg-[#111] border border-white/10 rounded-2xl shadow-2xl overflow-hidden max-h-[92dvh] flex flex-col">
+      <div className="w-full max-w-lg bg-[#0e0e1e] border border-white/10 rounded-2xl shadow-2xl overflow-hidden max-h-[92dvh] flex flex-col">
         {done ? (
           <div className="p-10 text-center">
-            <div className="w-16 h-16 bg-amber-500/20 border border-amber-500/30 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+            <div className="w-16 h-16 bg-violet-500/20 border border-violet-500/30 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
             </div>
             <p className="text-white font-black text-xl mb-1">¡Publicado!</p>
             <p className="text-gray-500 text-sm">Tu anuncio ya está visible en el Mercado.</p>
@@ -234,7 +234,7 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
           <>
             <div className="px-6 py-4 border-b border-white/5 flex items-center justify-between shrink-0">
               <div>
-                <p className="text-amber-500 text-[10px] font-bold uppercase tracking-widest">Nuevo anuncio</p>
+                <p className="text-violet-400 text-[10px] font-bold uppercase tracking-widest">Nuevo anuncio</p>
                 <h3 className="text-white font-black text-lg">Publicar en el Mercado</h3>
               </div>
               <button onClick={onClose} className="text-gray-600 hover:text-white transition-colors p-1">
@@ -251,10 +251,10 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
                     <button key={val} onClick={() => set('txn_type', val)}
                       className={`py-3 rounded-xl text-sm font-black border transition-all flex flex-col items-center gap-1 ${
                         form.txn_type === val
-                          ? val === 'sale'    ? 'bg-amber-500 border-amber-500 text-black'
+                          ? val === 'sale'    ? 'bg-violet-600 border-violet-500 text-white'
                           : val === 'auction' ? 'bg-red-500 border-red-500 text-white'
                                               : 'bg-blue-500 border-blue-500 text-white'
-                          : 'bg-[#1a1a1a] border-white/10 text-gray-500 hover:border-white/20 hover:text-white'
+                          : 'bg-[#161628] border-white/10 text-gray-500 hover:border-white/20 hover:text-white'
                       }`}>
                       <span className="text-xl">{ico}</span>
                       <span>{lbl}</span>
@@ -266,7 +266,7 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
               {/* ② Foto — la más importante */}
               <div>
                 <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-2 block">
-                  Foto del artículo <span className="text-amber-500">📷</span>
+                  Foto del artículo <span className="text-violet-400">📷</span>
                 </label>
                 {imagePreview ? (
                   <div className="relative rounded-xl overflow-hidden border border-white/10 group">
@@ -281,8 +281,8 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
                     <div className="absolute bottom-2 right-2 bg-green-500/90 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">✓ Lista</div>
                   </div>
                 ) : (
-                  <label className="flex flex-col items-center justify-center h-36 border-2 border-dashed border-white/10 rounded-xl cursor-pointer hover:border-amber-500/40 hover:bg-amber-500/3 transition-all group">
-                    <svg className="w-8 h-8 text-gray-600 group-hover:text-amber-500 transition-colors mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <label className="flex flex-col items-center justify-center h-36 border-2 border-dashed border-white/10 rounded-xl cursor-pointer hover:border-violet-500/40 hover:bg-violet-600/3 transition-all group">
+                    <svg className="w-8 h-8 text-gray-600 group-hover:text-violet-400 transition-colors mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                     <p className="text-gray-500 text-sm group-hover:text-gray-300 transition-colors font-medium">Agregar foto del artículo</p>
@@ -297,7 +297,7 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
                 <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1 block">Título *</label>
                 <input value={form.title} onChange={e => set('title', e.target.value)}
                   placeholder="Ej: LeBron James RC 2003 Topps Chrome PSA 9..."
-                  className="w-full bg-[#1a1a1a] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-500/50 placeholder-gray-700" />
+                  className="w-full bg-[#161628] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-violet-500/50 placeholder-gray-700" />
               </div>
 
               {/* ④ Descripción */}
@@ -306,7 +306,7 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
                 <textarea value={form.description} onChange={e => set('description', e.target.value)}
                   placeholder="Serial, variante, condición específica, incluye envío, etc..."
                   rows={2}
-                  className="w-full bg-[#1a1a1a] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-500/50 resize-none placeholder-gray-700" />
+                  className="w-full bg-[#161628] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-violet-500/50 resize-none placeholder-gray-700" />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -314,7 +314,7 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
                 <div>
                   <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1 block">Deporte</label>
                   <select value={form.sport} onChange={e => set('sport', e.target.value)}
-                    className="w-full bg-[#1a1a1a] border border-white/10 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none">
+                    className="w-full bg-[#161628] border border-white/10 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none">
                     {SPORT_OPTIONS.map(s => <option key={s}>{s}</option>)}
                   </select>
                 </div>
@@ -322,7 +322,7 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
                 <div>
                   <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1 block">Tipo</label>
                   <select value={form.kind} onChange={e => set('kind', e.target.value as any)}
-                    className="w-full bg-[#1a1a1a] border border-white/10 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none">
+                    className="w-full bg-[#161628] border border-white/10 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none">
                     <option value="card">🃏 Carta individual</option>
                     <option value="box">📦 Caja sellada</option>
                     <option value="accessory">🛡️ Accesorio</option>
@@ -337,7 +337,7 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-bold">$</span>
                       <input type="number" value={form.price} onChange={e => set('price', e.target.value)}
                         placeholder="500" min="0"
-                        className="w-full bg-[#1a1a1a] border border-white/10 text-white rounded-xl pl-7 pr-4 py-2.5 text-sm focus:outline-none focus:border-amber-500/50" />
+                        className="w-full bg-[#161628] border border-white/10 text-white rounded-xl pl-7 pr-4 py-2.5 text-sm focus:outline-none focus:border-violet-500/50" />
                     </div>
                   </div>
                 )}
@@ -350,7 +350,7 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-bold">$</span>
                       <input type="number" value={form.min_bid} onChange={e => set('min_bid', e.target.value)}
                         placeholder="100" min="0"
-                        className="w-full bg-[#1a1a1a] border border-white/10 text-white rounded-xl pl-7 pr-4 py-2.5 text-sm focus:outline-none focus:border-red-500/50" />
+                        className="w-full bg-[#161628] border border-white/10 text-white rounded-xl pl-7 pr-4 py-2.5 text-sm focus:outline-none focus:border-red-500/50" />
                     </div>
                   </div>
                 )}
@@ -359,7 +359,7 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
                 <div>
                   <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1 block">Condición</label>
                   <select value={form.condition} onChange={e => set('condition', e.target.value)}
-                    className="w-full bg-[#1a1a1a] border border-white/10 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none">
+                    className="w-full bg-[#161628] border border-white/10 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none">
                     {CONDITION_OPTIONS.map(c => <option key={c}>{c}</option>)}
                   </select>
                 </div>
@@ -370,7 +370,7 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
                     <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1 block">Grado (si aplica)</label>
                     <input value={form.grade} onChange={e => set('grade', e.target.value)}
                       placeholder="PSA 10, BGS 9.5..."
-                      className="w-full bg-[#1a1a1a] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-500/50 placeholder-gray-700" />
+                      className="w-full bg-[#161628] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-violet-500/50 placeholder-gray-700" />
                   </div>
                 )}
               </div>
@@ -380,7 +380,7 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
 
             <div className="px-6 py-4 border-t border-white/5 shrink-0">
               <button onClick={submit} disabled={loading || !form.title.trim()}
-                className="w-full bg-amber-500 hover:bg-amber-400 disabled:opacity-40 text-black font-black py-3 rounded-xl transition-all flex items-center justify-center gap-2">
+                className="w-full bg-violet-600 hover:bg-violet-500 disabled:opacity-40 text-black font-black py-3 rounded-xl transition-all flex items-center justify-center gap-2">
                 {loading
                   ? <><div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />{uploading ? 'Subiendo foto...' : 'Publicando...'}</>
                   : <>📢 Publicar anuncio</>
@@ -420,7 +420,7 @@ function BidModal({ item, onClose, user, navigate }: {
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClick={e => e.target === e.currentTarget && onClose()}>
-      <div className="w-full max-w-md bg-[#111] border border-white/10 rounded-2xl p-6 shadow-2xl">
+      <div className="w-full max-w-md bg-[#0e0e1e] border border-white/10 rounded-2xl p-6 shadow-2xl">
         {done ? (
           <div className="text-center py-4">
             <div className="w-14 h-14 bg-green-500/20 border border-green-500/30 rounded-full flex items-center justify-center mx-auto mb-3">
@@ -433,7 +433,7 @@ function BidModal({ item, onClose, user, navigate }: {
           <>
             <div className="flex items-start justify-between mb-5">
               <div>
-                <p className="text-amber-500 text-xs font-bold uppercase tracking-widest mb-0.5">Hacer una puja</p>
+                <p className="text-violet-400 text-xs font-bold uppercase tracking-widest mb-0.5">Hacer una puja</p>
                 <h3 className="text-white font-black text-lg leading-tight">{item.name}</h3>
                 <p className="text-gray-500 text-xs">{item.detail.slice(0, 60)}...</p>
               </div>
@@ -441,22 +441,22 @@ function BidModal({ item, onClose, user, navigate }: {
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>
-            <div className="bg-[#1a1a1a] rounded-xl p-3 mb-4 flex items-center justify-between">
+            <div className="bg-[#161628] rounded-xl p-3 mb-4 flex items-center justify-between">
               <span className="text-gray-500 text-xs">Precio listado</span>
               <span className="text-white font-black">{item.price}</span>
             </div>
             <div className="mb-4">
-              <label className="text-gray-400 text-xs mb-1.5 block">Tu puja (USD) — mínimo <span className="text-amber-400 font-bold">${minBid.toLocaleString()}</span></label>
+              <label className="text-gray-400 text-xs mb-1.5 block">Tu puja (USD) — mínimo <span className="text-violet-400 font-bold">${minBid.toLocaleString()}</span></label>
               <div className="relative">
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold">$</span>
                 <input type="number" value={amount} onChange={e => { setAmount(e.target.value); setError('') }}
                   placeholder={`${minBid}`} min={minBid}
-                  className="w-full bg-[#0a0a0a] border border-white/10 text-white rounded-xl pl-8 pr-4 py-3 text-lg font-black focus:outline-none focus:border-amber-500/50" />
+                  className="w-full bg-[#06060f] border border-white/10 text-white rounded-xl pl-8 pr-4 py-3 text-lg font-black focus:outline-none focus:border-violet-500/50" />
               </div>
               {error && <p className="text-red-400 text-xs mt-1.5">{error}</p>}
             </div>
             <button onClick={submit} disabled={loading || !amount}
-              className="w-full bg-amber-500 hover:bg-amber-400 disabled:opacity-40 text-black font-black py-3 rounded-xl transition-all">
+              className="w-full bg-violet-600 hover:bg-violet-500 disabled:opacity-40 text-black font-black py-3 rounded-xl transition-all">
               {loading ? 'Enviando puja...' : 'Confirmar puja'}
             </button>
             <p className="text-gray-600 text-[10px] text-center mt-3">El vendedor decide si acepta. Si ganas, te contactamos por email.</p>
@@ -493,7 +493,7 @@ function TradeModal({ item, onClose, user, navigate }: {
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClick={e => e.target === e.currentTarget && onClose()}>
-      <div className="w-full max-w-md bg-[#111] border border-white/10 rounded-2xl p-6 shadow-2xl">
+      <div className="w-full max-w-md bg-[#0e0e1e] border border-white/10 rounded-2xl p-6 shadow-2xl">
         {done ? (
           <div className="text-center py-4">
             <div className="w-14 h-14 bg-blue-500/20 border border-blue-500/30 rounded-full flex items-center justify-center mx-auto mb-3">
@@ -519,7 +519,7 @@ function TradeModal({ item, onClose, user, navigate }: {
               <textarea value={offer} onChange={e => setOffer(e.target.value)}
                 placeholder="Ej: Mahomes RC PSA 9 + $500 USD en efectivo..."
                 rows={4}
-                className="w-full bg-[#1a1a1a] border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500/50 resize-none" />
+                className="w-full bg-[#161628] border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500/50 resize-none" />
             </div>
             <button onClick={submit} disabled={loading || !offer.trim()}
               className="w-full bg-blue-500 hover:bg-blue-400 disabled:opacity-40 text-white font-black py-3 rounded-xl transition-all">
@@ -637,30 +637,30 @@ export default function Marketplace() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] pt-20 pb-24 px-4 sm:px-6">
+    <div className="min-h-screen bg-[#06060f] pt-20 pb-24 px-4 sm:px-6">
       <div className="max-w-7xl mx-auto">
 
         {/* Header */}
         <div className="flex items-start justify-between gap-4 mb-8">
           <div>
-            <p className="text-amber-500 text-xs font-bold uppercase tracking-widest mb-1">PullStack</p>
+            <p className="text-violet-400 text-xs font-bold uppercase tracking-widest mb-1">PullStack</p>
             <h1 className="text-4xl font-black text-white mb-1">Mercado</h1>
             <p className="text-gray-500 text-sm">Compra · Subasta · Tradea · NBA · NFL · Soccer · MLB · Pokémon · One Piece</p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <button onClick={() => user ? setShowPublish(true) : navigate('/login')}
-              className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-black px-4 py-2.5 rounded-xl text-sm transition-all hover:shadow-lg hover:shadow-amber-500/20">
+              className="flex items-center gap-2 bg-violet-600 hover:bg-violet-500 text-white font-black px-4 py-2.5 rounded-xl text-sm transition-all hover:shadow-lg hover:shadow-violet-500/20">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
               <span className="hidden sm:inline">Publicar</span>
             </button>
             <button onClick={() => setCartOpen(true)}
-              className="flex items-center gap-2 bg-[#111] border border-white/10 hover:border-amber-500/30 text-white px-4 py-2.5 rounded-xl transition-colors">
+              className="flex items-center gap-2 bg-[#0e0e1e] border border-white/10 hover:border-violet-500/30 text-white px-4 py-2.5 rounded-xl transition-colors">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
               </svg>
               <span className="text-sm font-bold hidden sm:inline">Carrito</span>
               {cartCount > 0 && (
-                <span className="bg-amber-500 text-black text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center">{cartCount}</span>
+                <span className="bg-violet-600 text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center">{cartCount}</span>
               )}
             </button>
           </div>
@@ -676,7 +676,7 @@ export default function Marketplace() {
             placeholder="Buscar carta, jugador, caja, marca... (ej: Charizard, Flagg, Topps, Prizm)"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="w-full bg-[#111] border border-white/10 text-white placeholder-gray-600 pl-11 pr-4 py-3.5 rounded-xl text-sm focus:outline-none focus:border-amber-500/50 transition-colors"
+            className="w-full bg-[#0e0e1e] border border-white/10 text-white placeholder-gray-600 pl-11 pr-4 py-3.5 rounded-xl text-sm focus:outline-none focus:border-violet-500/50 transition-colors"
           />
           {query && (
             <button onClick={() => setQuery('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-600 hover:text-gray-300">
@@ -693,7 +693,7 @@ export default function Marketplace() {
           <div className="flex gap-2 flex-wrap">
             {KINDS.map((k) => (
               <button key={k.value} onClick={() => setKind(k.value)}
-                className={`px-3 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${kind === k.value ? 'bg-amber-500 text-black' : 'bg-[#111] border border-white/10 text-gray-400 hover:border-amber-500/30 hover:text-amber-400'}`}>
+                className={`px-3 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${kind === k.value ? 'bg-violet-600 text-white' : 'bg-[#0e0e1e] border border-white/10 text-gray-400 hover:border-violet-500/30 hover:text-violet-400'}`}>
                 {k.label}
               </button>
             ))}
@@ -701,7 +701,7 @@ export default function Marketplace() {
             {/* Tipo de transacción */}
             {TXNS.map((t) => (
               <button key={t} onClick={() => setTxn(t)}
-                className={`px-3 py-2 rounded-lg text-xs font-bold transition-all ${txn === t ? 'bg-amber-500 text-black' : 'bg-[#111] border border-white/10 text-gray-400 hover:border-amber-500/30 hover:text-amber-400'}`}>
+                className={`px-3 py-2 rounded-lg text-xs font-bold transition-all ${txn === t ? 'bg-violet-600 text-white' : 'bg-[#0e0e1e] border border-white/10 text-gray-400 hover:border-violet-500/30 hover:text-violet-400'}`}>
                 {t}
               </button>
             ))}
@@ -717,11 +717,11 @@ export default function Marketplace() {
             <div className="ml-auto flex items-center gap-2">
               <button onClick={() => setShowMXN(!showMXN)}
                 title="Cambiar moneda"
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${showMXN ? 'bg-amber-500/10 border-amber-500/30 text-amber-400' : 'bg-[#111] border-white/10 text-gray-500 hover:text-gray-300'}`}>
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${showMXN ? 'bg-violet-500/10 border-violet-500/30 text-violet-400' : 'bg-[#0e0e1e] border-white/10 text-gray-500 hover:text-gray-300'}`}>
                 {showMXN ? '🇲🇽 MXN' : '🇺🇸 USD'}
               </button>
               <select value={sort} onChange={(e) => setSort(e.target.value)}
-                className="bg-[#111] border border-white/10 text-gray-400 px-3 py-1.5 rounded-lg text-xs focus:outline-none focus:border-amber-500/50">
+                className="bg-[#0e0e1e] border border-white/10 text-gray-400 px-3 py-1.5 rounded-lg text-xs focus:outline-none focus:border-violet-500/50">
                 {SORTS.map((s) => <option key={s}>{s}</option>)}
               </select>
             </div>
@@ -746,7 +746,7 @@ export default function Marketplace() {
                 const displayListing = listing.price || listing.min_bid || (listing.txn_type === 'trade' ? 'A convenir' : '—')
                 const isOwner = user?.id === listing.user_id
                 return (
-                  <div key={listing.id} className="group bg-[#111] border border-white/5 hover:border-amber-500/30 rounded-2xl overflow-hidden transition-all hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(245,158,11,0.08)]">
+                  <div key={listing.id} className="group bg-[#0e0e1e] border border-white/5 hover:border-violet-500/30 rounded-2xl overflow-hidden transition-all hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(139,92,246,0.15)]">
                     {/* Visual header */}
                     <div className="relative h-44 bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] flex items-center justify-center overflow-hidden">
                       {listing.image_url
@@ -755,8 +755,8 @@ export default function Marketplace() {
                       }
                       <div className="absolute inset-0 bg-gradient-to-t from-[#111] via-transparent to-transparent" />
                       <div className="absolute top-3 left-3 flex gap-1.5 flex-wrap">
-                        <span className="bg-amber-500/90 text-black text-[9px] font-black px-2 py-0.5 rounded-full uppercase">Particular</span>
-                        {listing.grade && <span className="bg-black/70 backdrop-blur text-amber-400 text-[9px] font-bold px-2 py-0.5 rounded-full border border-amber-500/30">{listing.grade}</span>}
+                        <span className="bg-violet-600/90 text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase">Particular</span>
+                        {listing.grade && <span className="bg-black/70 backdrop-blur text-violet-400 text-[9px] font-bold px-2 py-0.5 rounded-full border border-violet-500/30">{listing.grade}</span>}
                       </div>
                       <div className={`absolute top-3 right-3 text-[10px] font-black px-2 py-0.5 rounded-full border uppercase ${txnColor}`}>{txnLabel}</div>
                       <div className="absolute bottom-2 left-3 right-3 flex items-center justify-between">
@@ -766,7 +766,7 @@ export default function Marketplace() {
                     </div>
 
                     <div className="p-4">
-                      <p className="text-amber-500 text-[10px] font-bold uppercase tracking-widest mb-0.5 truncate">{listing.display_name}</p>
+                      <p className="text-violet-400 text-[10px] font-bold uppercase tracking-widest mb-0.5 truncate">{listing.display_name}</p>
                       <h3 className="text-white font-black text-sm leading-tight mb-1 line-clamp-2">{listing.title}</h3>
                       {listing.description && <p className="text-gray-600 text-[10px] leading-relaxed mb-3 line-clamp-2">{listing.description}</p>}
                       {listing.condition && !listing.description && <p className="text-gray-600 text-[10px] mb-3">{listing.condition}</p>}
@@ -792,21 +792,21 @@ export default function Marketplace() {
                       {listing.kind === 'card' ? (
                         <div className="grid grid-cols-3 gap-1.5">
                           <button onClick={() => { if (!user) { navigate('/login'); return }; alert('Contacta al vendedor en Mensajes para coordinar la compra.') }}
-                            className={`py-2 rounded-lg text-[11px] font-bold transition-all text-center ${listing.txn_type === 'sale' ? 'bg-amber-500 hover:bg-amber-400 text-black' : 'bg-[#1a1a1a] border border-white/10 text-gray-500 hover:border-amber-500/30 hover:text-amber-400'}`}>
+                            className={`py-2 rounded-lg text-[11px] font-bold transition-all text-center ${listing.txn_type === 'sale' ? 'bg-violet-600 hover:bg-violet-500 text-white' : 'bg-[#161628] border border-white/10 text-gray-500 hover:border-violet-500/30 hover:text-violet-400'}`}>
                             🛒 Comprar
                           </button>
                           <button onClick={() => { if (!user) { navigate('/login'); return }; alert('Envía tu puja al vendedor por Mensajes.') }}
-                            className={`py-2 rounded-lg text-[11px] font-bold transition-all text-center ${listing.txn_type === 'auction' ? 'bg-red-500/80 hover:bg-red-500 text-white' : 'bg-[#1a1a1a] border border-white/10 text-gray-500 hover:border-red-500/30 hover:text-red-400'}`}>
+                            className={`py-2 rounded-lg text-[11px] font-bold transition-all text-center ${listing.txn_type === 'auction' ? 'bg-red-500/80 hover:bg-red-500 text-white' : 'bg-[#161628] border border-white/10 text-gray-500 hover:border-red-500/30 hover:text-red-400'}`}>
                             🔨 Pujar
                           </button>
                           <button onClick={() => { if (!user) { navigate('/login'); return }; alert('Propón tu trade al vendedor en Mensajes.') }}
-                            className={`py-2 rounded-lg text-[11px] font-bold transition-all text-center ${listing.txn_type === 'trade' ? 'bg-blue-500/80 hover:bg-blue-500 text-white' : 'bg-[#1a1a1a] border border-white/10 text-gray-500 hover:border-blue-500/30 hover:text-blue-400'}`}>
+                            className={`py-2 rounded-lg text-[11px] font-bold transition-all text-center ${listing.txn_type === 'trade' ? 'bg-blue-500/80 hover:bg-blue-500 text-white' : 'bg-[#161628] border border-white/10 text-gray-500 hover:border-blue-500/30 hover:text-blue-400'}`}>
                             🔄 Trade
                           </button>
                         </div>
                       ) : (
                         <button onClick={() => navigate('/messages')}
-                          className="w-full bg-amber-500/10 hover:bg-amber-500 border border-amber-500/30 hover:border-amber-500 text-amber-400 hover:text-black font-bold py-2 px-3 rounded-lg text-xs transition-all">
+                          className="w-full bg-violet-500/10 hover:bg-violet-600 border border-violet-500/30 hover:border-violet-500 text-violet-400 hover:text-black font-bold py-2 px-3 rounded-lg text-xs transition-all">
                           Contactar vendedor
                         </button>
                       )}
@@ -828,7 +828,7 @@ export default function Marketplace() {
         {/* Resultados */}
         <p className="text-gray-600 text-sm mb-6">
           <span className="text-white font-bold">{results.length}</span> resultados en catálogo
-          {query && <span> para "<span className="text-amber-400">{query}</span>"</span>}
+          {query && <span> para "<span className="text-violet-400">{query}</span>"</span>}
         </p>
 
         {results.length === 0 ? (
@@ -837,7 +837,7 @@ export default function Marketplace() {
             <p className="text-gray-400 font-bold text-lg">Sin resultados</p>
             <p className="text-gray-600 text-sm mt-1">Intenta con otros filtros o un término diferente</p>
             <button onClick={() => { setSport('Todos'); setKind('all'); setTxn('Todos'); setQuery('') }}
-              className="mt-4 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 text-sm font-bold px-4 py-2 rounded-lg transition-all">
+              className="mt-4 bg-violet-500/10 hover:bg-violet-500/20 border border-violet-500/30 text-violet-400 text-sm font-bold px-4 py-2 rounded-lg transition-all">
               Limpiar filtros
             </button>
           </div>
@@ -845,7 +845,7 @@ export default function Marketplace() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {results.map((item) => (
               <div key={item.id}
-                className="group bg-[#111] border border-white/5 hover:border-amber-500/30 rounded-2xl overflow-hidden cursor-pointer transition-all hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(245,158,11,0.08)]">
+                className="group bg-[#0e0e1e] border border-white/5 hover:border-violet-500/30 rounded-2xl overflow-hidden cursor-pointer transition-all hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(139,92,246,0.15)]">
                 {/* Imagen */}
                 {(() => { const { isRC, isAuto, is1of1, numbered, gradeCo, gradeNum } = cardAttrs(item); return (
                 <div className="relative h-48 overflow-hidden">
@@ -855,13 +855,13 @@ export default function Marketplace() {
                   {/* Badges top-left */}
                   <div className="absolute top-3 left-3 flex flex-wrap gap-1 max-w-[calc(100%-70px)]">
                     {item.badge && (
-                      <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wider ${item.badge.includes('🔥') || item.badge.includes('🏆') ? 'bg-red-600 text-white' : item.badge.includes('🌍') ? 'bg-blue-600 text-white' : 'bg-amber-500 text-black'}`}>
+                      <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wider ${item.badge.includes('🔥') || item.badge.includes('🏆') ? 'bg-red-600 text-white' : item.badge.includes('🌍') ? 'bg-blue-600 text-white' : 'bg-violet-600 text-white'}`}>
                         {item.badge}
                       </span>
                     )}
                     {isRC    && <span className="bg-purple-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase">RC</span>}
                     {isAuto  && <span className="bg-blue-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase">Auto</span>}
-                    {is1of1  && <span className="bg-gradient-to-r from-amber-400 to-yellow-300 text-black text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase">1/1</span>}
+                    {is1of1  && <span className="bg-gradient-to-r from-violet-400 to-yellow-300 text-black text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase">1/1</span>}
                     {numbered && !is1of1 && <span className="bg-white/10 backdrop-blur text-white text-[9px] font-black px-1.5 py-0.5 rounded-full">{numbered}</span>}
                   </div>
                   {/* Tipo transacción top-right */}
@@ -871,7 +871,7 @@ export default function Marketplace() {
                   {/* Footer de la imagen */}
                   <div className="absolute bottom-2 left-3 right-3 flex items-center justify-between gap-1">
                     {gradeCo && gradeNum && (
-                      <span className="bg-black/70 backdrop-blur text-amber-400 text-[10px] font-bold px-2 py-0.5 rounded-lg border border-amber-500/30 shrink-0">
+                      <span className="bg-black/70 backdrop-blur text-violet-400 text-[10px] font-bold px-2 py-0.5 rounded-lg border border-violet-500/30 shrink-0">
                         <span className="text-gray-500">{gradeCo}</span> {gradeNum}
                       </span>
                     )}
@@ -884,7 +884,7 @@ export default function Marketplace() {
 
                 {/* Contenido */}
                 <div className="p-4">
-                  <p className="text-[10px] text-amber-500 font-bold uppercase tracking-widest mb-0.5">{item.brand}</p>
+                  <p className="text-[10px] text-violet-400 font-bold uppercase tracking-widest mb-0.5">{item.brand}</p>
                   <h3 className="text-white font-black text-sm leading-tight mb-0.5">{item.name}</h3>
                   <p className="text-gray-600 text-[10px] leading-relaxed mb-3 line-clamp-2">{item.detail}</p>
 
@@ -898,9 +898,9 @@ export default function Marketplace() {
                     {user && (
                       <button onClick={() => toggleCollection(item)} disabled={savingId === item.id}
                         title={savedIds.has(item.id) ? 'Quitar de colección' : 'Guardar en colección'}
-                        className={`p-2 rounded-lg border transition-all shrink-0 ${savedIds.has(item.id) ? 'bg-amber-500/20 border-amber-500/40 text-amber-400' : 'bg-white/5 border-white/10 text-gray-500 hover:text-amber-400 hover:border-amber-500/30'}`}>
+                        className={`p-2 rounded-lg border transition-all shrink-0 ${savedIds.has(item.id) ? 'bg-violet-500/20 border-violet-500/40 text-violet-400' : 'bg-white/5 border-white/10 text-gray-500 hover:text-violet-400 hover:border-violet-500/30'}`}>
                         {savingId === item.id
-                          ? <div className="w-3.5 h-3.5 border border-amber-400 border-t-transparent rounded-full animate-spin" />
+                          ? <div className="w-3.5 h-3.5 border border-violet-400 border-t-transparent rounded-full animate-spin" />
                           : <svg className="w-3.5 h-3.5" fill={savedIds.has(item.id) ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                             </svg>
@@ -914,26 +914,26 @@ export default function Marketplace() {
                     <div className="grid grid-cols-3 gap-1.5">
                       <button onClick={() => { addToCart(item); setCartOpen(true) }}
                         className={`py-2 rounded-lg text-[11px] font-bold transition-all text-center ${
-                          item.txn === 'sale' ? 'bg-amber-500 hover:bg-amber-400 text-black' : 'bg-[#1a1a1a] border border-white/10 text-gray-500 hover:border-amber-500/30 hover:text-amber-400'
+                          item.txn === 'sale' ? 'bg-violet-600 hover:bg-violet-500 text-white' : 'bg-[#161628] border border-white/10 text-gray-500 hover:border-violet-500/30 hover:text-violet-400'
                         }`}>
                         🛒 Comprar
                       </button>
                       <button onClick={() => user ? setBidItem(item) : navigate('/login')}
                         className={`py-2 rounded-lg text-[11px] font-bold transition-all text-center ${
-                          item.txn === 'auction' ? 'bg-red-500/80 hover:bg-red-500 text-white' : 'bg-[#1a1a1a] border border-white/10 text-gray-500 hover:border-red-500/30 hover:text-red-400'
+                          item.txn === 'auction' ? 'bg-red-500/80 hover:bg-red-500 text-white' : 'bg-[#161628] border border-white/10 text-gray-500 hover:border-red-500/30 hover:text-red-400'
                         }`}>
                         🔨 Pujar
                       </button>
                       <button onClick={() => user ? setTradeItem(item) : navigate('/login')}
                         className={`py-2 rounded-lg text-[11px] font-bold transition-all text-center ${
-                          item.txn === 'trade' ? 'bg-blue-500/80 hover:bg-blue-500 text-white' : 'bg-[#1a1a1a] border border-white/10 text-gray-500 hover:border-blue-500/30 hover:text-blue-400'
+                          item.txn === 'trade' ? 'bg-blue-500/80 hover:bg-blue-500 text-white' : 'bg-[#161628] border border-white/10 text-gray-500 hover:border-blue-500/30 hover:text-blue-400'
                         }`}>
                         🔄 Trade
                       </button>
                     </div>
                   ) : (
                     <button onClick={() => { addToCart(item); setCartOpen(true) }}
-                      className="w-full bg-amber-500/10 hover:bg-amber-500 border border-amber-500/30 hover:border-amber-500 text-amber-400 hover:text-black font-bold py-2 px-3 rounded-lg text-xs transition-all">
+                      className="w-full bg-violet-500/10 hover:bg-violet-600 border border-violet-500/30 hover:border-violet-500 text-violet-400 hover:text-black font-bold py-2 px-3 rounded-lg text-xs transition-all">
                       + Agregar al carrito
                     </button>
                   )}

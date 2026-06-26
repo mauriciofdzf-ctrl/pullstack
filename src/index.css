@@ -8,4 +8,31 @@ body {
   margin: 0;
   font-family: system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
+  background-color: #06060f;
+  /* Glow ambiental en la esquina superior */
+  background-image:
+    radial-gradient(ellipse 80% 50% at 10% -10%, rgba(109,40,217,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 90% 110%, rgba(192,38,211,0.08) 0%, transparent 50%);
+}
+
+/* Scrollbar sutil con tinte violeta */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(139, 92, 246, 0.3);
+  border-radius: 99px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 92, 246, 0.5);
+}
+
+/* Selección de texto */
+::selection {
+  background: rgba(139, 92, 246, 0.35);
+  color: #fff;
 }

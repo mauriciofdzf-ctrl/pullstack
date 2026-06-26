@@ -97,7 +97,7 @@ function RaffleCard({ raffle, onEnter, entered, loading }: {
   const isUrgent = new Date(raffle.ends_at).getTime() - Date.now() < 24 * 60 * 60 * 1000
 
   return (
-    <div className="bg-[#111] border border-white/5 hover:border-amber-500/20 rounded-2xl overflow-hidden transition-all group">
+    <div className="bg-[#0e0e1e] border border-white/5 hover:border-violet-500/20 rounded-2xl overflow-hidden transition-all group">
       <div className="aspect-video overflow-hidden relative">
         <img src={raffle.image} alt={raffle.title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
@@ -109,7 +109,7 @@ function RaffleCard({ raffle, onEnter, entered, loading }: {
           {isUrgent && <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />}
           <span className="text-white text-xs font-bold">{countdown}</span>
         </div>
-        <div className="absolute bottom-3 left-3 bg-amber-500/90 text-black text-xs font-black px-2.5 py-1 rounded-lg">
+        <div className="absolute bottom-3 left-3 bg-violet-600/90 text-white text-xs font-black px-2.5 py-1 rounded-lg">
           {raffle.highlight}
         </div>
       </div>
@@ -119,16 +119,16 @@ function RaffleCard({ raffle, onEnter, entered, loading }: {
         <div className="mb-4">
           <div className="flex justify-between text-xs mb-1.5">
             <span className="text-gray-500">{raffle.sold_tickets} / {raffle.max_tickets} boletos</span>
-            <span className={`font-bold ${pct >= 80 ? 'text-red-400' : 'text-amber-400'}`}>{pct}% vendido</span>
+            <span className={`font-bold ${pct >= 80 ? 'text-red-400' : 'text-violet-400'}`}>{pct}% vendido</span>
           </div>
-          <div className="w-full bg-[#1a1a1a] rounded-full h-1.5">
-            <div className={`h-1.5 rounded-full transition-all ${pct >= 80 ? 'bg-red-500' : 'bg-amber-500'}`} style={{ width: `${pct}%` }} />
+          <div className="w-full bg-[#161628] rounded-full h-1.5">
+            <div className={`h-1.5 rounded-full transition-all ${pct >= 80 ? 'bg-red-500' : 'bg-violet-600'}`} style={{ width: `${pct}%` }} />
           </div>
         </div>
         <div className="flex items-center justify-between">
           <div>
             <p className="text-gray-500 text-[10px]">Por boleto</p>
-            <p className="text-amber-400 font-black text-xl">${raffle.price_per_ticket} <span className="text-sm">USD</span></p>
+            <p className="text-violet-400 font-black text-xl">${raffle.price_per_ticket} <span className="text-sm">USD</span></p>
           </div>
           <button onClick={onEnter} disabled={entered || loading || countdown === 'Terminada'}
             className={`font-black px-5 py-2.5 rounded-xl text-sm transition-all ${
@@ -137,8 +137,8 @@ function RaffleCard({ raffle, onEnter, entered, loading }: {
                 : countdown === 'Terminada'
                 ? 'bg-gray-500/20 border border-gray-500/20 text-gray-500 cursor-default'
                 : loading
-                ? 'bg-amber-500/50 text-black cursor-wait'
-                : 'bg-amber-500 hover:bg-amber-400 text-black'
+                ? 'bg-violet-500/50 text-black cursor-wait'
+                : 'bg-violet-600 hover:bg-violet-500 text-white'
             }`}>
             {loading ? '...' : entered ? '✓ Inscrito' : countdown === 'Terminada' ? 'Terminada' : 'Participar'}
           </button>
@@ -174,7 +174,7 @@ export default function Raffles() {
   }, [user, navigate, enteredIds])
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] pt-24 pb-16 px-4">
+    <div className="min-h-screen bg-[#06060f] pt-24 pb-16 px-4">
       <div className="max-w-5xl mx-auto">
 
         <div className="mb-8">
@@ -183,10 +183,10 @@ export default function Raffles() {
         </div>
 
         {!user && (
-          <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 mb-6 flex items-center justify-between gap-4">
+          <div className="bg-violet-500/10 border border-violet-500/20 rounded-2xl p-4 mb-6 flex items-center justify-between gap-4">
             <p className="text-amber-300 text-sm font-medium">Inicia sesión para participar en rifas</p>
             <button onClick={() => navigate('/login')}
-              className="bg-amber-500 hover:bg-amber-400 text-black font-black px-4 py-2 rounded-xl text-sm transition-all shrink-0">
+              className="bg-violet-600 hover:bg-violet-500 text-white font-black px-4 py-2 rounded-xl text-sm transition-all shrink-0">
               Iniciar sesión
             </button>
           </div>
@@ -210,14 +210,14 @@ export default function Raffles() {
           ))}
         </div>
 
-        <div className="bg-[#111] border border-white/5 rounded-2xl p-6">
+        <div className="bg-[#0e0e1e] border border-white/5 rounded-2xl p-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div>
               <h3 className="text-white font-bold text-lg mb-1">¿Tienes una carta para rifar?</h3>
               <p className="text-gray-500 text-sm">Abrimos rifas a vendedores verificados. Comisión de solo 5%. Sin riesgo de no-shows.</p>
             </div>
             <a href="/messages"
-              className="bg-[#1a1a1a] border border-white/10 hover:border-amber-500/30 text-gray-300 hover:text-amber-400 font-bold px-5 py-2.5 rounded-xl text-sm transition-all whitespace-nowrap">
+              className="bg-[#161628] border border-white/10 hover:border-violet-500/30 text-gray-300 hover:text-violet-400 font-bold px-5 py-2.5 rounded-xl text-sm transition-all whitespace-nowrap">
               Contactar para listar →
             </a>
           </div>

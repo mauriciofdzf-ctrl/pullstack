@@ -56,7 +56,7 @@ const TXN_CSS: Record<string, string>     = {
 }
 const PRIORITY_CSS: Record<string, string> = {
   high:   'bg-red-500/15 text-red-400 border-red-500/30',
-  medium: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
+  medium: 'bg-violet-600/15 text-violet-400 border-violet-500/30',
   low:    'bg-gray-500/15 text-gray-400 border-gray-500/30',
 }
 const PRIORITY_LABEL: Record<string, string> = { high: 'Alta', medium: 'Media', low: 'Baja' }
@@ -135,14 +135,14 @@ function NewListingInline({ user, profile, onCreated }: {
 
   if (!open) return (
     <button onClick={() => setOpen(true)}
-      className="bg-amber-500 hover:bg-amber-400 text-black font-black px-4 py-2 rounded-xl text-sm transition-all flex items-center gap-1.5 shrink-0">
+      className="bg-violet-600 hover:bg-violet-500 text-white font-black px-4 py-2 rounded-xl text-sm transition-all flex items-center gap-1.5 shrink-0">
       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
       Nuevo anuncio
     </button>
   )
 
   return (
-    <div className="bg-[#111] border border-amber-500/20 rounded-2xl p-5 mb-6">
+    <div className="bg-[#0e0e1e] border border-violet-500/20 rounded-2xl p-5 mb-6">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-white font-bold">Publicar artículo</h3>
         <button onClick={() => setOpen(false)} className="text-gray-500 hover:text-white">
@@ -155,10 +155,10 @@ function NewListingInline({ user, profile, onCreated }: {
           <button key={val} onClick={() => set('txn_type', val)}
             className={`py-2.5 rounded-xl text-xs font-black border transition-all flex flex-col items-center gap-0.5 ${
               form.txn_type === val
-                ? val === 'sale' ? 'bg-amber-500 border-amber-500 text-black'
+                ? val === 'sale' ? 'bg-violet-600 border-violet-500 text-white'
                 : val === 'auction' ? 'bg-red-500 border-red-500 text-white'
                                     : 'bg-blue-500 border-blue-500 text-white'
-                : 'bg-[#1a1a1a] border-white/10 text-gray-500 hover:border-white/20'
+                : 'bg-[#161628] border-white/10 text-gray-500 hover:border-white/20'
             }`}>
             <span>{ico}</span><span>{lbl}</span>
           </button>
@@ -177,8 +177,8 @@ function NewListingInline({ user, profile, onCreated }: {
             <div className="absolute bottom-2 right-2 bg-green-500/90 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">✓ Lista</div>
           </div>
         ) : (
-          <label className="flex items-center gap-3 h-14 border border-dashed border-white/10 rounded-xl cursor-pointer hover:border-amber-500/30 hover:bg-amber-500/3 px-4 transition-all group">
-            <svg className="w-5 h-5 text-gray-600 group-hover:text-amber-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <label className="flex items-center gap-3 h-14 border border-dashed border-white/10 rounded-xl cursor-pointer hover:border-violet-500/30 hover:bg-violet-600/3 px-4 transition-all group">
+            <svg className="w-5 h-5 text-gray-600 group-hover:text-violet-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
             <div>
@@ -193,18 +193,18 @@ function NewListingInline({ user, profile, onCreated }: {
       <div className="space-y-2">
         <input value={form.title} onChange={e => set('title', e.target.value)}
           placeholder="Título: jugador, carta, set... *"
-          className="w-full bg-[#1a1a1a] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-500/50 placeholder-gray-700" />
+          className="w-full bg-[#161628] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-violet-500/50 placeholder-gray-700" />
         <textarea value={form.description} onChange={e => set('description', e.target.value)}
           placeholder="Serial, condición, incluye envío..."
           rows={2}
-          className="w-full bg-[#1a1a1a] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-500/50 resize-none placeholder-gray-700" />
+          className="w-full bg-[#161628] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-violet-500/50 resize-none placeholder-gray-700" />
         <div className="grid grid-cols-2 gap-2">
           <select value={form.sport} onChange={e => set('sport', e.target.value)}
-            className="bg-[#1a1a1a] border border-white/10 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none">
+            className="bg-[#161628] border border-white/10 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none">
             {SPORT_OPTIONS.map(s => <option key={s}>{s}</option>)}
           </select>
           <select value={form.kind} onChange={e => set('kind', e.target.value as any)}
-            className="bg-[#1a1a1a] border border-white/10 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none">
+            className="bg-[#161628] border border-white/10 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none">
             <option value="card">🃏 Carta</option>
             <option value="box">📦 Caja</option>
             <option value="accessory">🛡️ Accesorio</option>
@@ -214,7 +214,7 @@ function NewListingInline({ user, profile, onCreated }: {
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-bold">$</span>
               <input type="number" value={form.price} onChange={e => set('price', e.target.value)}
                 placeholder="Precio USD" min="0"
-                className="w-full bg-[#1a1a1a] border border-white/10 text-white rounded-xl pl-7 pr-4 py-2.5 text-sm focus:outline-none focus:border-amber-500/50" />
+                className="w-full bg-[#161628] border border-white/10 text-white rounded-xl pl-7 pr-4 py-2.5 text-sm focus:outline-none focus:border-violet-500/50" />
             </div>
           )}
           {form.txn_type === 'auction' && (
@@ -222,17 +222,17 @@ function NewListingInline({ user, profile, onCreated }: {
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-bold">$</span>
               <input type="number" value={form.min_bid} onChange={e => set('min_bid', e.target.value)}
                 placeholder="Puja mínima USD" min="0"
-                className="w-full bg-[#1a1a1a] border border-white/10 text-white rounded-xl pl-7 pr-4 py-2.5 text-sm focus:outline-none focus:border-red-500/50" />
+                className="w-full bg-[#161628] border border-white/10 text-white rounded-xl pl-7 pr-4 py-2.5 text-sm focus:outline-none focus:border-red-500/50" />
             </div>
           )}
           <select value={form.condition} onChange={e => set('condition', e.target.value)}
-            className="bg-[#1a1a1a] border border-white/10 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none">
+            className="bg-[#161628] border border-white/10 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none">
             {CONDITION_OPTIONS.map(c => <option key={c}>{c}</option>)}
           </select>
           {form.kind === 'card' && (
             <input value={form.grade} onChange={e => set('grade', e.target.value)}
               placeholder="Grado: PSA 10, BGS 9.5..."
-              className="bg-[#1a1a1a] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-500/50 placeholder-gray-700" />
+              className="bg-[#161628] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-violet-500/50 placeholder-gray-700" />
           )}
         </div>
       </div>
@@ -240,7 +240,7 @@ function NewListingInline({ user, profile, onCreated }: {
       {error && <p className="text-red-400 text-xs mt-2 bg-red-500/10 px-3 py-1.5 rounded-lg border border-red-500/20">{error}</p>}
 
       <button onClick={submit} disabled={loading || !form.title.trim()}
-        className="w-full mt-4 bg-amber-500 hover:bg-amber-400 disabled:opacity-40 text-black font-black py-2.5 rounded-xl text-sm transition-all flex items-center justify-center gap-2">
+        className="w-full mt-4 bg-violet-600 hover:bg-violet-500 disabled:opacity-40 text-black font-black py-2.5 rounded-xl text-sm transition-all flex items-center justify-center gap-2">
         {loading
           ? <><div className="w-3.5 h-3.5 border-2 border-black/30 border-t-black rounded-full animate-spin" />{uploading ? 'Subiendo foto...' : 'Publicando...'}</>
           : '📢 Publicar en el Mercado'}
@@ -338,18 +338,18 @@ export default function Wallet() {
   const filtered   = sportFilter === 'Todos' ? items : items.filter(i => i.sport === sportFilter)
 
   if (authLoading || (loading && user)) return (
-    <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
-      <div className="w-10 h-10 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+    <div className="min-h-screen bg-[#06060f] flex items-center justify-center">
+      <div className="w-10 h-10 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
     </div>
   )
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] pt-20 pb-28 px-4 sm:px-6">
+    <div className="min-h-screen bg-[#06060f] pt-20 pb-28 px-4 sm:px-6">
       <div className="max-w-6xl mx-auto">
 
         {/* Header */}
         <div className="mb-6">
-          <p className="text-amber-500 text-[10px] font-bold uppercase tracking-widest mb-1">PullStack</p>
+          <p className="text-violet-400 text-[10px] font-bold uppercase tracking-widest mb-1">PullStack</p>
           <h1 className="text-4xl font-black text-white mb-1">Mi Portfolio</h1>
           <p className="text-gray-600 text-sm">Colección · Anuncios activos · Lista de deseos</p>
         </div>
@@ -358,11 +358,11 @@ export default function Wallet() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-7">
           {[
             { label: 'Piezas',     value: items.length.toString(),    sub: '',                                  color: 'text-white' },
-            { label: 'Valor est.', value: totalValue === 0 ? '—' : totalValue >= 1e6 ? `$${(totalValue/1e6).toFixed(1)}M` : totalValue >= 1000 ? `$${(totalValue/1000).toFixed(0)}K` : `$${totalValue.toLocaleString()}`, sub: 'USD', color: 'text-amber-400' },
+            { label: 'Valor est.', value: totalValue === 0 ? '—' : totalValue >= 1e6 ? `$${(totalValue/1e6).toFixed(1)}M` : totalValue >= 1000 ? `$${(totalValue/1000).toFixed(0)}K` : `$${totalValue.toLocaleString()}`, sub: 'USD', color: 'text-violet-400' },
             { label: 'En venta',   value: activeAds.toString(),       sub: myListings.length > activeAds ? `${myListings.length - activeAds} pausados` : '', color: 'text-green-400' },
             { label: 'Deseadas',   value: wishes.length.toString(),   sub: '',                                  color: 'text-blue-400' },
           ].map(s => (
-            <div key={s.label} className="bg-[#111] border border-white/5 rounded-2xl p-4">
+            <div key={s.label} className="bg-[#0e0e1e] border border-white/5 rounded-2xl p-4">
               <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1">{s.label}</p>
               <p className={`font-black text-2xl ${s.color}`}>{s.value}</p>
               {s.sub && <p className="text-gray-600 text-[10px] mt-0.5">{s.sub}</p>}
@@ -371,14 +371,14 @@ export default function Wallet() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 mb-6 bg-[#111] border border-white/5 rounded-xl p-1 w-fit">
+        <div className="flex gap-1 mb-6 bg-[#0e0e1e] border border-white/5 rounded-xl p-1 w-fit">
           {([
             ['collection', '🃏', 'Colección',    items.length],
             ['listings',   '📢', 'Mis Anuncios', myListings.length],
             ['wishlist',   '⭐', 'Deseadas',     wishes.length],
           ] as const).map(([id, ico, lbl, cnt]) => (
             <button key={id} onClick={() => setTab(id)}
-              className={`px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-1.5 ${tab === id ? 'bg-amber-500 text-black' : 'text-gray-500 hover:text-gray-300'}`}>
+              className={`px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-1.5 ${tab === id ? 'bg-violet-600 text-white' : 'text-gray-500 hover:text-gray-300'}`}>
               <span>{ico}</span>
               <span className="hidden sm:inline">{lbl}</span>
               {cnt > 0 && <span className={`text-[10px] font-black ${tab === id ? 'text-black/60' : 'text-gray-600'}`}>({cnt})</span>}
@@ -390,12 +390,12 @@ export default function Wallet() {
         {tab === 'collection' && (
           <>
             {Object.keys(sportBreak).length > 0 && (
-              <div className="bg-[#111] border border-white/5 rounded-2xl p-4 mb-5">
+              <div className="bg-[#0e0e1e] border border-white/5 rounded-2xl p-4 mb-5">
                 <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-2">Por deporte</p>
                 <div className="flex flex-wrap gap-1.5">
                   {Object.entries(sportBreak).map(([sport, count]) => (
                     <button key={sport} onClick={() => setSport(sport === sportFilter ? 'Todos' : sport)}
-                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs transition-all ${sportFilter === sport ? 'bg-amber-500/20 border border-amber-500/30 text-amber-400' : 'bg-[#1a1a1a] border border-white/5 text-gray-400 hover:border-white/10'}`}>
+                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs transition-all ${sportFilter === sport ? 'bg-violet-500/20 border border-violet-500/30 text-violet-400' : 'bg-[#161628] border border-white/5 text-gray-400 hover:border-white/10'}`}>
                       {SPORT_ICONS[sport] || '🃏'} {sport} <span className="font-black">{count}</span>
                     </button>
                   ))}
@@ -411,7 +411,7 @@ export default function Wallet() {
                 <div className="text-6xl mb-5">🃏</div>
                 <h2 className="text-white font-black text-2xl mb-2">Colección vacía</h2>
                 <p className="text-gray-500 text-sm mb-8 max-w-sm">Guarda cartas desde el Mercado con el botón 🔖 para armar tu portfolio.</p>
-                <Link to="/marketplace" className="bg-amber-500 hover:bg-amber-400 text-black font-black px-6 py-3 rounded-xl transition-all">
+                <Link to="/marketplace" className="bg-violet-600 hover:bg-violet-500 text-white font-black px-6 py-3 rounded-xl transition-all">
                   Explorar el Mercado →
                 </Link>
               </div>
@@ -419,16 +419,16 @@ export default function Wallet() {
               <>
                 <p className="text-gray-600 text-xs mb-4">
                   <span className="text-white font-bold">{filtered.length}</span> artículo{filtered.length !== 1 ? 's' : ''}
-                  {sportFilter !== 'Todos' && <span> en <span className="text-amber-400">{sportFilter}</span></span>}
+                  {sportFilter !== 'Todos' && <span> en <span className="text-violet-400">{sportFilter}</span></span>}
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                   {filtered.map(item => (
-                    <div key={item.id} className="group bg-[#111] border border-white/5 hover:border-amber-500/20 rounded-2xl p-4 transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-amber-500/5">
+                    <div key={item.id} className="group bg-[#0e0e1e] border border-white/5 hover:border-violet-500/20 rounded-2xl p-4 transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-violet-500/5">
                       <div className="flex items-start justify-between gap-2 mb-3">
                         <div className="flex items-center gap-2">
                           <span className="text-2xl">{SPORT_ICONS[item.sport] || '🃏'}</span>
                           <div>
-                            <p className="text-[10px] text-amber-500 font-bold uppercase tracking-widest">{item.sport}</p>
+                            <p className="text-[10px] text-violet-400 font-bold uppercase tracking-widest">{item.sport}</p>
                             <p className="text-[10px] text-gray-600">{KIND_LABEL[item.kind] || item.kind}</p>
                           </div>
                         </div>
@@ -442,14 +442,14 @@ export default function Wallet() {
                       </div>
                       <h3 className="text-white font-black text-sm leading-tight mb-1 line-clamp-2">{item.name}</h3>
                       <div className="flex items-end justify-between mt-3 pt-3 border-t border-white/5">
-                        <p className="text-amber-400 font-black text-lg">{item.price}</p>
+                        <p className="text-violet-400 font-black text-lg">{item.price}</p>
                         <p className="text-gray-600 text-[10px]">{new Date(item.added_at).toLocaleDateString('es-MX', { month: 'short', day: 'numeric' })}</p>
                       </div>
                     </div>
                   ))}
                 </div>
                 <div className="mt-8 text-center">
-                  <Link to="/marketplace" className="inline-flex items-center gap-2 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 font-bold px-5 py-2.5 rounded-xl text-sm transition-all">
+                  <Link to="/marketplace" className="inline-flex items-center gap-2 bg-violet-500/10 hover:bg-violet-500/20 border border-violet-500/30 text-violet-400 font-bold px-5 py-2.5 rounded-xl text-sm transition-all">
                     + Agregar más al portfolio
                   </Link>
                 </div>
@@ -478,8 +478,8 @@ export default function Wallet() {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {myListings.map(listing => (
-                  <div key={listing.id} className={`group bg-[#111] border rounded-2xl overflow-hidden transition-all ${listing.active ? 'border-white/5 hover:border-amber-500/20' : 'border-white/5 opacity-55'}`}>
-                    <div className="relative h-44 bg-[#1a1a1a] overflow-hidden">
+                  <div key={listing.id} className={`group bg-[#0e0e1e] border rounded-2xl overflow-hidden transition-all ${listing.active ? 'border-white/5 hover:border-violet-500/20' : 'border-white/5 opacity-55'}`}>
+                    <div className="relative h-44 bg-[#161628] overflow-hidden">
                       {listing.image_url
                         ? <img src={listing.image_url} alt={listing.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                         : (
@@ -508,7 +508,7 @@ export default function Wallet() {
                       <div className="flex items-center gap-2 text-[10px] text-gray-500 mb-3">
                         {!listing.image_url && <span>{SPORT_ICONS[listing.sport]} {listing.sport}</span>}
                         <span>{KIND_LABEL[listing.kind]}</span>
-                        {listing.grade && <><span>·</span><span className="text-amber-400 font-bold">{listing.grade}</span></>}
+                        {listing.grade && <><span>·</span><span className="text-violet-400 font-bold">{listing.grade}</span></>}
                         {listing.condition && <><span>·</span><span>{listing.condition.split(' ')[0]}</span></>}
                       </div>
 
@@ -523,7 +523,7 @@ export default function Wallet() {
 
                       <div className="flex gap-2">
                         <button onClick={() => toggleListing(listing.id, listing.active)} disabled={removing === listing.id}
-                          className={`flex-1 py-1.5 rounded-lg text-xs font-bold border transition-all ${listing.active ? 'bg-[#1a1a1a] border-white/10 text-gray-400 hover:border-red-500/30 hover:text-red-400' : 'bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20'}`}>
+                          className={`flex-1 py-1.5 rounded-lg text-xs font-bold border transition-all ${listing.active ? 'bg-[#161628] border-white/10 text-gray-400 hover:border-red-500/30 hover:text-red-400' : 'bg-violet-500/10 border-violet-500/30 text-violet-400 hover:bg-violet-500/20'}`}>
                           {removing === listing.id
                             ? <div className="w-3 h-3 border border-current border-t-transparent rounded-full animate-spin mx-auto" />
                             : listing.active ? 'Pausar' : '▶ Activar'
@@ -535,7 +535,7 @@ export default function Wallet() {
                           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7M4 7h16" /></svg>
                         </button>
                         <Link to="/marketplace" title="Ver en Mercado"
-                          className="px-3 py-1.5 rounded-lg border border-white/5 text-gray-600 hover:text-amber-400 hover:border-amber-500/30 transition-all flex items-center">
+                          className="px-3 py-1.5 rounded-lg border border-white/5 text-gray-600 hover:text-violet-400 hover:border-violet-500/30 transition-all flex items-center">
                           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
                         </Link>
                       </div>
@@ -556,25 +556,25 @@ export default function Wallet() {
                 <p className="text-gray-600 text-xs mt-0.5">Tu lista de objetivos de colección</p>
               </div>
               <button onClick={() => setShowWishForm(!showWishForm)}
-                className="bg-amber-500 hover:bg-amber-400 text-black font-black px-4 py-2 rounded-xl text-sm transition-all shrink-0">
+                className="bg-violet-600 hover:bg-violet-500 text-white font-black px-4 py-2 rounded-xl text-sm transition-all shrink-0">
                 + Agregar
               </button>
             </div>
 
             {showWishForm && (
-              <div className="bg-[#111] border border-amber-500/20 rounded-2xl p-5 mb-6">
+              <div className="bg-[#0e0e1e] border border-violet-500/20 rounded-2xl p-5 mb-6">
                 <h3 className="text-white font-bold mb-4">Nueva carta deseada</h3>
                 <div className="grid sm:grid-cols-2 gap-3 mb-3">
                   <div className="sm:col-span-2">
                     <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1 block">Carta / Jugador *</label>
                     <input value={wishName} onChange={e => setWishName(e.target.value)}
                       placeholder="Ej. LeBron James RC PSA 10, Charizard 1st Ed..."
-                      className="w-full bg-[#1a1a1a] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-500/50 placeholder-gray-700" />
+                      className="w-full bg-[#161628] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-violet-500/50 placeholder-gray-700" />
                   </div>
                   <div>
                     <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1 block">Deporte</label>
                     <select value={wishSport} onChange={e => setWishSport(e.target.value)}
-                      className="w-full bg-[#1a1a1a] border border-white/10 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none">
+                      className="w-full bg-[#161628] border border-white/10 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none">
                       {SPORT_OPTIONS.map(s => <option key={s}>{s}</option>)}
                     </select>
                   </div>
@@ -584,21 +584,21 @@ export default function Wallet() {
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
                       <input value={wishMaxPrice} onChange={e => setWishMaxPrice(e.target.value)}
                         placeholder="500" type="number"
-                        className="w-full bg-[#1a1a1a] border border-white/10 text-white rounded-xl pl-7 pr-4 py-2.5 text-sm focus:outline-none focus:border-amber-500/50" />
+                        className="w-full bg-[#161628] border border-white/10 text-white rounded-xl pl-7 pr-4 py-2.5 text-sm focus:outline-none focus:border-violet-500/50" />
                     </div>
                   </div>
                   <div className="sm:col-span-2">
                     <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1 block">Notas</label>
                     <input value={wishNotes} onChange={e => setWishNotes(e.target.value)}
                       placeholder="Variante, grado mínimo, condición..."
-                      className="w-full bg-[#1a1a1a] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-500/50 placeholder-gray-700" />
+                      className="w-full bg-[#161628] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-violet-500/50 placeholder-gray-700" />
                   </div>
                   <div className="sm:col-span-2">
                     <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-2 block">Prioridad</label>
                     <div className="flex gap-2">
                       {(['high','medium','low'] as const).map(p => (
                         <button key={p} onClick={() => setWishPriority(p)}
-                          className={`flex-1 py-2 rounded-lg text-xs font-bold border transition-all ${wishPriority === p ? PRIORITY_CSS[p] : 'bg-[#1a1a1a] border-white/10 text-gray-500'}`}>
+                          className={`flex-1 py-2 rounded-lg text-xs font-bold border transition-all ${wishPriority === p ? PRIORITY_CSS[p] : 'bg-[#161628] border-white/10 text-gray-500'}`}>
                           {PRIORITY_LABEL[p]}
                         </button>
                       ))}
@@ -608,7 +608,7 @@ export default function Wallet() {
                 <div className="flex gap-2 justify-end">
                   <button onClick={() => setShowWishForm(false)} className="text-gray-500 hover:text-white text-sm px-4 py-2 transition-colors">Cancelar</button>
                   <button onClick={addWish} disabled={wishSaving || !wishName.trim()}
-                    className="bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-black font-black px-5 py-2 rounded-xl text-sm transition-all">
+                    className="bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-black font-black px-5 py-2 rounded-xl text-sm transition-all">
                     {wishSaving ? 'Guardando...' : 'Agregar'}
                   </button>
                 </div>
@@ -621,14 +621,14 @@ export default function Wallet() {
                 <h2 className="text-white font-black text-2xl mb-2">Lista vacía</h2>
                 <p className="text-gray-500 text-sm mb-8 max-w-sm">Agrega las cartas que quieres conseguir para tenerlas siempre a la vista.</p>
                 <button onClick={() => setShowWishForm(true)}
-                  className="bg-amber-500 hover:bg-amber-400 text-black font-black px-6 py-3 rounded-xl transition-all">
+                  className="bg-violet-600 hover:bg-violet-500 text-white font-black px-6 py-3 rounded-xl transition-all">
                   + Agregar primera carta
                 </button>
               </div>
             ) : (
               <div className="space-y-2.5">
                 {wishes.map(w => (
-                  <div key={w.id} className="group bg-[#111] border border-white/5 hover:border-amber-500/20 rounded-2xl p-4 transition-all flex items-center gap-4">
+                  <div key={w.id} className="group bg-[#0e0e1e] border border-white/5 hover:border-violet-500/20 rounded-2xl p-4 transition-all flex items-center gap-4">
                     <div className="text-2xl shrink-0">{SPORT_ICONS[w.sport] || '🃏'}</div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap mb-0.5">
@@ -637,13 +637,13 @@ export default function Wallet() {
                       </div>
                       <div className="flex items-center gap-2 text-xs text-gray-500 flex-wrap">
                         <span>{w.sport}</span>
-                        {w.max_price && <span>· Máx. <span className="text-amber-400 font-bold">{w.max_price}</span></span>}
+                        {w.max_price && <span>· Máx. <span className="text-violet-400 font-bold">{w.max_price}</span></span>}
                         {w.notes && <span>· {w.notes}</span>}
                       </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       <Link to="/marketplace"
-                        className="bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 text-xs font-bold px-3 py-1.5 rounded-lg transition-all hidden sm:block whitespace-nowrap">
+                        className="bg-violet-500/10 hover:bg-violet-500/20 border border-violet-500/30 text-violet-400 text-xs font-bold px-3 py-1.5 rounded-lg transition-all hidden sm:block whitespace-nowrap">
                         Buscar →
                       </Link>
                       <button onClick={() => removeWish(w.id)} disabled={removing === w.id}

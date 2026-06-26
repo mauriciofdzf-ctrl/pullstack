@@ -24,7 +24,7 @@ const ROOMS = [
 ]
 
 const AVATAR_COLORS = [
-  'from-amber-500 to-orange-600',
+  'from-violet-500 to-fuchsia-700',
   'from-purple-500 to-pink-600',
   'from-blue-500 to-cyan-600',
   'from-green-500 to-teal-600',
@@ -108,13 +108,13 @@ export default function Chat() {
   }
 
   if (!user) return (
-    <div className="min-h-screen bg-[#0a0a0a] pt-24 pb-16 px-4 flex items-center justify-center">
+    <div className="min-h-screen bg-[#06060f] pt-24 pb-16 px-4 flex items-center justify-center">
       <div className="text-center">
         <div className="text-5xl mb-4">💬</div>
         <h2 className="text-white text-2xl font-black mb-2">Chat de Coleccionistas</h2>
         <p className="text-gray-400 text-sm mb-6">Inicia sesión para unirte a la conversación</p>
         <button onClick={() => navigate('/login', { state: { from: '/chat' } })}
-          className="bg-amber-500 hover:bg-amber-400 text-black font-black px-6 py-2.5 rounded-xl transition-all">
+          className="bg-violet-600 hover:bg-violet-500 text-white font-black px-6 py-2.5 rounded-xl transition-all">
           Iniciar sesión
         </button>
       </div>
@@ -124,11 +124,11 @@ export default function Chat() {
   const currentRoom = ROOMS.find(r => r.id === room)
 
   return (
-    <div className="bg-[#0a0a0a] pt-16" style={{ height: '100dvh', display: 'flex', flexDirection: 'column' }}>
+    <div className="bg-[#06060f] pt-16" style={{ height: '100dvh', display: 'flex', flexDirection: 'column' }}>
       <div className="flex flex-1 min-h-0 max-w-6xl mx-auto w-full">
 
         {/* Sidebar de rooms */}
-        <div className="w-16 sm:w-52 border-r border-white/5 bg-[#0a0a0a] flex flex-col shrink-0">
+        <div className="w-16 sm:w-52 border-r border-white/5 bg-[#06060f] flex flex-col shrink-0">
           <div className="p-3 sm:p-4 border-b border-white/5">
             <p className="text-white font-black text-sm hidden sm:block">Chat</p>
             <p className="text-gray-600 text-[10px] hidden sm:block mt-0.5">
@@ -140,7 +140,7 @@ export default function Chat() {
               <button key={r.id} onClick={() => setRoom(r.id)}
                 className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-left transition-all ${
                   room === r.id
-                    ? 'bg-amber-500/10 border-r-2 border-amber-500 text-amber-400'
+                    ? 'bg-violet-500/10 border-r-2 border-violet-500 text-violet-400'
                     : 'text-gray-500 hover:text-gray-300 hover:bg-white/3'
                 }`}>
                 <span className="text-lg shrink-0">{r.icon}</span>
@@ -194,8 +194,8 @@ export default function Chat() {
                       )}
                       <div className={`px-3.5 py-2.5 rounded-2xl text-sm leading-relaxed ${
                         isMe
-                          ? 'bg-amber-500 text-black font-medium rounded-tr-md'
-                          : 'bg-[#1a1a1a] border border-white/5 text-gray-200 rounded-tl-md'
+                          ? 'bg-violet-600 text-white font-medium rounded-tr-md'
+                          : 'bg-[#161628] border border-white/5 text-gray-200 rounded-tl-md'
                       }`}>
                         {m.content}
                       </div>
@@ -216,10 +216,10 @@ export default function Chat() {
                 onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() } }}
                 placeholder={`Mensaje en #${currentRoom?.label}...`}
                 maxLength={500}
-                className="flex-1 bg-[#1a1a1a] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-500/50 transition-colors"
+                className="flex-1 bg-[#161628] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-violet-500/50 transition-colors"
               />
               <button onClick={send} disabled={!input.trim() || sending}
-                className="bg-amber-500 hover:bg-amber-400 disabled:opacity-40 text-black font-black px-4 py-2.5 rounded-xl transition-all shrink-0">
+                className="bg-violet-600 hover:bg-violet-500 disabled:opacity-40 text-black font-black px-4 py-2.5 rounded-xl transition-all shrink-0">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                 </svg>

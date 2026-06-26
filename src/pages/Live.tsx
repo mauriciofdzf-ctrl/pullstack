@@ -37,7 +37,7 @@ export default function Live() {
     setNotifiedIds(prev => { const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s })
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] pt-24 pb-16 px-4">
+    <div className="min-h-screen bg-[#06060f] pt-24 pb-16 px-4">
       <div className="max-w-5xl mx-auto">
 
         {/* Header */}
@@ -51,7 +51,7 @@ export default function Live() {
         </div>
 
         {/* Live stream player */}
-        <div className="bg-[#111] border border-white/5 rounded-2xl overflow-hidden mb-8">
+        <div className="bg-[#0e0e1e] border border-white/5 rounded-2xl overflow-hidden mb-8">
           <div className="aspect-video bg-[#0d0d0d] flex items-center justify-center relative">
             <div className="absolute inset-0 bg-gradient-to-br from-[#0a0a0a] to-[#1a1a1a] flex items-center justify-center">
               <div className="text-center">
@@ -90,7 +90,7 @@ export default function Live() {
             <h2 className="text-white font-bold text-lg mb-4">Próximos breaks</h2>
             <div className="space-y-3">
               {SCHEDULE.map(ev => (
-                <div key={ev.id} className="bg-[#111] border border-white/5 hover:border-white/10 rounded-2xl p-4 transition-all">
+                <div key={ev.id} className="bg-[#0e0e1e] border border-white/5 hover:border-white/10 rounded-2xl p-4 transition-all">
                   <div className="flex items-center gap-3">
                     {ev.status === 'live' ? (
                       <div className="flex items-center gap-1.5 bg-red-500/20 border border-red-500/30 text-red-400 px-2.5 py-1 rounded-lg text-xs font-bold shrink-0">
@@ -111,7 +111,7 @@ export default function Live() {
                       </button>
                     ) : (
                       <button onClick={() => toggle(ev.id)}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-bold shrink-0 border transition-all ${notifiedIds.has(ev.id) ? 'bg-amber-500/20 border-amber-500/40 text-amber-400' : 'bg-[#1a1a1a] border-white/10 text-gray-400 hover:border-white/20'}`}>
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold shrink-0 border transition-all ${notifiedIds.has(ev.id) ? 'bg-violet-500/20 border-violet-500/40 text-violet-400' : 'bg-[#161628] border-white/10 text-gray-400 hover:border-white/20'}`}>
                         {notifiedIds.has(ev.id) ? '✓ Anotado' : 'Notificarme'}
                       </button>
                     )}
@@ -120,10 +120,10 @@ export default function Live() {
               ))}
             </div>
 
-            <div className="mt-4 bg-[#111] border border-white/5 rounded-2xl p-4 text-center">
+            <div className="mt-4 bg-[#0e0e1e] border border-white/5 rounded-2xl p-4 text-center">
               <p className="text-gray-500 text-sm mb-3">¿Quieres entrar a un break grupal?</p>
               <a href="/messages"
-                className="inline-block bg-amber-500 hover:bg-amber-400 text-black font-black px-5 py-2.5 rounded-xl text-sm transition-all">
+                className="inline-block bg-violet-600 hover:bg-violet-500 text-white font-black px-5 py-2.5 rounded-xl text-sm transition-all">
                 Solicitar spot en grupo break
               </a>
             </div>
@@ -134,14 +134,14 @@ export default function Live() {
             <h2 className="text-white font-bold text-lg mb-4">Breaks anteriores</h2>
             <div className="space-y-3">
               {PAST.map(p => (
-                <div key={p.id} className="bg-[#111] border border-white/5 rounded-2xl p-4">
+                <div key={p.id} className="bg-[#0e0e1e] border border-white/5 rounded-2xl p-4">
                   <div className="flex items-center justify-between mb-1">
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${SPORT_BADGE[p.sport] || ''}`}>{p.sport}</span>
                     <span className="text-gray-600 text-[10px]">{p.date}</span>
                   </div>
                   <p className="text-white font-bold text-sm mb-1">{p.title}</p>
                   <p className="text-gray-600 text-xs mb-2">{p.pulls}</p>
-                  <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg px-2.5 py-1.5 text-amber-400 text-xs font-bold">
+                  <div className="bg-violet-500/10 border border-violet-500/20 rounded-lg px-2.5 py-1.5 text-violet-400 text-xs font-bold">
                     🔥 {p.highlight}
                   </div>
                 </div>
@@ -151,7 +151,7 @@ export default function Live() {
         </div>
 
         {/* How it works */}
-        <div className="bg-[#111] border border-white/5 rounded-2xl p-6">
+        <div className="bg-[#0e0e1e] border border-white/5 rounded-2xl p-6">
           <h2 className="text-white font-bold text-lg mb-5 text-center">¿Cómo funcionan los breaks?</h2>
           <div className="grid sm:grid-cols-4 gap-4">
             {HOW_IT_WORKS.map(h => (

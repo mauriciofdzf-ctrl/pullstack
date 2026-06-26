@@ -214,7 +214,7 @@ export default function ChatBot() {
       {/* Botón flotante */}
       <button
         onClick={() => setOpen((o) => !o)}
-        className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-amber-500 hover:bg-amber-400 text-black rounded-full shadow-[0_8px_30px_rgba(245,158,11,0.4)] flex items-center justify-center transition-all hover:scale-110 active:scale-95"
+        className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-violet-600 hover:bg-violet-500 text-white rounded-full shadow-[0_8px_30px_rgba(245,158,11,0.4)] flex items-center justify-center transition-all hover:scale-110 active:scale-95"
         title="Abrir PullBot"
       >
         {open ? (
@@ -235,10 +235,10 @@ export default function ChatBot() {
 
       {/* Panel de chat */}
       {open && (
-        <div className="fixed bottom-24 right-6 z-50 w-[360px] max-h-[560px] flex flex-col bg-[#111] border border-white/10 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.6)] overflow-hidden">
+        <div className="fixed bottom-24 right-6 z-50 w-[360px] max-h-[560px] flex flex-col bg-[#0e0e1e] border border-white/10 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.6)] overflow-hidden">
           {/* Header */}
           <div className="flex items-center gap-3 px-4 py-3 bg-[#0d0d0d] border-b border-white/5">
-            <div className="w-9 h-9 bg-amber-500 rounded-full flex items-center justify-center text-black shrink-0">
+            <div className="w-9 h-9 bg-violet-600 rounded-full flex items-center justify-center text-black shrink-0">
               <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 2a2 2 0 012 2v1h2a3 3 0 013 3v7a3 3 0 01-3 3H8l-4 3v-3H4a3 3 0 01-3-3V8a3 3 0 013-3h2V4a2 2 0 012-2h4zM9 9a1 1 0 100 2 1 1 0 000-2zm6 0a1 1 0 100 2 1 1 0 000-2zm-3 4a3 3 0 01-2.83-2h5.66A3 3 0 0112 13z" />
               </svg>
@@ -262,14 +262,14 @@ export default function ChatBot() {
             {messages.map((m) => (
               <div key={m.id} className={`flex gap-2 ${m.from === 'user' ? 'flex-row-reverse' : ''}`}>
                 {m.from === 'bot' && (
-                  <div className="w-7 h-7 bg-amber-500 rounded-full flex items-center justify-center text-black shrink-0 mt-0.5">
+                  <div className="w-7 h-7 bg-violet-600 rounded-full flex items-center justify-center text-black shrink-0 mt-0.5">
                     <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M12 2a2 2 0 012 2v1h2a3 3 0 013 3v7a3 3 0 01-3 3H8l-4 3v-3H4a3 3 0 01-3-3V8a3 3 0 013-3h2V4a2 2 0 012-2h4z" />
                     </svg>
                   </div>
                 )}
                 <div className={`flex flex-col gap-2 max-w-[85%] ${m.from === 'user' ? 'items-end' : 'items-start'}`}>
-                  <div className={`px-3 py-2.5 rounded-2xl text-sm leading-relaxed ${m.from === 'user' ? 'bg-amber-500 text-black font-medium rounded-br-sm' : 'bg-[#1a1a1a] border border-white/5 text-gray-200 rounded-bl-sm'}`}>
+                  <div className={`px-3 py-2.5 rounded-2xl text-sm leading-relaxed ${m.from === 'user' ? 'bg-violet-600 text-white font-medium rounded-br-sm' : 'bg-[#161628] border border-white/5 text-gray-200 rounded-bl-sm'}`}>
                     {renderText(m.text)}
                   </div>
                   {m.chips && m.chips.length > 0 && (
@@ -278,7 +278,7 @@ export default function ChatBot() {
                         <button
                           key={c}
                           onClick={() => sendMessage(c)}
-                          className="bg-[#1a1a1a] hover:bg-amber-500/10 border border-white/10 hover:border-amber-500/40 text-gray-400 hover:text-amber-400 text-[11px] px-2.5 py-1 rounded-full transition-all"
+                          className="bg-[#161628] hover:bg-violet-500/10 border border-white/10 hover:border-violet-500/40 text-gray-400 hover:text-violet-400 text-[11px] px-2.5 py-1 rounded-full transition-all"
                         >
                           {c}
                         </button>
@@ -292,12 +292,12 @@ export default function ChatBot() {
             {/* Typing indicator */}
             {typing && (
               <div className="flex gap-2">
-                <div className="w-7 h-7 bg-amber-500 rounded-full flex items-center justify-center text-black shrink-0">
+                <div className="w-7 h-7 bg-violet-600 rounded-full flex items-center justify-center text-black shrink-0">
                   <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 2a2 2 0 012 2v1h2a3 3 0 013 3v7a3 3 0 01-3 3H8l-4 3v-3H4a3 3 0 01-3-3V8a3 3 0 013-3h2V4a2 2 0 012-2h4z" />
                   </svg>
                 </div>
-                <div className="bg-[#1a1a1a] border border-white/5 rounded-2xl rounded-bl-sm px-4 py-3 flex gap-1 items-center">
+                <div className="bg-[#161628] border border-white/5 rounded-2xl rounded-bl-sm px-4 py-3 flex gap-1 items-center">
                   {[0, 1, 2].map((i) => (
                     <span key={i} className="w-1.5 h-1.5 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
                   ))}
@@ -316,12 +316,12 @@ export default function ChatBot() {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && sendMessage(input)}
                 placeholder="Pregunta sobre precios, gradeo, cómo comprar..."
-                className="flex-1 bg-[#111] border border-white/10 text-white placeholder-gray-700 px-3 py-2.5 rounded-xl text-xs focus:outline-none focus:border-amber-500/40"
+                className="flex-1 bg-[#0e0e1e] border border-white/10 text-white placeholder-gray-700 px-3 py-2.5 rounded-xl text-xs focus:outline-none focus:border-violet-500/40"
               />
               <button
                 onClick={() => sendMessage(input)}
                 disabled={!input.trim()}
-                className="bg-amber-500 hover:bg-amber-400 disabled:opacity-30 text-black p-2.5 rounded-xl transition-all shrink-0"
+                className="bg-violet-600 hover:bg-violet-500 disabled:opacity-30 text-black p-2.5 rounded-xl transition-all shrink-0"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />

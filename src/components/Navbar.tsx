@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 
 const AVATAR_COLORS = [
-  'from-amber-500 to-orange-600',
+  'from-violet-500 to-fuchsia-700',
   'from-purple-500 to-pink-600',
   'from-blue-500 to-cyan-600',
   'from-green-500 to-teal-600',
@@ -52,13 +52,13 @@ export default function Navbar() {
   const color = getColor(user?.id || 'x')
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-black/90 backdrop-blur-md border-b border-white/5">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#06060f]/95 backdrop-blur-md border-b border-white/5">
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2.5 shrink-0">
-            <div className="w-8 h-8 bg-gradient-to-br from-amber-400 to-amber-600 rounded-lg flex items-center justify-center shadow-lg shadow-amber-500/30">
-              <span className="text-black font-black text-sm">PS</span>
+            <div className="w-8 h-8 bg-gradient-to-br from-violet-500 to-fuchsia-600 rounded-lg flex items-center justify-center shadow-lg shadow-violet-500/30">
+              <span className="text-white font-black text-sm">PS</span>
             </div>
             <span className="text-white font-black text-xl tracking-tight">PullStack</span>
           </Link>
@@ -70,10 +70,10 @@ export default function Navbar() {
                 className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
                   link.grading
                     ? isActive(link.to)
-                      ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                      : 'text-amber-400 hover:bg-amber-500/10 border border-amber-500/20'
+                      ? 'bg-violet-500/20 text-violet-400 border border-violet-500/30'
+                      : 'text-violet-400 hover:bg-violet-500/10 border border-violet-500/20'
                     : isActive(link.to)
-                    ? 'bg-amber-500/10 text-amber-400'
+                    ? 'bg-violet-500/10 text-violet-400'
                     : 'text-gray-400 hover:text-white hover:bg-white/5'
                 }`}>
                 {link.live && <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />}
@@ -96,7 +96,7 @@ export default function Navbar() {
                   </div>
                   <div className="text-left hidden xl:block">
                     <div className="text-white text-sm font-bold leading-tight">{profile?.display_name || 'Coleccionista'}</div>
-                    {isAdmin && <div className="text-amber-400 text-[10px] font-bold">Admin</div>}
+                    {isAdmin && <div className="text-violet-400 text-[10px] font-bold">Admin</div>}
                   </div>
                   <svg className={`w-4 h-4 text-gray-500 transition-transform ${dropOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -104,7 +104,7 @@ export default function Navbar() {
                 </button>
 
                 {dropOpen && (
-                  <div className="absolute right-0 mt-2 w-52 bg-[#111] border border-white/10 rounded-xl shadow-2xl py-1 overflow-hidden z-50">
+                  <div className="absolute right-0 mt-2 w-52 bg-[#0e0e1e] border border-white/10 rounded-xl shadow-2xl py-1 overflow-hidden z-50">
                     <div className="px-4 py-3 border-b border-white/5">
                       <div className="text-white font-bold text-sm truncate">{profile?.display_name || 'Coleccionista'}</div>
                       <div className="text-gray-500 text-xs truncate">{user.email}</div>
@@ -123,7 +123,7 @@ export default function Navbar() {
                     </button>
                     {isAdmin && (
                       <button onClick={() => { setDropOpen(false); navigate('/admin') }}
-                        className="w-full text-left px-4 py-2.5 text-sm text-amber-400 hover:bg-amber-500/10 transition-colors flex items-center gap-2.5">
+                        className="w-full text-left px-4 py-2.5 text-sm text-violet-400 hover:bg-violet-500/10 transition-colors flex items-center gap-2.5">
                         <span>⚙️</span> Admin Panel
                       </button>
                     )}
@@ -145,7 +145,7 @@ export default function Navbar() {
                 <Link to="/login" className="text-gray-400 hover:text-white text-sm font-medium transition-colors px-3 py-2">
                   Iniciar sesión
                 </Link>
-                <Link to="/register" className="bg-amber-500 hover:bg-amber-400 text-black text-sm font-black px-4 py-2 rounded-lg transition-all hover:shadow-lg hover:shadow-amber-500/20">
+                <Link to="/register" className="bg-violet-600 hover:bg-violet-500 text-white text-sm font-black px-4 py-2 rounded-lg transition-all hover:shadow-lg hover:shadow-violet-500/20">
                   Crear cuenta
                 </Link>
               </>
@@ -153,7 +153,7 @@ export default function Navbar() {
           </div>
 
           {/* Mobile menu button */}
-          <button className="lg:hidden text-gray-400 hover:text-amber-400 transition-colors" onClick={() => setMenuOpen(!menuOpen)}>
+          <button className="lg:hidden text-gray-400 hover:text-violet-400 transition-colors" onClick={() => setMenuOpen(!menuOpen)}>
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               {menuOpen
                 ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -169,7 +169,7 @@ export default function Navbar() {
             {links.map((link) => (
               <Link key={link.to} to={link.to} onClick={() => setMenuOpen(false)}
                 className={`flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                  isActive(link.to) ? 'bg-amber-500/10 text-amber-400' : 'text-gray-400 hover:text-white'
+                  isActive(link.to) ? 'bg-violet-500/10 text-violet-400' : 'text-gray-400 hover:text-white'
                 }`}>
                 {link.live && <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />}
                 {link.label}
@@ -179,7 +179,7 @@ export default function Navbar() {
               {user ? (
                 <>
                   <Link to="/profile" onClick={() => setMenuOpen(false)}
-                    className="flex-1 text-center bg-[#1a1a1a] border border-white/10 text-gray-300 text-sm font-bold py-2 rounded-lg">
+                    className="flex-1 text-center bg-[#161628] border border-white/10 text-gray-300 text-sm font-bold py-2 rounded-lg">
                     Mi perfil
                   </Link>
                   <button onClick={() => { setMenuOpen(false); handleSignOut() }}
@@ -190,7 +190,7 @@ export default function Navbar() {
               ) : (
                 <>
                   <Link to="/login" onClick={() => setMenuOpen(false)} className="text-gray-400 hover:text-white text-sm font-medium">Iniciar sesión</Link>
-                  <Link to="/register" onClick={() => setMenuOpen(false)} className="bg-amber-500 hover:bg-amber-400 text-black text-sm font-black px-4 py-2 rounded-lg">Crear cuenta</Link>
+                  <Link to="/register" onClick={() => setMenuOpen(false)} className="bg-violet-600 hover:bg-violet-500 text-white text-sm font-black px-4 py-2 rounded-lg">Crear cuenta</Link>
                 </>
               )}
             </div>

@@ -61,13 +61,13 @@ function GradingCalc() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Inputs */}
-      <div className="bg-[#111] border border-white/5 rounded-2xl p-6 space-y-5">
+      <div className="bg-[#0e0e1e] border border-white/5 rounded-2xl p-6 space-y-5">
         <h3 className="text-white font-black text-lg">Datos de tu carta</h3>
 
         <div>
           <label className="block text-gray-400 text-sm font-medium mb-1.5">Valor raw estimado (USD)</label>
           <input type="number" value={rawValue} onChange={(e) => setRawValue(e.target.value)} placeholder="Ej: 120"
-            className="w-full bg-[#1a1a1a] border border-white/10 text-white placeholder-gray-600 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-amber-500/50 transition-colors" />
+            className="w-full bg-[#161628] border border-white/10 text-white placeholder-gray-600 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-violet-500/50 transition-colors" />
         </div>
 
         <div>
@@ -75,7 +75,7 @@ function GradingCalc() {
           <div className="space-y-2">
             {CONDITIONS.map((c) => (
               <button key={c.value} onClick={() => setCondition(c.value)}
-                className={`w-full text-left px-4 py-3 rounded-xl border transition-all ${condition === c.value ? 'border-amber-500/50 bg-amber-500/5 text-white' : 'border-white/10 bg-[#1a1a1a] text-gray-400 hover:border-amber-500/20'}`}>
+                className={`w-full text-left px-4 py-3 rounded-xl border transition-all ${condition === c.value ? 'border-violet-500/50 bg-violet-600/5 text-white' : 'border-white/10 bg-[#161628] text-gray-400 hover:border-violet-500/20'}`}>
                 <span className="font-bold text-sm">{c.label}</span>
                 <br />
                 <span className="text-[11px] text-gray-600">{c.desc}</span>
@@ -89,7 +89,7 @@ function GradingCalc() {
           <div className="grid grid-cols-3 gap-2">
             {[{ v: 'modern', l: 'Moderna (2000+)' }, { v: 'recent', l: 'Reciente (2010+)' }, { v: 'vintage', l: 'Vintage (<1990)' }].map((e) => (
               <button key={e.v} onClick={() => setEra(e.v)}
-                className={`py-2 px-2 rounded-lg border text-xs font-bold transition-all text-center ${era === e.v ? 'border-amber-500/50 bg-amber-500/5 text-amber-400' : 'border-white/10 bg-[#1a1a1a] text-gray-500 hover:border-amber-500/20'}`}>
+                className={`py-2 px-2 rounded-lg border text-xs font-bold transition-all text-center ${era === e.v ? 'border-violet-500/50 bg-violet-600/5 text-violet-400' : 'border-white/10 bg-[#161628] text-gray-500 hover:border-violet-500/20'}`}>
                 {e.l}
               </button>
             ))}
@@ -99,7 +99,7 @@ function GradingCalc() {
         <div>
           <label className="block text-gray-400 text-sm font-medium mb-1.5">Servicio de grading</label>
           <select value={serviceIdx} onChange={(e) => setServiceIdx(parseInt(e.target.value))}
-            className="w-full bg-[#1a1a1a] border border-white/10 text-white px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-amber-500/50">
+            className="w-full bg-[#161628] border border-white/10 text-white px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-violet-500/50">
             {SERVICES.map((s, i) => (
               <option key={i} value={i}>{s.label} — ${s.cost} · {s.days}</option>
             ))}
@@ -108,7 +108,7 @@ function GradingCalc() {
         </div>
 
         <button onClick={calculate}
-          className="w-full bg-amber-500 hover:bg-amber-400 text-black font-black py-3 rounded-xl transition-all hover:shadow-lg hover:shadow-amber-500/20">
+          className="w-full bg-violet-600 hover:bg-violet-500 text-white font-black py-3 rounded-xl transition-all hover:shadow-lg hover:shadow-violet-500/20">
           Calcular
         </button>
       </div>
@@ -116,22 +116,22 @@ function GradingCalc() {
       {/* Output */}
       <div className="space-y-4">
         {!result ? (
-          <div className="bg-[#111] border border-white/5 rounded-2xl p-6 flex flex-col items-center justify-center h-full gap-4 text-center">
+          <div className="bg-[#0e0e1e] border border-white/5 rounded-2xl p-6 flex flex-col items-center justify-center h-full gap-4 text-center">
             <div className="text-4xl">🔢</div>
             <p className="text-gray-500 text-sm">Llena el formulario y presiona Calcular para ver si conviene gradear tu carta.</p>
           </div>
         ) : (
           <>
             {/* Recomendación */}
-            <div className={`rounded-2xl p-5 border ${result.net > 0 && result.net > parseFloat(rawValue) * 0.3 ? 'bg-green-500/5 border-green-500/20' : result.net > 0 ? 'bg-amber-500/5 border-amber-500/20' : 'bg-red-500/5 border-red-500/20'}`}>
-              <p className={`font-black text-xl mb-1 ${result.net > 0 && result.net > parseFloat(rawValue) * 0.3 ? 'text-green-400' : result.net > 0 ? 'text-amber-400' : 'text-red-400'}`}>
+            <div className={`rounded-2xl p-5 border ${result.net > 0 && result.net > parseFloat(rawValue) * 0.3 ? 'bg-green-500/5 border-green-500/20' : result.net > 0 ? 'bg-violet-600/5 border-violet-500/20' : 'bg-red-500/5 border-red-500/20'}`}>
+              <p className={`font-black text-xl mb-1 ${result.net > 0 && result.net > parseFloat(rawValue) * 0.3 ? 'text-green-400' : result.net > 0 ? 'text-violet-400' : 'text-red-400'}`}>
                 {result.net > parseFloat(rawValue) * 0.3 ? '✓' : result.net > 0 ? '⚠' : '✗'} {result.rec}
               </p>
               <p className="text-gray-500 text-sm">{result.probGrade}</p>
             </div>
 
             {/* Números */}
-            <div className="bg-[#111] border border-white/5 rounded-2xl p-5 space-y-3">
+            <div className="bg-[#0e0e1e] border border-white/5 rounded-2xl p-5 space-y-3">
               <h3 className="text-white font-black text-sm uppercase tracking-widest">Proyección financiera</h3>
               <div className="space-y-2.5 text-sm">
                 {[
@@ -149,7 +149,7 @@ function GradingCalc() {
             </div>
 
             {/* Grade breakdown */}
-            <div className="bg-[#111] border border-white/5 rounded-2xl p-5">
+            <div className="bg-[#0e0e1e] border border-white/5 rounded-2xl p-5">
               <h3 className="text-white font-black text-sm uppercase tracking-widest mb-3">Probabilidades de grade</h3>
               {[
                 { g: 'PSA 10', p: CONDITIONS.find(c => c.value === condition)!.p10 },
@@ -161,8 +161,8 @@ function GradingCalc() {
                     <span className="font-bold">{g}</span>
                     <span>{Math.round(p * 100)}%</span>
                   </div>
-                  <div className="h-1.5 bg-[#1a1a1a] rounded-full overflow-hidden">
-                    <div className="h-full bg-amber-500 rounded-full transition-all" style={{ width: `${p * 100}%` }} />
+                  <div className="h-1.5 bg-[#161628] rounded-full overflow-hidden">
+                    <div className="h-full bg-violet-600 rounded-full transition-all" style={{ width: `${p * 100}%` }} />
                   </div>
                 </div>
               ))}
@@ -248,12 +248,12 @@ export default function Aprende() {
   ]
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] pt-20 pb-24 px-4 sm:px-6">
+    <div className="min-h-screen bg-[#06060f] pt-20 pb-24 px-4 sm:px-6">
       <div className="max-w-6xl mx-auto">
 
         {/* Header */}
         <div className="mb-10">
-          <p className="text-amber-500 text-xs font-bold uppercase tracking-widest mb-1">PullStack</p>
+          <p className="text-violet-400 text-xs font-bold uppercase tracking-widest mb-1">PullStack</p>
           <h1 className="text-4xl font-black text-white mb-2">Aprende el Hobby</h1>
           <p className="text-gray-500 text-sm max-w-xl">
             Todo lo que necesitas saber para entender el mercado de trading cards, tomar mejores decisiones y construir una colección con estrategia.
@@ -264,7 +264,7 @@ export default function Aprende() {
         <div className="flex gap-1 overflow-x-auto pb-2 mb-8 scrollbar-none">
           {tabs.map((t) => (
             <button key={t.id} onClick={() => setTab(t.id)}
-              className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all shrink-0 ${tab === t.id ? 'bg-amber-500 text-black' : 'bg-[#111] border border-white/5 text-gray-400 hover:text-white hover:border-amber-500/20'}`}>
+              className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all shrink-0 ${tab === t.id ? 'bg-violet-600 text-white' : 'bg-[#0e0e1e] border border-white/5 text-gray-400 hover:text-white hover:border-violet-500/20'}`}>
               <span>{t.icon}</span> {t.label}
             </button>
           ))}
@@ -274,12 +274,12 @@ export default function Aprende() {
         {tab === 'tipos' && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {CARD_TYPES.map((ct) => (
-              <div key={ct.en} className="bg-[#111] border border-white/5 hover:border-amber-500/20 rounded-2xl p-5 transition-all hover:-translate-y-0.5">
+              <div key={ct.en} className="bg-[#0e0e1e] border border-white/5 hover:border-violet-500/20 rounded-2xl p-5 transition-all hover:-translate-y-0.5">
                 <div className="flex items-start gap-3 mb-2">
                   <span className="text-2xl">{ct.icon}</span>
                   <div>
                     <h3 className="text-white font-black text-sm">{ct.name}</h3>
-                    <span className="text-amber-500 text-[10px] font-bold uppercase tracking-widest">{ct.en}</span>
+                    <span className="text-violet-400 text-[10px] font-bold uppercase tracking-widest">{ct.en}</span>
                   </div>
                 </div>
                 <p className="text-gray-500 text-xs leading-relaxed">{ct.desc}</p>
@@ -287,7 +287,7 @@ export default function Aprende() {
             ))}
 
             {/* Parallels chart */}
-            <div className="bg-[#111] border border-amber-500/20 rounded-2xl p-5 sm:col-span-2 lg:col-span-3">
+            <div className="bg-[#0e0e1e] border border-violet-500/20 rounded-2xl p-5 sm:col-span-2 lg:col-span-3">
               <h3 className="text-white font-black text-sm mb-4">Jerarquía de Parallels (ejemplo Topps/Panini Chrome)</h3>
               <div className="flex flex-wrap gap-2">
                 {[
@@ -295,10 +295,10 @@ export default function Aprende() {
                   { label: 'Refractor', clr: 'bg-gray-600 text-white', print: '~500' },
                   { label: 'Silver', clr: 'bg-slate-500 text-white', print: '~199' },
                   { label: 'Blue', clr: 'bg-blue-600 text-white', print: '/150' },
-                  { label: 'Gold', clr: 'bg-amber-500 text-black', print: '/50' },
+                  { label: 'Gold', clr: 'bg-violet-600 text-white', print: '/50' },
                   { label: 'Orange', clr: 'bg-orange-500 text-black', print: '/25' },
                   { label: 'Red', clr: 'bg-red-600 text-white', print: '/5' },
-                  { label: 'Superfractor', clr: 'bg-gradient-to-r from-amber-400 to-yellow-200 text-black font-black', print: '1/1' },
+                  { label: 'Superfractor', clr: 'bg-gradient-to-r from-violet-400 to-yellow-200 text-black font-black', print: '1/1' },
                 ].map((p) => (
                   <div key={p.label} className="text-center">
                     <div className={`${p.clr} px-3 py-1.5 rounded-lg text-xs font-bold mb-1`}>{p.label}</div>
@@ -314,7 +314,7 @@ export default function Aprende() {
         {/* ── Tab: Grading ── */}
         {tab === 'grading' && (
           <div className="space-y-6">
-            <div className="bg-[#111] border border-white/5 rounded-2xl p-6">
+            <div className="bg-[#0e0e1e] border border-white/5 rounded-2xl p-6">
               <h2 className="text-white font-black text-xl mb-2">¿Qué es el grading?</h2>
               <p className="text-gray-400 text-sm leading-relaxed max-w-2xl">
                 Una empresa independiente evalúa la autenticidad y condición de la carta, le asigna un grado numérico (1–10) y la encapsula en un slab plástico con número de certificación único. Convierte una carta "de confianza" en un activo verificado, líquido y tradeable globalmente.
@@ -330,8 +330,8 @@ export default function Aprende() {
                   { label: 'Bordes', desc: 'Sin rayones, raspaduras ni marcas de manejo.' },
                   { label: 'Superficie', desc: 'Sin rayaduras, scratches, manchas o marcas de impresión.' },
                 ].map((e) => (
-                  <div key={e.label} className="bg-[#111] border border-white/5 rounded-xl p-4">
-                    <p className="text-amber-400 font-black text-sm mb-1">{e.label}</p>
+                  <div key={e.label} className="bg-[#0e0e1e] border border-white/5 rounded-xl p-4">
+                    <p className="text-violet-400 font-black text-sm mb-1">{e.label}</p>
                     <p className="text-gray-600 text-xs">{e.desc}</p>
                   </div>
                 ))}
@@ -354,11 +354,11 @@ export default function Aprende() {
               </div>
             </div>
 
-            <div className="bg-[#111] border border-white/5 rounded-2xl p-6">
+            <div className="bg-[#0e0e1e] border border-white/5 rounded-2xl p-6">
               <h2 className="text-white font-black text-xl mb-4">Escala de grades PSA</h2>
               <div className="space-y-2">
                 {[
-                  { g: 10, label: 'Gem Mint', desc: 'Prácticamente perfecta. Esquinas afiladas, centrado ≤55/45, sin defectos.', clr: 'text-amber-400 bg-amber-500/10 border-amber-500/30' },
+                  { g: 10, label: 'Gem Mint', desc: 'Prácticamente perfecta. Esquinas afiladas, centrado ≤55/45, sin defectos.', clr: 'text-violet-400 bg-violet-500/10 border-violet-500/30' },
                   { g: 9,  label: 'Mint', desc: 'Excelente, con defectos mínimos sólo visibles bajo inspección cercana.', clr: 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20' },
                   { g: 8,  label: 'Near Mint-Mint', desc: 'Muy buena, con un pequeño defecto visible sin lupa.', clr: 'text-green-400 bg-green-500/10 border-green-500/20' },
                   { g: 7,  label: 'Near Mint', desc: 'Buena condición con ligero desgaste. Aún atractiva.', clr: 'text-blue-400 bg-blue-500/10 border-blue-500/20' },
@@ -386,8 +386,8 @@ export default function Aprende() {
               <p className="text-gray-500 text-sm">Ingresa los datos de tu carta y calcula si el grading tiene sentido financiero para ti.</p>
             </div>
             <GradingCalc />
-            <div className="mt-6 bg-[#111] border border-white/5 rounded-2xl p-5">
-              <h3 className="text-amber-400 font-black text-sm mb-2">⚠️ Nota importante</h3>
+            <div className="mt-6 bg-[#0e0e1e] border border-white/5 rounded-2xl p-5">
+              <h3 className="text-violet-400 font-black text-sm mb-2">⚠️ Nota importante</h3>
               <p className="text-gray-500 text-xs leading-relaxed">
                 Los multiplicadores de valor son estimaciones basadas en datos históricos de mercado. Las probabilidades de grade son aproximaciones. El grading no garantiza el grado esperado. El valor real depende de demanda del jugador, liquidez del set y timing del mercado. Usa esta calculadora como guía orientativa, no como garantía.
               </p>
@@ -398,22 +398,22 @@ export default function Aprende() {
         {/* ── Tab: Valor ── */}
         {tab === 'valor' && (
           <div className="space-y-6">
-            <div className="bg-[#111] border border-white/5 rounded-2xl p-6">
+            <div className="bg-[#0e0e1e] border border-white/5 rounded-2xl p-6">
               <h2 className="text-white font-black text-xl mb-2">La ecuación del valor</h2>
               <p className="text-gray-400 text-sm leading-relaxed">
                 El valor de una carta no depende de un solo factor. Es la combinación de varios elementos simultáneamente. Entender esto es lo que separa a un coleccionista estratégico de uno que compra por hype.
               </p>
-              <div className="mt-4 bg-[#1a1a1a] rounded-xl p-3 font-mono text-amber-400 text-sm">
+              <div className="mt-4 bg-[#161628] rounded-xl p-3 font-mono text-violet-400 text-sm">
                 Valor = jugador + carta correcta + escasez + condición + marca + timing + liquidez + narrativa
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {VALUE_FACTORS.map((f) => (
-                <div key={f.factor} className="bg-[#111] border border-white/5 rounded-2xl p-5 hover:border-amber-500/20 transition-all">
+                <div key={f.factor} className="bg-[#0e0e1e] border border-white/5 rounded-2xl p-5 hover:border-violet-500/20 transition-all">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-2xl">{f.icon}</span>
-                    <span className="text-amber-500 font-black text-sm">{f.weight}</span>
+                    <span className="text-violet-400 font-black text-sm">{f.weight}</span>
                   </div>
                   <h3 className="text-white font-black text-sm mb-1">{f.factor}</h3>
                   <p className="text-gray-500 text-xs leading-relaxed">{f.desc}</p>
@@ -436,8 +436,8 @@ export default function Aprende() {
               </div>
             </div>
 
-            <div className="bg-[#111] border border-amber-500/20 rounded-2xl p-6">
-              <h3 className="text-amber-400 font-black text-lg mb-4">Las 8 reglas de oro</h3>
+            <div className="bg-[#0e0e1e] border border-violet-500/20 rounded-2xl p-6">
+              <h3 className="text-violet-400 font-black text-lg mb-4">Las 8 reglas de oro</h3>
               <div className="space-y-3">
                 {[
                   'La carta correcta importa más que la carta rara. Una /5 de un jugador sin demanda puede ser difícil de vender.',
@@ -450,7 +450,7 @@ export default function Aprende() {
                   'La confianza es el producto. El mayor riesgo en cartas es pagar de más, comprar falso o no poder vender.',
                 ].map((rule, i) => (
                   <div key={i} className="flex items-start gap-3">
-                    <span className="text-amber-500 font-black text-sm shrink-0 w-6">{i + 1}.</span>
+                    <span className="text-violet-400 font-black text-sm shrink-0 w-6">{i + 1}.</span>
                     <p className="text-gray-400 text-sm">{rule}</p>
                   </div>
                 ))}
@@ -462,7 +462,7 @@ export default function Aprende() {
         {/* ── Tab: Guía LATAM ── */}
         {tab === 'latam' && (
           <div className="space-y-5">
-            <div className="bg-amber-500/5 border border-amber-500/20 rounded-2xl p-6">
+            <div className="bg-violet-600/5 border border-violet-500/20 rounded-2xl p-6">
               <h2 className="text-white font-black text-xl mb-2">🌎 Por qué LATAM es diferente</h2>
               <p className="text-gray-400 text-sm leading-relaxed max-w-2xl">
                 El mercado de cartas está dominado por plataformas en inglés y precios en dólares. Para el coleccionista en México o LATAM hay barreras reales: importación, tipo de cambio, desconfianza, falta de comps locales y educación en español. PullStack existe para cambiar eso.
@@ -471,7 +471,7 @@ export default function Aprende() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {LATAM_TIPS.map((tip) => (
-                <div key={tip.title} className="bg-[#111] border border-white/5 rounded-2xl p-5 hover:border-amber-500/20 transition-all">
+                <div key={tip.title} className="bg-[#0e0e1e] border border-white/5 rounded-2xl p-5 hover:border-violet-500/20 transition-all">
                   <div className="flex items-center gap-2 mb-2">
                     <span className="text-2xl">{tip.icon}</span>
                     <h3 className="text-white font-black text-sm">{tip.title}</h3>
@@ -481,7 +481,7 @@ export default function Aprende() {
               ))}
             </div>
 
-            <div className="bg-[#111] border border-white/5 rounded-2xl p-6">
+            <div className="bg-[#0e0e1e] border border-white/5 rounded-2xl p-6">
               <h3 className="text-white font-black text-lg mb-4">Calculadora de Costo Real LATAM</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-3">
@@ -506,15 +506,15 @@ export default function Aprende() {
                               <div class="flex justify-between"><span>Precio base</span><span class="text-white">$${price.toFixed(0)} USD</span></div>
                               <div class="flex justify-between"><span>Envío</span><span class="text-white">$${shipping.toFixed(0)} USD</span></div>
                               <div class="flex justify-between"><span>Impuestos est. (18%)</span><span class="text-red-400">$${tax.toFixed(0)} USD</span></div>
-                              <div class="flex justify-between border-t border-white/10 pt-2 mt-2"><span class="font-bold text-white">Total USD</span><span class="font-black text-amber-400">$${totalUSD.toFixed(0)} USD</span></div>
-                              <div class="flex justify-between"><span class="font-bold text-white">Total MXN</span><span class="font-black text-amber-400">$${Math.round(totalMXN).toLocaleString()} MXN</span></div>
+                              <div class="flex justify-between border-t border-white/10 pt-2 mt-2"><span class="font-bold text-white">Total USD</span><span class="font-black text-violet-400">$${totalUSD.toFixed(0)} USD</span></div>
+                              <div class="flex justify-between"><span class="font-bold text-white">Total MXN</span><span class="font-black text-violet-400">$${Math.round(totalMXN).toLocaleString()} MXN</span></div>
                             </div>`
                         }}
-                        className="w-full bg-[#1a1a1a] border border-white/10 text-white placeholder-gray-600 px-3 py-2.5 rounded-xl text-sm focus:outline-none focus:border-amber-500/50" />
+                        className="w-full bg-[#161628] border border-white/10 text-white placeholder-gray-600 px-3 py-2.5 rounded-xl text-sm focus:outline-none focus:border-violet-500/50" />
                     </div>
                   ))}
                 </div>
-                <div id="latam-result" className="bg-[#1a1a1a] border border-white/5 rounded-xl p-4 flex items-center justify-center">
+                <div id="latam-result" className="bg-[#161628] border border-white/5 rounded-xl p-4 flex items-center justify-center">
                   <p className="text-gray-600 text-xs text-center">Ingresa datos para ver el costo real puesto en México</p>
                 </div>
               </div>
