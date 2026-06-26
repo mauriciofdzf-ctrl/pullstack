@@ -115,7 +115,11 @@ export default function Navbar() {
                     </button>
                     <button onClick={() => { setDropOpen(false); navigate('/wallet') }}
                       className="w-full text-left px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors flex items-center gap-2.5">
-                      <span>🃏</span> Mi colección
+                      <span>🃏</span> Mi portfolio
+                    </button>
+                    <button onClick={() => { setDropOpen(false); navigate('/chat') }}
+                      className="w-full text-left px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors flex items-center gap-2.5">
+                      <span>💬</span> Chat en vivo
                     </button>
                     {isAdmin && (
                       <button onClick={() => { setDropOpen(false); navigate('/admin') }}

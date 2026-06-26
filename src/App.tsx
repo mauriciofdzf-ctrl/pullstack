@@ -17,6 +17,7 @@ import ResetPassword from './pages/ResetPassword'
 import Wallet from './pages/Wallet'
 import Aprende from './pages/Aprende'
 import Grading from './pages/Grading'
+import Chat from './pages/Chat'
 import './index.css'
 
 function App() {
@@ -40,6 +41,7 @@ function App() {
             <Route path="/wallet"         element={<Wallet />} />
             <Route path="/aprende"        element={<Aprende />} />
             <Route path="/grading"        element={<Grading />} />
+            <Route path="/chat"           element={<Chat />} />
             <Route path="/admin"       element={<AdminRoute><Admin /></AdminRoute>} />
           </Routes>
           <ChatBot />

@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { getImages, type ImageKey } from '../lib/imageConfig'
 import CartDrawer, { type CartEntry } from '../components/CartDrawer'
 import { useAuth } from '../contexts/AuthContext'
@@ -114,8 +115,146 @@ function cardAttrs(item: Item) {
   return { isRC, isAuto, is1of1, numbered, gradeCo, gradeNum }
 }
 
+// ─── Bid Modal ────────────────────────────────────────────────────────────────
+function BidModal({ item, onClose, user, navigate }: {
+  item: Item
+  onClose: () => void
+  user: { id: string } | null
+  navigate: ReturnType<typeof useNavigate>
+}) {
+  const [amount, setAmount]   = useState('')
+  const [loading, setLoading] = useState(false)
+  const [done, setDone]       = useState(false)
+  const [error, setError]     = useState('')
+  const minBid = Math.ceil(parsePrice(item.price) * 0.8)
+
+  const submit = async () => {
+    if (!user) { onClose(); navigate('/login'); return }
+    const n = parseFloat(amount)
+    if (isNaN(n) || n < minBid) { setError(`La puja mínima es $${minBid.toLocaleString()} USD`); return }
+    setLoading(true); setError('')
+    await supabase.from('bids').insert({ user_id: user.id, item_id: item.id, item_name: item.name, amount: n })
+    setLoading(false); setDone(true)
+    setTimeout(onClose, 1800)
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="w-full max-w-md bg-[#111] border border-white/10 rounded-2xl p-6 shadow-2xl">
+        {done ? (
+          <div className="text-center py-4">
+            <div className="w-14 h-14 bg-green-500/20 border border-green-500/30 rounded-full flex items-center justify-center mx-auto mb-3">
+              <svg className="w-7 h-7 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+            </div>
+            <p className="text-white font-black text-lg">¡Puja enviada!</p>
+            <p className="text-gray-500 text-sm mt-1">Te notificaremos si eres el ganador.</p>
+          </div>
+        ) : (
+          <>
+            <div className="flex items-start justify-between mb-5">
+              <div>
+                <p className="text-amber-500 text-xs font-bold uppercase tracking-widest mb-0.5">Hacer una puja</p>
+                <h3 className="text-white font-black text-lg leading-tight">{item.name}</h3>
+                <p className="text-gray-500 text-xs">{item.detail.slice(0, 60)}...</p>
+              </div>
+              <button onClick={onClose} className="text-gray-600 hover:text-white ml-3 shrink-0">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <div className="bg-[#1a1a1a] rounded-xl p-3 mb-4 flex items-center justify-between">
+              <span className="text-gray-500 text-xs">Precio listado</span>
+              <span className="text-white font-black">{item.price}</span>
+            </div>
+            <div className="mb-4">
+              <label className="text-gray-400 text-xs mb-1.5 block">Tu puja (USD) — mínimo <span className="text-amber-400 font-bold">${minBid.toLocaleString()}</span></label>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold">$</span>
+                <input type="number" value={amount} onChange={e => { setAmount(e.target.value); setError('') }}
+                  placeholder={`${minBid}`} min={minBid}
+                  className="w-full bg-[#0a0a0a] border border-white/10 text-white rounded-xl pl-8 pr-4 py-3 text-lg font-black focus:outline-none focus:border-amber-500/50" />
+              </div>
+              {error && <p className="text-red-400 text-xs mt-1.5">{error}</p>}
+            </div>
+            <button onClick={submit} disabled={loading || !amount}
+              className="w-full bg-amber-500 hover:bg-amber-400 disabled:opacity-40 text-black font-black py-3 rounded-xl transition-all">
+              {loading ? 'Enviando puja...' : 'Confirmar puja'}
+            </button>
+            <p className="text-gray-600 text-[10px] text-center mt-3">El vendedor decide si acepta. Si ganas, te contactamos por email.</p>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ─── Trade Modal ──────────────────────────────────────────────────────────────
+function TradeModal({ item, onClose, user, navigate }: {
+  item: Item
+  onClose: () => void
+  user: { id: string } | null
+  navigate: ReturnType<typeof useNavigate>
+}) {
+  const [offer, setOffer]     = useState('')
+  const [loading, setLoading] = useState(false)
+  const [done, setDone]       = useState(false)
+
+  const submit = async () => {
+    if (!user) { onClose(); navigate('/login'); return }
+    if (!offer.trim()) return
+    setLoading(true)
+    await supabase.from('messages').insert({
+      user_id: user.id,
+      content: `📦 Propuesta de Trade para "${item.name}" (${item.price})\n\nLo que ofrezco: ${offer}`,
+      from_admin: false,
+    })
+    setLoading(false); setDone(true)
+    setTimeout(onClose, 1800)
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="w-full max-w-md bg-[#111] border border-white/10 rounded-2xl p-6 shadow-2xl">
+        {done ? (
+          <div className="text-center py-4">
+            <div className="w-14 h-14 bg-blue-500/20 border border-blue-500/30 rounded-full flex items-center justify-center mx-auto mb-3">
+              <svg className="w-7 h-7 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+            </div>
+            <p className="text-white font-black text-lg">¡Propuesta enviada!</p>
+            <p className="text-gray-500 text-sm mt-1">Revisa tus mensajes para la respuesta.</p>
+          </div>
+        ) : (
+          <>
+            <div className="flex items-start justify-between mb-5">
+              <div>
+                <p className="text-blue-400 text-xs font-bold uppercase tracking-widest mb-0.5">Proponer Trade</p>
+                <h3 className="text-white font-black text-lg leading-tight">{item.name}</h3>
+                <p className="text-gray-500 text-xs">{item.price}</p>
+              </div>
+              <button onClick={onClose} className="text-gray-600 hover:text-white ml-3">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <div className="mb-4">
+              <label className="text-gray-400 text-xs mb-1.5 block">¿Qué ofreces a cambio?</label>
+              <textarea value={offer} onChange={e => setOffer(e.target.value)}
+                placeholder="Ej: Mahomes RC PSA 9 + $500 USD en efectivo..."
+                rows={4}
+                className="w-full bg-[#1a1a1a] border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500/50 resize-none" />
+            </div>
+            <button onClick={submit} disabled={loading || !offer.trim()}
+              className="w-full bg-blue-500 hover:bg-blue-400 disabled:opacity-40 text-white font-black py-3 rounded-xl transition-all">
+              {loading ? 'Enviando...' : 'Enviar propuesta de trade'}
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
 export default function Marketplace() {
   const { user } = useAuth()
+  const navigate = useNavigate()
   const [sport,  setSport]  = useState('Todos')
   const [kind,   setKind]   = useState('all')
   const [txn,    setTxn]    = useState('Todos')
@@ -126,6 +265,8 @@ export default function Marketplace() {
   const [savedIds,   setSavedIds]   = useState<Set<number>>(new Set())
   const [savingId,   setSavingId]   = useState<number | null>(null)
   const [showMXN,    setShowMXN]    = useState(false)
+  const [bidItem,    setBidItem]    = useState<Item | null>(null)
+  const [tradeItem,  setTradeItem]  = useState<Item | null>(null)
 
   const MXN_RATE = 17.5
   const fmtMXN = (usdStr: string) => {
@@ -347,34 +488,55 @@ export default function Marketplace() {
                   <h3 className="text-white font-black text-sm leading-tight mb-0.5">{item.name}</h3>
                   <p className="text-gray-600 text-[10px] leading-relaxed mb-3 line-clamp-2">{item.detail}</p>
 
-                  <div className="flex items-end justify-between gap-2">
+                  {/* Price row */}
+                  <div className="flex items-end justify-between gap-2 mb-3">
                     <div>
                       <p className="text-white font-black text-lg leading-none">{displayPrice(item.price)}</p>
                       <p className="text-gray-600 text-[10px]">{item.sub}</p>
                       {item.change && <p className="text-green-400 text-[10px] font-bold">{item.change}</p>}
                     </div>
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      {user && (
-                        <button
-                          onClick={() => toggleCollection(item)}
-                          disabled={savingId === item.id}
-                          title={savedIds.has(item.id) ? 'Quitar de colección' : 'Guardar en colección'}
-                          className={`p-2 rounded-lg border transition-all text-sm ${savedIds.has(item.id) ? 'bg-amber-500/20 border-amber-500/40 text-amber-400' : 'bg-white/5 border-white/10 text-gray-500 hover:text-amber-400 hover:border-amber-500/30'}`}>
-                          {savingId === item.id
-                            ? <div className="w-3.5 h-3.5 border border-amber-400 border-t-transparent rounded-full animate-spin" />
-                            : <svg className="w-3.5 h-3.5" fill={savedIds.has(item.id) ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                              </svg>
-                          }
-                        </button>
-                      )}
-                      <button
-                        onClick={() => { addToCart(item); setCartOpen(true) }}
-                        className="bg-amber-500/10 hover:bg-amber-500 border border-amber-500/30 hover:border-amber-500 text-amber-400 hover:text-black font-bold py-2 px-3 rounded-lg text-xs transition-all">
-                        {item.txn === 'auction' ? 'Pujar' : item.txn === 'trade' ? 'Tradear' : '+ Agregar'}
+                    {user && (
+                      <button onClick={() => toggleCollection(item)} disabled={savingId === item.id}
+                        title={savedIds.has(item.id) ? 'Quitar de colección' : 'Guardar en colección'}
+                        className={`p-2 rounded-lg border transition-all shrink-0 ${savedIds.has(item.id) ? 'bg-amber-500/20 border-amber-500/40 text-amber-400' : 'bg-white/5 border-white/10 text-gray-500 hover:text-amber-400 hover:border-amber-500/30'}`}>
+                        {savingId === item.id
+                          ? <div className="w-3.5 h-3.5 border border-amber-400 border-t-transparent rounded-full animate-spin" />
+                          : <svg className="w-3.5 h-3.5" fill={savedIds.has(item.id) ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                            </svg>
+                        }
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Action buttons */}
+                  {item.kind === 'card' ? (
+                    <div className="grid grid-cols-3 gap-1.5">
+                      <button onClick={() => { addToCart(item); setCartOpen(true) }}
+                        className={`py-2 rounded-lg text-[11px] font-bold transition-all text-center ${
+                          item.txn === 'sale' ? 'bg-amber-500 hover:bg-amber-400 text-black' : 'bg-[#1a1a1a] border border-white/10 text-gray-500 hover:border-amber-500/30 hover:text-amber-400'
+                        }`}>
+                        🛒 Comprar
+                      </button>
+                      <button onClick={() => user ? setBidItem(item) : navigate('/login')}
+                        className={`py-2 rounded-lg text-[11px] font-bold transition-all text-center ${
+                          item.txn === 'auction' ? 'bg-red-500/80 hover:bg-red-500 text-white' : 'bg-[#1a1a1a] border border-white/10 text-gray-500 hover:border-red-500/30 hover:text-red-400'
+                        }`}>
+                        🔨 Pujar
+                      </button>
+                      <button onClick={() => user ? setTradeItem(item) : navigate('/login')}
+                        className={`py-2 rounded-lg text-[11px] font-bold transition-all text-center ${
+                          item.txn === 'trade' ? 'bg-blue-500/80 hover:bg-blue-500 text-white' : 'bg-[#1a1a1a] border border-white/10 text-gray-500 hover:border-blue-500/30 hover:text-blue-400'
+                        }`}>
+                        🔄 Trade
                       </button>
                     </div>
-                  </div>
+                  ) : (
+                    <button onClick={() => { addToCart(item); setCartOpen(true) }}
+                      className="w-full bg-amber-500/10 hover:bg-amber-500 border border-amber-500/30 hover:border-amber-500 text-amber-400 hover:text-black font-bold py-2 px-3 rounded-lg text-xs transition-all">
+                      + Agregar al carrito
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
@@ -390,6 +552,8 @@ export default function Marketplace() {
           onClear={() => setCart([])}
         />
       )}
+      {bidItem   && <BidModal   item={bidItem}   onClose={() => setBidItem(null)}   user={user} navigate={navigate} />}
+      {tradeItem && <TradeModal item={tradeItem} onClose={() => setTradeItem(null)} user={user} navigate={navigate} />}
     </div>
   )
 }
