@@ -30,7 +30,7 @@ export default function Landing() {
   ]
 
   return (
-    <main className="bg-[#06060f] text-white pt-16">
+    <main className="bg-[#111128] text-white pt-16">
 
       {/* ─── HERO ─── */}
       <section className="relative min-h-screen flex items-center overflow-hidden">
@@ -124,7 +124,7 @@ export default function Landing() {
       </section>
 
       {/* ─── CATEGORÍAS ─── */}
-      <section className="py-20 px-6 bg-[#0d0d0d]">
+      <section className="py-20 px-6 bg-[#16162e]">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
             <p className="text-violet-400 text-xs font-bold uppercase tracking-widest mb-2">Explorar</p>
@@ -169,7 +169,7 @@ export default function Landing() {
               <div
                 key={card.player}
                 onClick={() => navigate('/marketplace')}
-                className="group bg-[#0e0e1e] border border-white/5 hover:border-violet-500/40 rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_60px_rgba(245,158,11,0.12)]"
+                className="group bg-[#1a1a36] border border-white/5 hover:border-violet-500/40 rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_60px_rgba(245,158,11,0.12)]"
               >
                 <div className="relative h-56 overflow-hidden">
                   <img src={card.img} alt={card.sport} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
@@ -196,7 +196,7 @@ export default function Landing() {
       </section>
 
       {/* ─── LIVE AUCTIONS ─── */}
-      <section className="py-20 px-6 bg-[#0d0d0d]">
+      <section className="py-20 px-6 bg-[#16162e]">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-end justify-between mb-10">
             <div>
@@ -213,7 +213,7 @@ export default function Landing() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
             {liveNow.map((a) => (
               <div key={a.title} onClick={() => navigate('/live')}
-                className="group bg-[#0e0e1e] border border-white/5 hover:border-red-500/30 rounded-2xl overflow-hidden cursor-pointer transition-all hover:-translate-y-1">
+                className="group bg-[#1a1a36] border border-white/5 hover:border-red-500/30 rounded-2xl overflow-hidden cursor-pointer transition-all hover:-translate-y-1">
                 <div className="relative h-44 overflow-hidden">
                   <img src={a.img} alt={a.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#111] to-transparent" />

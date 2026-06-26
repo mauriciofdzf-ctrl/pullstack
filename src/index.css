@@ -8,11 +8,11 @@ body {
   margin: 0;
   font-family: system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
-  background-color: #06060f;
-  /* Glow ambiental en la esquina superior */
+  background-color: #111128;
   background-image:
-    radial-gradient(ellipse 80% 50% at 10% -10%, rgba(109,40,217,0.12) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 40% at 90% 110%, rgba(192,38,211,0.08) 0%, transparent 50%);
+    radial-gradient(ellipse 90% 55% at 5%  -5%,  rgba(109,40,217,0.22) 0%, transparent 55%),
+    radial-gradient(ellipse 70% 45% at 95% 105%, rgba(192,38,211,0.16) 0%, transparent 50%),
+    radial-gradient(ellipse 50% 30% at 50%   0%, rgba(124,58,237,0.10) 0%, transparent 40%);
 }
 
 /* Scrollbar sutil con tinte violeta */

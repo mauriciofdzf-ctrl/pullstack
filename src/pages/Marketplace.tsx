@@ -238,7 +238,7 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={e => e.target === e.currentTarget && onClose()}>
-      <div className="w-full max-w-lg bg-[#0e0e1e] border border-white/10 rounded-2xl shadow-2xl overflow-hidden max-h-[92dvh] flex flex-col">
+      <div className="w-full max-w-lg bg-[#1a1a36] border border-white/10 rounded-2xl shadow-2xl overflow-hidden max-h-[92dvh] flex flex-col">
         {done ? (
           <div className="p-10 text-center">
             <div className="w-16 h-16 bg-violet-500/20 border border-violet-500/30 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -271,7 +271,7 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
                           ? val === 'sale'    ? 'bg-violet-600 border-violet-500 text-white'
                           : val === 'auction' ? 'bg-red-500 border-red-500 text-white'
                                               : 'bg-blue-500 border-blue-500 text-white'
-                          : 'bg-[#161628] border-white/10 text-gray-500 hover:border-white/20 hover:text-white'
+                          : 'bg-[#21213e] border-white/10 text-gray-500 hover:border-white/20 hover:text-white'
                       }`}>
                       <span className="text-xl">{ico}</span>
                       <span>{lbl}</span>
@@ -335,7 +335,7 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
                 <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1 block">Título *</label>
                 <input value={form.title} onChange={e => set('title', e.target.value)}
                   placeholder="Ej: LeBron James RC 2003 Topps Chrome PSA 9..."
-                  className="w-full bg-[#161628] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-violet-500/50 placeholder-gray-700" />
+                  className="w-full bg-[#21213e] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-violet-500/50 placeholder-gray-700" />
               </div>
 
               {/* ④ Descripción */}
@@ -344,7 +344,7 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
                 <textarea value={form.description} onChange={e => set('description', e.target.value)}
                   placeholder="Serial, variante, condición específica, incluye envío, etc..."
                   rows={2}
-                  className="w-full bg-[#161628] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-violet-500/50 resize-none placeholder-gray-700" />
+                  className="w-full bg-[#21213e] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-violet-500/50 resize-none placeholder-gray-700" />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -352,7 +352,7 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
                 <div>
                   <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1 block">Deporte</label>
                   <select value={form.sport} onChange={e => set('sport', e.target.value)}
-                    className="w-full bg-[#161628] border border-white/10 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none">
+                    className="w-full bg-[#21213e] border border-white/10 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none">
                     {SPORT_OPTIONS.map(s => <option key={s}>{s}</option>)}
                   </select>
                 </div>
@@ -360,7 +360,7 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
                 <div>
                   <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1 block">Tipo</label>
                   <select value={form.kind} onChange={e => set('kind', e.target.value as any)}
-                    className="w-full bg-[#161628] border border-white/10 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none">
+                    className="w-full bg-[#21213e] border border-white/10 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none">
                     <option value="card">🃏 Carta individual</option>
                     <option value="box">📦 Caja sellada</option>
                     <option value="accessory">🛡️ Accesorio</option>
@@ -375,7 +375,7 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-bold">$</span>
                       <input type="number" value={form.price} onChange={e => set('price', e.target.value)}
                         placeholder="500" min="0"
-                        className="w-full bg-[#161628] border border-white/10 text-white rounded-xl pl-7 pr-4 py-2.5 text-sm focus:outline-none focus:border-violet-500/50" />
+                        className="w-full bg-[#21213e] border border-white/10 text-white rounded-xl pl-7 pr-4 py-2.5 text-sm focus:outline-none focus:border-violet-500/50" />
                     </div>
                   </div>
                 )}
@@ -388,7 +388,7 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-bold">$</span>
                       <input type="number" value={form.min_bid} onChange={e => set('min_bid', e.target.value)}
                         placeholder="100" min="0"
-                        className="w-full bg-[#161628] border border-white/10 text-white rounded-xl pl-7 pr-4 py-2.5 text-sm focus:outline-none focus:border-red-500/50" />
+                        className="w-full bg-[#21213e] border border-white/10 text-white rounded-xl pl-7 pr-4 py-2.5 text-sm focus:outline-none focus:border-red-500/50" />
                     </div>
                   </div>
                 )}
@@ -397,7 +397,7 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
                 <div>
                   <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1 block">Condición</label>
                   <select value={form.condition} onChange={e => set('condition', e.target.value)}
-                    className="w-full bg-[#161628] border border-white/10 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none">
+                    className="w-full bg-[#21213e] border border-white/10 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none">
                     {CONDITION_OPTIONS.map(c => <option key={c}>{c}</option>)}
                   </select>
                 </div>
@@ -408,7 +408,7 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
                     <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1 block">Grado (si aplica)</label>
                     <input value={form.grade} onChange={e => set('grade', e.target.value)}
                       placeholder="PSA 10, BGS 9.5..."
-                      className="w-full bg-[#161628] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-violet-500/50 placeholder-gray-700" />
+                      className="w-full bg-[#21213e] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-violet-500/50 placeholder-gray-700" />
                   </div>
                 )}
               </div>
@@ -458,7 +458,7 @@ function BidModal({ item, onClose, user, navigate }: {
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClick={e => e.target === e.currentTarget && onClose()}>
-      <div className="w-full max-w-md bg-[#0e0e1e] border border-white/10 rounded-2xl p-6 shadow-2xl">
+      <div className="w-full max-w-md bg-[#1a1a36] border border-white/10 rounded-2xl p-6 shadow-2xl">
         {done ? (
           <div className="text-center py-4">
             <div className="w-14 h-14 bg-green-500/20 border border-green-500/30 rounded-full flex items-center justify-center mx-auto mb-3">
@@ -479,7 +479,7 @@ function BidModal({ item, onClose, user, navigate }: {
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>
-            <div className="bg-[#161628] rounded-xl p-3 mb-4 flex items-center justify-between">
+            <div className="bg-[#21213e] rounded-xl p-3 mb-4 flex items-center justify-between">
               <span className="text-gray-500 text-xs">Precio listado</span>
               <span className="text-white font-black">{item.price}</span>
             </div>
@@ -489,7 +489,7 @@ function BidModal({ item, onClose, user, navigate }: {
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold">$</span>
                 <input type="number" value={amount} onChange={e => { setAmount(e.target.value); setError('') }}
                   placeholder={`${minBid}`} min={minBid}
-                  className="w-full bg-[#06060f] border border-white/10 text-white rounded-xl pl-8 pr-4 py-3 text-lg font-black focus:outline-none focus:border-violet-500/50" />
+                  className="w-full bg-[#111128] border border-white/10 text-white rounded-xl pl-8 pr-4 py-3 text-lg font-black focus:outline-none focus:border-violet-500/50" />
               </div>
               {error && <p className="text-red-400 text-xs mt-1.5">{error}</p>}
             </div>
@@ -531,7 +531,7 @@ function TradeModal({ item, onClose, user, navigate }: {
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClick={e => e.target === e.currentTarget && onClose()}>
-      <div className="w-full max-w-md bg-[#0e0e1e] border border-white/10 rounded-2xl p-6 shadow-2xl">
+      <div className="w-full max-w-md bg-[#1a1a36] border border-white/10 rounded-2xl p-6 shadow-2xl">
         {done ? (
           <div className="text-center py-4">
             <div className="w-14 h-14 bg-blue-500/20 border border-blue-500/30 rounded-full flex items-center justify-center mx-auto mb-3">
@@ -557,7 +557,7 @@ function TradeModal({ item, onClose, user, navigate }: {
               <textarea value={offer} onChange={e => setOffer(e.target.value)}
                 placeholder="Ej: Mahomes RC PSA 9 + $500 USD en efectivo..."
                 rows={4}
-                className="w-full bg-[#161628] border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500/50 resize-none" />
+                className="w-full bg-[#21213e] border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500/50 resize-none" />
             </div>
             <button onClick={submit} disabled={loading || !offer.trim()}
               className="w-full bg-blue-500 hover:bg-blue-400 disabled:opacity-40 text-white font-black py-3 rounded-xl transition-all">
@@ -675,7 +675,7 @@ export default function Marketplace() {
   }
 
   return (
-    <div className="min-h-screen bg-[#06060f] pt-20 pb-24 px-4 sm:px-6">
+    <div className="min-h-screen bg-[#111128] pt-20 pb-24 px-4 sm:px-6">
       <div className="max-w-7xl mx-auto">
 
         {/* Header */}
@@ -692,7 +692,7 @@ export default function Marketplace() {
               <span className="hidden sm:inline">Publicar</span>
             </button>
             <button onClick={() => setCartOpen(true)}
-              className="flex items-center gap-2 bg-[#0e0e1e] border border-white/10 hover:border-violet-500/30 text-white px-4 py-2.5 rounded-xl transition-colors">
+              className="flex items-center gap-2 bg-[#1a1a36] border border-white/10 hover:border-violet-500/30 text-white px-4 py-2.5 rounded-xl transition-colors">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
               </svg>
@@ -714,7 +714,7 @@ export default function Marketplace() {
             placeholder="Buscar carta, jugador, caja, marca... (ej: Charizard, Flagg, Topps, Prizm)"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="w-full bg-[#0e0e1e] border border-white/10 text-white placeholder-gray-600 pl-11 pr-4 py-3.5 rounded-xl text-sm focus:outline-none focus:border-violet-500/50 transition-colors"
+            className="w-full bg-[#1a1a36] border border-white/10 text-white placeholder-gray-600 pl-11 pr-4 py-3.5 rounded-xl text-sm focus:outline-none focus:border-violet-500/50 transition-colors"
           />
           {query && (
             <button onClick={() => setQuery('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-600 hover:text-gray-300">
@@ -731,7 +731,7 @@ export default function Marketplace() {
           <div className="flex gap-2 flex-wrap">
             {KINDS.map((k) => (
               <button key={k.value} onClick={() => setKind(k.value)}
-                className={`px-3 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${kind === k.value ? 'bg-violet-600 text-white' : 'bg-[#0e0e1e] border border-white/10 text-gray-400 hover:border-violet-500/30 hover:text-violet-400'}`}>
+                className={`px-3 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${kind === k.value ? 'bg-violet-600 text-white' : 'bg-[#1a1a36] border border-white/10 text-gray-400 hover:border-violet-500/30 hover:text-violet-400'}`}>
                 {k.label}
               </button>
             ))}
@@ -739,7 +739,7 @@ export default function Marketplace() {
             {/* Tipo de transacción */}
             {TXNS.map((t) => (
               <button key={t} onClick={() => setTxn(t)}
-                className={`px-3 py-2 rounded-lg text-xs font-bold transition-all ${txn === t ? 'bg-violet-600 text-white' : 'bg-[#0e0e1e] border border-white/10 text-gray-400 hover:border-violet-500/30 hover:text-violet-400'}`}>
+                className={`px-3 py-2 rounded-lg text-xs font-bold transition-all ${txn === t ? 'bg-violet-600 text-white' : 'bg-[#1a1a36] border border-white/10 text-gray-400 hover:border-violet-500/30 hover:text-violet-400'}`}>
                 {t}
               </button>
             ))}
@@ -755,11 +755,11 @@ export default function Marketplace() {
             <div className="ml-auto flex items-center gap-2">
               <button onClick={() => setShowMXN(!showMXN)}
                 title="Cambiar moneda"
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${showMXN ? 'bg-violet-500/10 border-violet-500/30 text-violet-400' : 'bg-[#0e0e1e] border-white/10 text-gray-500 hover:text-gray-300'}`}>
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${showMXN ? 'bg-violet-500/10 border-violet-500/30 text-violet-400' : 'bg-[#1a1a36] border-white/10 text-gray-500 hover:text-gray-300'}`}>
                 {showMXN ? '🇲🇽 MXN' : '🇺🇸 USD'}
               </button>
               <select value={sort} onChange={(e) => setSort(e.target.value)}
-                className="bg-[#0e0e1e] border border-white/10 text-gray-400 px-3 py-1.5 rounded-lg text-xs focus:outline-none focus:border-violet-500/50">
+                className="bg-[#1a1a36] border border-white/10 text-gray-400 px-3 py-1.5 rounded-lg text-xs focus:outline-none focus:border-violet-500/50">
                 {SORTS.map((s) => <option key={s}>{s}</option>)}
               </select>
             </div>
@@ -784,7 +784,7 @@ export default function Marketplace() {
                 const displayListing = listing.price || listing.min_bid || (listing.txn_type === 'trade' ? 'A convenir' : '—')
                 const isOwner = user?.id === listing.user_id
                 return (
-                  <div key={listing.id} className="group bg-[#0e0e1e] border border-white/5 hover:border-violet-500/30 rounded-2xl overflow-hidden transition-all hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(139,92,246,0.15)]">
+                  <div key={listing.id} className="group bg-[#1a1a36] border border-white/5 hover:border-violet-500/30 rounded-2xl overflow-hidden transition-all hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(139,92,246,0.15)]">
                     {/* Visual header */}
                     <div className="relative h-44 bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] flex items-center justify-center overflow-hidden">
                       {listing.image_url
@@ -830,15 +830,15 @@ export default function Marketplace() {
                       {listing.kind === 'card' ? (
                         <div className="grid grid-cols-3 gap-1.5">
                           <button onClick={() => { if (!user) { navigate('/login'); return }; alert('Contacta al vendedor en Mensajes para coordinar la compra.') }}
-                            className={`py-2 rounded-lg text-[11px] font-bold transition-all text-center ${listing.txn_type === 'sale' ? 'bg-violet-600 hover:bg-violet-500 text-white' : 'bg-[#161628] border border-white/10 text-gray-500 hover:border-violet-500/30 hover:text-violet-400'}`}>
+                            className={`py-2 rounded-lg text-[11px] font-bold transition-all text-center ${listing.txn_type === 'sale' ? 'bg-violet-600 hover:bg-violet-500 text-white' : 'bg-[#21213e] border border-white/10 text-gray-500 hover:border-violet-500/30 hover:text-violet-400'}`}>
                             🛒 Comprar
                           </button>
                           <button onClick={() => { if (!user) { navigate('/login'); return }; alert('Envía tu puja al vendedor por Mensajes.') }}
-                            className={`py-2 rounded-lg text-[11px] font-bold transition-all text-center ${listing.txn_type === 'auction' ? 'bg-red-500/80 hover:bg-red-500 text-white' : 'bg-[#161628] border border-white/10 text-gray-500 hover:border-red-500/30 hover:text-red-400'}`}>
+                            className={`py-2 rounded-lg text-[11px] font-bold transition-all text-center ${listing.txn_type === 'auction' ? 'bg-red-500/80 hover:bg-red-500 text-white' : 'bg-[#21213e] border border-white/10 text-gray-500 hover:border-red-500/30 hover:text-red-400'}`}>
                             🔨 Pujar
                           </button>
                           <button onClick={() => { if (!user) { navigate('/login'); return }; alert('Propón tu trade al vendedor en Mensajes.') }}
-                            className={`py-2 rounded-lg text-[11px] font-bold transition-all text-center ${listing.txn_type === 'trade' ? 'bg-blue-500/80 hover:bg-blue-500 text-white' : 'bg-[#161628] border border-white/10 text-gray-500 hover:border-blue-500/30 hover:text-blue-400'}`}>
+                            className={`py-2 rounded-lg text-[11px] font-bold transition-all text-center ${listing.txn_type === 'trade' ? 'bg-blue-500/80 hover:bg-blue-500 text-white' : 'bg-[#21213e] border border-white/10 text-gray-500 hover:border-blue-500/30 hover:text-blue-400'}`}>
                             🔄 Trade
                           </button>
                         </div>
@@ -883,7 +883,7 @@ export default function Marketplace() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {results.map((item) => (
               <div key={item.id}
-                className="group bg-[#0e0e1e] border border-white/5 hover:border-violet-500/30 rounded-2xl overflow-hidden cursor-pointer transition-all hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(139,92,246,0.15)]">
+                className="group bg-[#1a1a36] border border-white/5 hover:border-violet-500/30 rounded-2xl overflow-hidden cursor-pointer transition-all hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(139,92,246,0.15)]">
                 {/* Imagen */}
                 {(() => { const { isRC, isAuto, is1of1, numbered, gradeCo, gradeNum } = cardAttrs(item); return (
                 <div className="relative h-48 overflow-hidden">
@@ -952,19 +952,19 @@ export default function Marketplace() {
                     <div className="grid grid-cols-3 gap-1.5">
                       <button onClick={() => { addToCart(item); setCartOpen(true) }}
                         className={`py-2 rounded-lg text-[11px] font-bold transition-all text-center ${
-                          item.txn === 'sale' ? 'bg-violet-600 hover:bg-violet-500 text-white' : 'bg-[#161628] border border-white/10 text-gray-500 hover:border-violet-500/30 hover:text-violet-400'
+                          item.txn === 'sale' ? 'bg-violet-600 hover:bg-violet-500 text-white' : 'bg-[#21213e] border border-white/10 text-gray-500 hover:border-violet-500/30 hover:text-violet-400'
                         }`}>
                         🛒 Comprar
                       </button>
                       <button onClick={() => user ? setBidItem(item) : navigate('/login')}
                         className={`py-2 rounded-lg text-[11px] font-bold transition-all text-center ${
-                          item.txn === 'auction' ? 'bg-red-500/80 hover:bg-red-500 text-white' : 'bg-[#161628] border border-white/10 text-gray-500 hover:border-red-500/30 hover:text-red-400'
+                          item.txn === 'auction' ? 'bg-red-500/80 hover:bg-red-500 text-white' : 'bg-[#21213e] border border-white/10 text-gray-500 hover:border-red-500/30 hover:text-red-400'
                         }`}>
                         🔨 Pujar
                       </button>
                       <button onClick={() => user ? setTradeItem(item) : navigate('/login')}
                         className={`py-2 rounded-lg text-[11px] font-bold transition-all text-center ${
-                          item.txn === 'trade' ? 'bg-blue-500/80 hover:bg-blue-500 text-white' : 'bg-[#161628] border border-white/10 text-gray-500 hover:border-blue-500/30 hover:text-blue-400'
+                          item.txn === 'trade' ? 'bg-blue-500/80 hover:bg-blue-500 text-white' : 'bg-[#21213e] border border-white/10 text-gray-500 hover:border-blue-500/30 hover:text-blue-400'
                         }`}>
                         🔄 Trade
                       </button>

@@ -60,7 +60,7 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-[#06060f] flex items-center justify-center px-4">
+    <div className="min-h-screen bg-[#111128] flex items-center justify-center px-4">
       <div className="w-full max-w-md">
 
         <div className="text-center mb-10">
@@ -74,13 +74,13 @@ export default function Login() {
           <p className="text-gray-500 text-sm">Inicia sesión para continuar en la plataforma</p>
         </div>
 
-        <div className="bg-[#0e0e1e] border border-white/5 rounded-2xl p-8 space-y-5">
+        <div className="bg-[#1a1a36] border border-white/5 rounded-2xl p-8 space-y-5">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-gray-400 text-sm font-medium mb-1.5">Email</label>
               <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required
                 placeholder="tu@email.com"
-                className="w-full bg-[#161628] border border-white/10 text-white placeholder-gray-600 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-violet-500/50 transition-colors" />
+                className="w-full bg-[#21213e] border border-white/10 text-white placeholder-gray-600 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-violet-500/50 transition-colors" />
             </div>
 
             <div>
@@ -93,7 +93,7 @@ export default function Login() {
               </div>
               <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required
                 placeholder="••••••••"
-                className="w-full bg-[#161628] border border-white/10 text-white placeholder-gray-600 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-violet-500/50 transition-colors" />
+                className="w-full bg-[#21213e] border border-white/10 text-white placeholder-gray-600 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-violet-500/50 transition-colors" />
             </div>
 
             {error && (

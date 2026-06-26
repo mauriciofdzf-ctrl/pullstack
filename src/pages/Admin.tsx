@@ -46,9 +46,9 @@ function ImageSlot({ imgKey }: { imgKey: ImageKey }) {
   }
 
   return (
-    <div className={`bg-[#0d0d0d] rounded-2xl overflow-hidden border transition-all ${custom ? 'border-violet-500/40' : 'border-white/5'}`}>
+    <div className={`bg-[#16162e] rounded-2xl overflow-hidden border transition-all ${custom ? 'border-violet-500/40' : 'border-white/5'}`}>
       {/* Preview */}
-      <div className="relative h-44 overflow-hidden bg-[#0e0e1e]">
+      <div className="relative h-44 overflow-hidden bg-[#1a1a36]">
         {error ? (
           <div className="w-full h-full flex flex-col items-center justify-center gap-2 text-gray-600">
             <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -81,7 +81,7 @@ function ImageSlot({ imgKey }: { imgKey: ImageKey }) {
           value={input}
           onChange={(e) => handlePreview(e.target.value)}
           placeholder="https://... (Unsplash, Cloudinary, Drive público, etc.)"
-          className="w-full bg-[#0e0e1e] border border-white/10 text-white placeholder-gray-700 px-3 py-2 rounded-lg text-xs focus:outline-none focus:border-violet-500/50 font-mono"
+          className="w-full bg-[#1a1a36] border border-white/10 text-white placeholder-gray-700 px-3 py-2 rounded-lg text-xs focus:outline-none focus:border-violet-500/50 font-mono"
         />
         <div className="flex gap-2">
           <button
@@ -125,7 +125,7 @@ export default function Admin() {
   const currentSection = IMAGE_SECTIONS.find((s) => s.label === activeSection)!
 
   return (
-    <div className="min-h-screen bg-[#06060f] pt-20 pb-16 px-6">
+    <div className="min-h-screen bg-[#111128] pt-20 pb-16 px-6">
       <div className="max-w-6xl mx-auto">
 
         {/* Header */}
@@ -171,7 +171,7 @@ export default function Admin() {
               <button
                 key={s.label}
                 onClick={() => setActiveSection(s.label)}
-                className={`px-4 py-2 rounded-lg text-sm font-bold transition-all relative ${activeSection === s.label ? 'bg-violet-600 text-white' : 'bg-[#0e0e1e] border border-white/10 text-gray-400 hover:border-violet-500/30 hover:text-violet-400'}`}
+                className={`px-4 py-2 rounded-lg text-sm font-bold transition-all relative ${activeSection === s.label ? 'bg-violet-600 text-white' : 'bg-[#1a1a36] border border-white/10 text-gray-400 hover:border-violet-500/30 hover:text-violet-400'}`}
               >
                 {s.label}
                 {customCount > 0 && (
@@ -192,7 +192,7 @@ export default function Admin() {
         </div>
 
         {/* Dónde se usan */}
-        <div className="mt-10 bg-[#0e0e1e] border border-white/5 rounded-2xl p-6">
+        <div className="mt-10 bg-[#1a1a36] border border-white/5 rounded-2xl p-6">
           <h3 className="text-white font-bold mb-4">¿Dónde se usa cada imagen?</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
             {[
@@ -213,7 +213,7 @@ export default function Admin() {
         </div>
 
         {/* Tips de URLs buenas */}
-        <div className="mt-6 bg-[#0e0e1e] border border-white/5 rounded-2xl p-6">
+        <div className="mt-6 bg-[#1a1a36] border border-white/5 rounded-2xl p-6">
           <h3 className="text-white font-bold mb-4">✅ URLs que funcionan bien</h3>
           <div className="space-y-2 text-xs text-gray-400">
             <div className="flex items-start gap-2">

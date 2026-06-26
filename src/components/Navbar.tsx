@@ -52,7 +52,7 @@ export default function Navbar() {
   const color = getColor(user?.id || 'x')
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#06060f]/95 backdrop-blur-md border-b border-white/5">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#111128]/95 backdrop-blur-md border-b border-white/5">
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -104,7 +104,7 @@ export default function Navbar() {
                 </button>
 
                 {dropOpen && (
-                  <div className="absolute right-0 mt-2 w-52 bg-[#0e0e1e] border border-white/10 rounded-xl shadow-2xl py-1 overflow-hidden z-50">
+                  <div className="absolute right-0 mt-2 w-52 bg-[#1a1a36] border border-white/10 rounded-xl shadow-2xl py-1 overflow-hidden z-50">
                     <div className="px-4 py-3 border-b border-white/5">
                       <div className="text-white font-bold text-sm truncate">{profile?.display_name || 'Coleccionista'}</div>
                       <div className="text-gray-500 text-xs truncate">{user.email}</div>
@@ -179,7 +179,7 @@ export default function Navbar() {
               {user ? (
                 <>
                   <Link to="/profile" onClick={() => setMenuOpen(false)}
-                    className="flex-1 text-center bg-[#161628] border border-white/10 text-gray-300 text-sm font-bold py-2 rounded-lg">
+                    className="flex-1 text-center bg-[#21213e] border border-white/10 text-gray-300 text-sm font-bold py-2 rounded-lg">
                     Mi perfil
                   </Link>
                   <button onClick={() => { setMenuOpen(false); handleSignOut() }}

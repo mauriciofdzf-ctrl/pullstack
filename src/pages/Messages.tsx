@@ -71,7 +71,7 @@ export default function Messages() {
   }
 
   if (!user) return (
-    <div className="min-h-screen bg-[#06060f] pt-24 pb-16 px-4 flex items-center justify-center">
+    <div className="min-h-screen bg-[#111128] pt-24 pb-16 px-4 flex items-center justify-center">
       <div className="text-center">
         <div className="text-5xl mb-4">💬</div>
         <h2 className="text-white text-2xl font-black mb-2">Mensajes</h2>
@@ -85,7 +85,7 @@ export default function Messages() {
   )
 
   return (
-    <div className="bg-[#06060f] pt-16" style={{ height: '100dvh', display: 'flex', flexDirection: 'column' }}>
+    <div className="bg-[#111128] pt-16" style={{ height: '100dvh', display: 'flex', flexDirection: 'column' }}>
       <div className="max-w-2xl mx-auto w-full flex flex-col flex-1 min-h-0 px-4">
 
         {/* Chat header */}
@@ -118,7 +118,7 @@ export default function Messages() {
               )}
               <div className={`max-w-xs lg:max-w-sm px-4 py-3 rounded-2xl text-sm leading-relaxed ${
                 m.from_admin
-                  ? 'bg-[#161628] border border-white/5 text-gray-300 rounded-tl-md'
+                  ? 'bg-[#21213e] border border-white/5 text-gray-300 rounded-tl-md'
                   : 'bg-violet-600 text-white font-medium rounded-tr-md'
               }`}>
                 {m.content}
@@ -135,7 +135,7 @@ export default function Messages() {
             <div className="flex flex-wrap gap-2">
               {QUICK.map(q => (
                 <button key={q} onClick={() => setInput(q)}
-                  className="bg-[#161628] border border-white/10 hover:border-violet-500/30 text-gray-400 hover:text-violet-400 text-xs px-3 py-1.5 rounded-lg transition-all">
+                  className="bg-[#21213e] border border-white/10 hover:border-violet-500/30 text-gray-400 hover:text-violet-400 text-xs px-3 py-1.5 rounded-lg transition-all">
                   {q}
                 </button>
               ))}
@@ -151,7 +151,7 @@ export default function Messages() {
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() } }}
               placeholder="Escribe tu mensaje..."
-              className="flex-1 bg-[#161628] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-violet-500/50 transition-colors"
+              className="flex-1 bg-[#21213e] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-violet-500/50 transition-colors"
             />
             <button onClick={send} disabled={!input.trim() || sending}
               className="bg-violet-600 hover:bg-violet-500 disabled:opacity-40 text-black font-black px-4 py-2.5 rounded-xl transition-all">
