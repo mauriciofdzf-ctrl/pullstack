@@ -27,6 +27,23 @@ type Item = {
   imgKey:    ImageKey
 }
 
+type UserListing = {
+  id: number
+  user_id: string
+  display_name: string
+  title: string
+  description: string | null
+  sport: string
+  kind: 'card' | 'box' | 'accessory'
+  txn_type: 'sale' | 'auction' | 'trade'
+  price: string | null
+  min_bid: string | null
+  grade: string | null
+  condition: string | null
+  active: boolean
+  created_at: string
+}
+
 // ─── Catálogo completo ────────────────────────────────────────────────────────
 const CATALOG: Item[] = [
   // ── Cartas NBA ───────────────────────────────────────────────────────────
@@ -113,6 +130,202 @@ function cardAttrs(item: Item) {
   const numbered = numMatch ? `/${numMatch[1]}` : null
   const [gradeCo, gradeNum] = item.grade ? item.grade.split(' ') : [null, null]
   return { isRC, isAuto, is1of1, numbered, gradeCo, gradeNum }
+}
+
+const SPORT_OPTIONS = ['NBA', 'NFL', 'Soccer', 'MLB', 'Pokémon', 'One Piece', 'General']
+const CONDITION_OPTIONS = ['Sin gradear (Raw)', 'Near Mint (NM)', 'Excellent (EX)', 'Very Good (VG)', 'Good (G)']
+const LISTING_SPORT_ICON: Record<string, string> = {
+  NBA:'🏀', NFL:'🏈', Soccer:'⚽', MLB:'⚾', 'Pokémon':'🃏', 'One Piece':'🏴‍☠️', General:'🛡️'
+}
+
+// ─── Publish Modal ────────────────────────────────────────────────────────────
+function PublishModal({ onClose, user, profile, onSuccess }: {
+  onClose: () => void
+  user: { id: string } | null
+  profile: { display_name?: string | null } | null
+  onSuccess: (listing: UserListing) => void
+}) {
+  const navigate = useNavigate()
+  const [form, setForm] = useState({
+    title: '', description: '',
+    sport: 'NBA', kind: 'card' as 'card' | 'box' | 'accessory',
+    txn_type: 'sale' as 'sale' | 'auction' | 'trade',
+    price: '', min_bid: '', grade: '', condition: 'Sin gradear (Raw)',
+  })
+  const [loading, setLoading] = useState(false)
+  const [error, setError]     = useState('')
+  const [done, setDone]       = useState(false)
+
+  const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }))
+
+  const submit = async () => {
+    if (!user) { onClose(); navigate('/login'); return }
+    if (!form.title.trim()) { setError('El título es obligatorio'); return }
+    if (form.txn_type !== 'trade' && !form.price && !form.min_bid) {
+      setError('Ingresa un precio o puja mínima'); return
+    }
+    setLoading(true); setError('')
+    const payload = {
+      user_id:      user.id,
+      display_name: profile?.display_name || user.id.slice(0, 8),
+      title:        form.title.trim(),
+      description:  form.description.trim() || null,
+      sport:        form.sport,
+      kind:         form.kind,
+      txn_type:     form.txn_type,
+      price:        form.price ? `$${form.price}` : null,
+      min_bid:      form.min_bid ? `$${form.min_bid}` : null,
+      grade:        form.grade.trim() || null,
+      condition:    form.condition,
+      active:       true,
+    }
+    const { data, error: err } = await supabase.from('listings').insert(payload).select().single()
+    setLoading(false)
+    if (err) { setError('Error al publicar. Intenta de nuevo.'); return }
+    setDone(true)
+    setTimeout(() => { onSuccess(data as UserListing); onClose() }, 1600)
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="w-full max-w-lg bg-[#111] border border-white/10 rounded-2xl shadow-2xl overflow-hidden max-h-[90dvh] overflow-y-auto">
+        {done ? (
+          <div className="p-8 text-center">
+            <div className="w-16 h-16 bg-amber-500/20 border border-amber-500/30 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+            </div>
+            <p className="text-white font-black text-xl mb-1">¡Publicado!</p>
+            <p className="text-gray-500 text-sm">Tu anuncio ya está visible en el Mercado.</p>
+          </div>
+        ) : (
+          <>
+            <div className="px-6 py-5 border-b border-white/5 flex items-center justify-between">
+              <div>
+                <p className="text-amber-500 text-xs font-bold uppercase tracking-widest mb-0.5">Nuevo anuncio</p>
+                <h3 className="text-white font-black text-lg">Publicar en el Mercado</h3>
+              </div>
+              <button onClick={onClose} className="text-gray-600 hover:text-white transition-colors">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+
+            <div className="px-6 py-5 space-y-4">
+              {/* Tipo de transacción — selector grande */}
+              <div>
+                <label className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2 block">¿Qué quieres hacer?</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {([['sale','🛒','Vender'],['auction','🔨','Subastar'],['trade','🔄','Tradear']] as const).map(([val, ico, lbl]) => (
+                    <button key={val} onClick={() => set('txn_type', val)}
+                      className={`py-3 rounded-xl text-sm font-black border transition-all flex flex-col items-center gap-1 ${
+                        form.txn_type === val
+                          ? val === 'sale'    ? 'bg-amber-500 border-amber-500 text-black'
+                          : val === 'auction' ? 'bg-red-500/80 border-red-500 text-white'
+                                              : 'bg-blue-500/80 border-blue-500 text-white'
+                          : 'bg-[#1a1a1a] border-white/10 text-gray-500 hover:border-white/20'
+                      }`}>
+                      <span className="text-xl">{ico}</span>
+                      <span>{lbl}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Título */}
+              <div>
+                <label className="text-gray-400 text-xs mb-1 block">Título del anuncio *</label>
+                <input value={form.title} onChange={e => set('title', e.target.value)}
+                  placeholder="Ej: LeBron James RC 2003 Topps Chrome PSA 9..."
+                  className="w-full bg-[#1a1a1a] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-500/50" />
+              </div>
+
+              {/* Descripción */}
+              <div>
+                <label className="text-gray-400 text-xs mb-1 block">Descripción (serial, variante, condición específica...)</label>
+                <textarea value={form.description} onChange={e => set('description', e.target.value)}
+                  placeholder="Cualquier detalle relevante para el comprador..."
+                  rows={2}
+                  className="w-full bg-[#1a1a1a] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-500/50 resize-none" />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                {/* Deporte */}
+                <div>
+                  <label className="text-gray-400 text-xs mb-1 block">Deporte / Franquicia</label>
+                  <select value={form.sport} onChange={e => set('sport', e.target.value)}
+                    className="w-full bg-[#1a1a1a] border border-white/10 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none">
+                    {SPORT_OPTIONS.map(s => <option key={s}>{s}</option>)}
+                  </select>
+                </div>
+                {/* Tipo */}
+                <div>
+                  <label className="text-gray-400 text-xs mb-1 block">Tipo de producto</label>
+                  <select value={form.kind} onChange={e => set('kind', e.target.value as any)}
+                    className="w-full bg-[#1a1a1a] border border-white/10 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none">
+                    <option value="card">🃏 Carta individual</option>
+                    <option value="box">📦 Caja sellada</option>
+                    <option value="accessory">🛡️ Accesorio</option>
+                  </select>
+                </div>
+
+                {/* Precio (sale) */}
+                {form.txn_type === 'sale' && (
+                  <div>
+                    <label className="text-gray-400 text-xs mb-1 block">Precio (USD) *</label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                      <input type="number" value={form.price} onChange={e => set('price', e.target.value)}
+                        placeholder="500" min="0"
+                        className="w-full bg-[#1a1a1a] border border-white/10 text-white rounded-xl pl-7 pr-4 py-2.5 text-sm focus:outline-none focus:border-amber-500/50" />
+                    </div>
+                  </div>
+                )}
+
+                {/* Puja mínima (auction) */}
+                {form.txn_type === 'auction' && (
+                  <div>
+                    <label className="text-gray-400 text-xs mb-1 block">Puja mínima (USD) *</label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                      <input type="number" value={form.min_bid} onChange={e => set('min_bid', e.target.value)}
+                        placeholder="100" min="0"
+                        className="w-full bg-[#1a1a1a] border border-white/10 text-white rounded-xl pl-7 pr-4 py-2.5 text-sm focus:outline-none focus:border-red-500/50" />
+                    </div>
+                  </div>
+                )}
+
+                {/* Condición */}
+                <div>
+                  <label className="text-gray-400 text-xs mb-1 block">Condición</label>
+                  <select value={form.condition} onChange={e => set('condition', e.target.value)}
+                    className="w-full bg-[#1a1a1a] border border-white/10 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none">
+                    {CONDITION_OPTIONS.map(c => <option key={c}>{c}</option>)}
+                  </select>
+                </div>
+
+                {/* Grado */}
+                {form.kind === 'card' && (
+                  <div>
+                    <label className="text-gray-400 text-xs mb-1 block">Grado (si está gradada)</label>
+                    <input value={form.grade} onChange={e => set('grade', e.target.value)}
+                      placeholder="PSA 10, BGS 9.5..."
+                      className="w-full bg-[#1a1a1a] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-500/50" />
+                  </div>
+                )}
+              </div>
+
+              {error && <p className="text-red-400 text-xs bg-red-500/10 border border-red-500/20 px-3 py-2 rounded-lg">{error}</p>}
+
+              <button onClick={submit} disabled={loading || !form.title.trim()}
+                className="w-full bg-amber-500 hover:bg-amber-400 disabled:opacity-40 text-black font-black py-3 rounded-xl transition-all">
+                {loading ? 'Publicando...' : 'Publicar anuncio'}
+              </button>
+              <p className="text-gray-600 text-[10px] text-center">Al publicar aceptas que PullStack puede moderar o retirar anuncios que incumplan las reglas.</p>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  )
 }
 
 // ─── Bid Modal ────────────────────────────────────────────────────────────────
@@ -253,7 +466,7 @@ function TradeModal({ item, onClose, user, navigate }: {
 }
 
 export default function Marketplace() {
-  const { user } = useAuth()
+  const { user, profile } = useAuth()
   const navigate = useNavigate()
   const [sport,  setSport]  = useState('Todos')
   const [kind,   setKind]   = useState('all')
@@ -265,8 +478,11 @@ export default function Marketplace() {
   const [savedIds,   setSavedIds]   = useState<Set<number>>(new Set())
   const [savingId,   setSavingId]   = useState<number | null>(null)
   const [showMXN,    setShowMXN]    = useState(false)
-  const [bidItem,    setBidItem]    = useState<Item | null>(null)
-  const [tradeItem,  setTradeItem]  = useState<Item | null>(null)
+  const [bidItem,       setBidItem]       = useState<Item | null>(null)
+  const [tradeItem,     setTradeItem]     = useState<Item | null>(null)
+  const [listings,      setListings]      = useState<UserListing[]>([])
+  const [showPublish,   setShowPublish]   = useState(false)
+  const [deletingId,    setDeletingId]    = useState<number | null>(null)
 
   const MXN_RATE = 17.5
   const fmtMXN = (usdStr: string) => {
@@ -289,6 +505,19 @@ export default function Marketplace() {
       })
   }, [user])
 
+  useEffect(() => {
+    supabase.from('listings').select('*').eq('active', true).order('created_at', { ascending: false })
+      .then(({ data }) => setListings((data as UserListing[]) || []))
+  }, [])
+
+  const deleteMyListing = async (id: number) => {
+    setDeletingId(id)
+    await supabase.from('listings').update({ active: false }).eq('id', id)
+    setListings(prev => prev.filter(l => l.id !== id))
+    setDeletingId(null)
+  }
+
+
   const toggleCollection = async (item: typeof CATALOG[0]) => {
     if (!user) return
     const isSaved = savedIds.has(item.id)
@@ -305,6 +534,14 @@ export default function Marketplace() {
     }
     setSavingId(null)
   }
+
+  const filteredListings = listings.filter(l => {
+    const ms = sport === 'Todos' || l.sport === sport || l.sport === 'General'
+    const mk = kind  === 'all'   || l.kind === kind
+    const mt = txn   === 'Todos' || (txn === 'Venta' && l.txn_type === 'sale') || (txn === 'Subasta' && l.txn_type === 'auction') || (txn === 'Trading' && l.txn_type === 'trade')
+    const mq = !query || l.title.toLowerCase().includes(query.toLowerCase()) || (l.description || '').toLowerCase().includes(query.toLowerCase())
+    return ms && mk && mt && mq
+  })
 
   let results = CATALOG.filter((item) => {
     const ms = sport === 'Todos' || item.sport === sport || item.sport === 'General'
@@ -337,18 +574,20 @@ export default function Marketplace() {
       <div className="max-w-7xl mx-auto">
 
         {/* Header */}
-        <div className="flex items-start justify-between mb-8">
+        <div className="flex items-start justify-between gap-4 mb-8">
           <div>
             <p className="text-amber-500 text-xs font-bold uppercase tracking-widest mb-1">PullStack</p>
-            <h1 className="text-4xl font-black text-white mb-1">Explorador</h1>
-            <p className="text-gray-500 text-sm">Cartas · Cajas Selladas · Accesorios · NBA · NFL · Soccer · MLB · Pokémon · One Piece</p>
+            <h1 className="text-4xl font-black text-white mb-1">Mercado</h1>
+            <p className="text-gray-500 text-sm">Compra · Subasta · Tradea · NBA · NFL · Soccer · MLB · Pokémon · One Piece</p>
           </div>
-          {/* Carrito */}
-          <div className="relative shrink-0">
-            <button
-              onClick={() => setCartOpen(true)}
-              className="flex items-center gap-2 bg-[#111] border border-white/10 hover:border-amber-500/30 text-white px-4 py-2.5 rounded-xl transition-colors"
-            >
+          <div className="flex items-center gap-2 shrink-0">
+            <button onClick={() => user ? setShowPublish(true) : navigate('/login')}
+              className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-black px-4 py-2.5 rounded-xl text-sm transition-all hover:shadow-lg hover:shadow-amber-500/20">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+              <span className="hidden sm:inline">Publicar</span>
+            </button>
+            <button onClick={() => setCartOpen(true)}
+              className="flex items-center gap-2 bg-[#111] border border-white/10 hover:border-amber-500/30 text-white px-4 py-2.5 rounded-xl transition-colors">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
               </svg>
@@ -425,9 +664,100 @@ export default function Marketplace() {
           )}
         </div>
 
+        {/* ── Anuncios de usuarios ────────────────────────────── */}
+        {filteredListings.length > 0 && (
+          <div className="mb-10">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex-1 h-px bg-white/5" />
+              <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">Anuncios de usuarios</span>
+              <div className="flex-1 h-px bg-white/5" />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              {filteredListings.map(listing => {
+                const txnLabel = listing.txn_type === 'sale' ? 'Venta' : listing.txn_type === 'auction' ? 'Subasta' : 'Trade'
+                const txnColor = listing.txn_type === 'sale' ? 'bg-green-500/10 text-green-400 border-green-500/30' : listing.txn_type === 'auction' ? 'bg-red-500/10 text-red-400 border-red-500/30' : 'bg-blue-500/10 text-blue-400 border-blue-500/30'
+                const displayListing = listing.price || listing.min_bid || (listing.txn_type === 'trade' ? 'A convenir' : '—')
+                const isOwner = user?.id === listing.user_id
+                return (
+                  <div key={listing.id} className="group bg-[#111] border border-white/5 hover:border-amber-500/30 rounded-2xl overflow-hidden transition-all hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(245,158,11,0.08)]">
+                    {/* Visual header con sport emoji */}
+                    <div className="relative h-36 bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] flex items-center justify-center overflow-hidden">
+                      <span className="text-6xl opacity-20 select-none">{LISTING_SPORT_ICON[listing.sport] || '🃏'}</span>
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#111] to-transparent" />
+                      <div className="absolute top-3 left-3 flex gap-1.5 flex-wrap">
+                        <span className="bg-amber-500/90 text-black text-[9px] font-black px-2 py-0.5 rounded-full uppercase">Particular</span>
+                        {listing.grade && <span className="bg-black/70 backdrop-blur text-amber-400 text-[9px] font-bold px-2 py-0.5 rounded-full border border-amber-500/30">{listing.grade}</span>}
+                      </div>
+                      <div className={`absolute top-3 right-3 text-[10px] font-black px-2 py-0.5 rounded-full border uppercase ${txnColor}`}>{txnLabel}</div>
+                      <div className="absolute bottom-2 left-3 right-3 flex items-center justify-between">
+                        <span className="text-[10px] text-gray-500">{LISTING_SPORT_ICON[listing.sport]} {listing.sport}</span>
+                        <span className="text-[10px] text-gray-600">{listing.kind === 'card' ? '🃏' : listing.kind === 'box' ? '📦' : '🛡️'}</span>
+                      </div>
+                    </div>
+
+                    <div className="p-4">
+                      <p className="text-amber-500 text-[10px] font-bold uppercase tracking-widest mb-0.5 truncate">{listing.display_name}</p>
+                      <h3 className="text-white font-black text-sm leading-tight mb-1 line-clamp-2">{listing.title}</h3>
+                      {listing.description && <p className="text-gray-600 text-[10px] leading-relaxed mb-3 line-clamp-2">{listing.description}</p>}
+                      {listing.condition && !listing.description && <p className="text-gray-600 text-[10px] mb-3">{listing.condition}</p>}
+
+                      <div className="flex items-end justify-between gap-2 mb-3">
+                        <div>
+                          <p className="text-white font-black text-lg leading-none">{displayListing}</p>
+                          {listing.txn_type === 'auction' && listing.min_bid && <p className="text-gray-600 text-[10px]">Puja mín.</p>}
+                          {listing.condition && listing.grade && <p className="text-gray-500 text-[10px]">{listing.condition}</p>}
+                        </div>
+                        {isOwner && (
+                          <button onClick={() => deleteMyListing(listing.id)} disabled={deletingId === listing.id}
+                            title="Retirar anuncio"
+                            className="text-gray-600 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100 p-1.5 rounded-lg hover:bg-red-500/10">
+                            {deletingId === listing.id
+                              ? <div className="w-3.5 h-3.5 border border-red-400/50 border-t-transparent rounded-full animate-spin" />
+                              : <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                            }
+                          </button>
+                        )}
+                      </div>
+
+                      {listing.kind === 'card' ? (
+                        <div className="grid grid-cols-3 gap-1.5">
+                          <button onClick={() => { if (!user) { navigate('/login'); return }; alert('Contacta al vendedor en Mensajes para coordinar la compra.') }}
+                            className={`py-2 rounded-lg text-[11px] font-bold transition-all text-center ${listing.txn_type === 'sale' ? 'bg-amber-500 hover:bg-amber-400 text-black' : 'bg-[#1a1a1a] border border-white/10 text-gray-500 hover:border-amber-500/30 hover:text-amber-400'}`}>
+                            🛒 Comprar
+                          </button>
+                          <button onClick={() => { if (!user) { navigate('/login'); return }; alert('Envía tu puja al vendedor por Mensajes.') }}
+                            className={`py-2 rounded-lg text-[11px] font-bold transition-all text-center ${listing.txn_type === 'auction' ? 'bg-red-500/80 hover:bg-red-500 text-white' : 'bg-[#1a1a1a] border border-white/10 text-gray-500 hover:border-red-500/30 hover:text-red-400'}`}>
+                            🔨 Pujar
+                          </button>
+                          <button onClick={() => { if (!user) { navigate('/login'); return }; alert('Propón tu trade al vendedor en Mensajes.') }}
+                            className={`py-2 rounded-lg text-[11px] font-bold transition-all text-center ${listing.txn_type === 'trade' ? 'bg-blue-500/80 hover:bg-blue-500 text-white' : 'bg-[#1a1a1a] border border-white/10 text-gray-500 hover:border-blue-500/30 hover:text-blue-400'}`}>
+                            🔄 Trade
+                          </button>
+                        </div>
+                      ) : (
+                        <button onClick={() => navigate('/messages')}
+                          className="w-full bg-amber-500/10 hover:bg-amber-500 border border-amber-500/30 hover:border-amber-500 text-amber-400 hover:text-black font-bold py-2 px-3 rounded-lg text-xs transition-all">
+                          Contactar vendedor
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* ── Catálogo PullStack ──────────────────────────────── */}
+        <div className="flex items-center gap-3 mb-5">
+          <div className="flex-1 h-px bg-white/5" />
+          <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">Catálogo PullStack</span>
+          <div className="flex-1 h-px bg-white/5" />
+        </div>
+
         {/* Resultados */}
         <p className="text-gray-600 text-sm mb-6">
-          <span className="text-white font-bold">{results.length}</span> resultados
+          <span className="text-white font-bold">{results.length}</span> resultados en catálogo
           {query && <span> para "<span className="text-amber-400">{query}</span>"</span>}
         </p>
 
@@ -554,6 +884,7 @@ export default function Marketplace() {
       )}
       {bidItem   && <BidModal   item={bidItem}   onClose={() => setBidItem(null)}   user={user} navigate={navigate} />}
       {tradeItem && <TradeModal item={tradeItem} onClose={() => setTradeItem(null)} user={user} navigate={navigate} />}
+      {showPublish && <PublishModal onClose={() => setShowPublish(false)} user={user} profile={profile} onSuccess={l => setListings(prev => [l, ...prev])} />}
     </div>
   )
 }

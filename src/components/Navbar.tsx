@@ -23,7 +23,7 @@ export default function Navbar() {
   const { user, profile, isAdmin, signOut } = useAuth()
 
   const links = [
-    { to: '/marketplace', label: 'Explorador' },
+    { to: '/marketplace', label: 'Mercado' },
     { to: '/aprende',     label: 'Aprende' },
     { to: '/grading',     label: 'Grading',   grading: true },
     { to: '/live',        label: 'En Vivo',   live: true },
