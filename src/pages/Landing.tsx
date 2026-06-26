@@ -1,9 +1,10 @@
+import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getImages } from '../lib/imageConfig'
 
 export default function Landing() {
   const navigate = useNavigate()
-  const IMGS = getImages()
+  const IMGS = useMemo(() => getImages(), [])
 
   // Arrays inside component so they can reference IMGS
   const trending = [

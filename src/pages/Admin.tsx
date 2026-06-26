@@ -112,9 +112,8 @@ export default function Admin() {
   const [resetDone, setResetDone] = useState(false)
 
   useEffect(() => {
-    const count = Object.keys(getOverrides()).length
-    setOverridesCount(count)
-  })
+    setOverridesCount(Object.keys(getOverrides()).length)
+  }, [activeSection, resetDone])
 
   const handleResetAll = () => {
     if (!confirm('¿Resetear TODAS las imágenes a los defaults? Esta acción no se puede deshacer.')) return

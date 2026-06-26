@@ -13,6 +13,9 @@ import Admin from './pages/Admin'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import Profile from './pages/Profile'
+import ResetPassword from './pages/ResetPassword'
+import Wallet from './pages/Wallet'
+import Aprende from './pages/Aprende'
 import './index.css'
 
 function App() {
@@ -29,9 +32,12 @@ function App() {
             <Route path="/community"   element={<Community />} />
             <Route path="/raffles"     element={<Raffles />} />
             <Route path="/messages"    element={<Messages />} />
-            <Route path="/login"       element={<Login />} />
-            <Route path="/register"    element={<Register />} />
-            <Route path="/profile"     element={<Profile />} />
+            <Route path="/login"          element={<Login />} />
+            <Route path="/register"       element={<Register />} />
+            <Route path="/profile"        element={<Profile />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/wallet"         element={<Wallet />} />
+            <Route path="/aprende"        element={<Aprende />} />
             <Route path="/admin"       element={<AdminRoute><Admin /></AdminRoute>} />
           </Routes>
           <ChatBot />

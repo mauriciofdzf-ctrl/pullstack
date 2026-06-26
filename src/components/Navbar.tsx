@@ -24,6 +24,7 @@ export default function Navbar() {
 
   const links = [
     { to: '/marketplace', label: 'Explorador' },
+    { to: '/aprende',     label: 'Aprende' },
     { to: '/live',        label: 'En Vivo',    live: true },
     { to: '/community',   label: 'Comunidad' },
     { to: '/raffles',     label: 'Rifas & Breaks' },
@@ -80,8 +81,11 @@ export default function Navbar() {
               <div className="relative" ref={dropRef}>
                 <button onClick={() => setDropOpen(!dropOpen)}
                   className="flex items-center gap-2.5 hover:bg-white/5 px-2 py-1.5 rounded-xl transition-all">
-                  <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${color} flex items-center justify-center text-white font-black text-xs shadow-md`}>
-                    {initials}
+                  <div className={`w-8 h-8 rounded-lg overflow-hidden shadow-md ${profile?.avatar_url ? '' : `bg-gradient-to-br ${color} flex items-center justify-center text-white font-black text-xs`}`}>
+                    {profile?.avatar_url
+                      ? <img src={profile.avatar_url} alt={initials} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                      : initials
+                    }
                   </div>
                   <div className="text-left hidden xl:block">
                     <div className="text-white text-sm font-bold leading-tight">{profile?.display_name || 'Coleccionista'}</div>
@@ -101,6 +105,10 @@ export default function Navbar() {
                     <button onClick={() => { setDropOpen(false); navigate('/profile') }}
                       className="w-full text-left px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors flex items-center gap-2.5">
                       <span>👤</span> Mi perfil
+                    </button>
+                    <button onClick={() => { setDropOpen(false); navigate('/wallet') }}
+                      className="w-full text-left px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors flex items-center gap-2.5">
+                      <span>🃏</span> Mi colección
                     </button>
                     {isAdmin && (
                       <button onClick={() => { setDropOpen(false); navigate('/admin') }}

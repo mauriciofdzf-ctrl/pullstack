@@ -1,5 +1,8 @@
-import { useState } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { getImages, type ImageKey } from '../lib/imageConfig'
+import CartDrawer, { type CartEntry } from '../components/CartDrawer'
+import { useAuth } from '../contexts/AuthContext'
+import { supabase } from '../lib/supabase'
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 type Sport  = 'NBA' | 'NFL' | 'Soccer' | 'MLB' | 'Pokémon' | 'One Piece' | 'General'
@@ -100,19 +103,70 @@ const kindIcon: Record<Kind, string> = { card:'🃏', box:'📦', accessory:'�
 function parsePrice(p: string): number {
   return parseFloat(p.replace(/[^0-9.]/g, '')) || 0
 }
+function cardAttrs(item: Item) {
+  const d = item.detail.toLowerCase()
+  const isRC     = d.includes(' rc ') || d.includes(' rc·') || d.includes('rc auto') || d.includes('rookie')
+  const isAuto   = d.includes('auto')
+  const is1of1   = d.includes('1/1') || d.includes('superfractor')
+  const numMatch = item.detail.match(/\/ *(\d+)/)
+  const numbered = numMatch ? `/${numMatch[1]}` : null
+  const [gradeCo, gradeNum] = item.grade ? item.grade.split(' ') : [null, null]
+  return { isRC, isAuto, is1of1, numbered, gradeCo, gradeNum }
+}
 
 export default function Marketplace() {
+  const { user } = useAuth()
   const [sport,  setSport]  = useState('Todos')
   const [kind,   setKind]   = useState('all')
   const [txn,    setTxn]    = useState('Todos')
   const [query,  setQuery]  = useState('')
   const [sort,   setSort]   = useState('Trending 🔥')
-  const [cart,   setCart]   = useState<number[]>([])
+  const [cart,       setCart]       = useState<CartEntry[]>([])
+  const [cartOpen,   setCartOpen]   = useState(false)
+  const [savedIds,   setSavedIds]   = useState<Set<number>>(new Set())
+  const [savingId,   setSavingId]   = useState<number | null>(null)
+  const [showMXN,    setShowMXN]    = useState(false)
 
-  const IMG = getImages()
+  const MXN_RATE = 17.5
+  const fmtMXN = (usdStr: string) => {
+    const n = parsePrice(usdStr)
+    if (!n) return usdStr
+    const mxn = n * MXN_RATE
+    return mxn >= 1000000 ? `$${(mxn / 1000000).toFixed(1)}M MXN` :
+           mxn >= 1000    ? `$${Math.round(mxn / 1000)}K MXN` :
+           `$${Math.round(mxn).toLocaleString()} MXN`
+  }
+  const displayPrice = (p: string) => showMXN ? fmtMXN(p) : p
+
+  const IMG = useMemo(() => getImages(), [])
+
+  useEffect(() => {
+    if (!user) { setSavedIds(new Set()); return }
+    supabase.from('collection_items').select('catalog_id').eq('user_id', user.id)
+      .then(({ data }) => {
+        if (data) setSavedIds(new Set(data.map((d) => d.catalog_id as number)))
+      })
+  }, [user])
+
+  const toggleCollection = async (item: typeof CATALOG[0]) => {
+    if (!user) return
+    const isSaved = savedIds.has(item.id)
+    setSavingId(item.id)
+    if (isSaved) {
+      await supabase.from('collection_items').delete().eq('user_id', user.id).eq('catalog_id', item.id)
+      setSavedIds((prev) => { const s = new Set(prev); s.delete(item.id); return s })
+    } else {
+      await supabase.from('collection_items').insert({
+        user_id: user.id, catalog_id: item.id, name: item.name,
+        sport: item.sport, kind: item.kind, price: item.price,
+      })
+      setSavedIds((prev) => new Set(prev).add(item.id))
+    }
+    setSavingId(null)
+  }
 
   let results = CATALOG.filter((item) => {
-    const ms = sport === 'Todos' || item.sport === sport || (sport !== 'Todos' && item.sport === 'General' && kind === 'accessory')
+    const ms = sport === 'Todos' || item.sport === sport || item.sport === 'General'
     const mk = kind  === 'all'   || item.kind  === kind
     const mt = txn   === 'Todos' || txnMap[item.txn] === txn
     const mq = !query || item.name.toLowerCase().includes(query.toLowerCase()) || item.brand.toLowerCase().includes(query.toLowerCase()) || item.detail.toLowerCase().includes(query.toLowerCase())
@@ -125,6 +179,17 @@ export default function Marketplace() {
   if (sort === 'Trending 🔥')   results = [...results].sort((a, b) => (b.hot ? 1 : 0) - (a.hot ? 1 : 0))
 
   const cartCount = cart.length
+
+  const addToCart = (item: typeof CATALOG[0]) => {
+    setCart((c) => [...c, { id: item.id, name: item.name, price: item.price, kind: item.kind, txn: item.txn }])
+  }
+  const removeOneFromCart = (id: number) => {
+    setCart((c) => {
+      const idx = c.findIndex((x) => x.id === id)
+      if (idx === -1) return c
+      return [...c.slice(0, idx), ...c.slice(idx + 1)]
+    })
+  }
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] pt-20 pb-24 px-4 sm:px-6">
@@ -139,7 +204,10 @@ export default function Marketplace() {
           </div>
           {/* Carrito */}
           <div className="relative shrink-0">
-            <button className="flex items-center gap-2 bg-[#111] border border-white/10 hover:border-amber-500/30 text-white px-4 py-2.5 rounded-xl transition-colors">
+            <button
+              onClick={() => setCartOpen(true)}
+              className="flex items-center gap-2 bg-[#111] border border-white/10 hover:border-amber-500/30 text-white px-4 py-2.5 rounded-xl transition-colors"
+            >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
               </svg>
@@ -191,7 +259,7 @@ export default function Marketplace() {
               </button>
             ))}
           </div>
-          {/* Deporte + Sort */}
+          {/* Deporte + Sort + MXN toggle */}
           <div className="flex gap-2 flex-wrap items-center">
             {SPORTS.map((s) => (
               <button key={s} onClick={() => setSport(s)}
@@ -199,13 +267,21 @@ export default function Marketplace() {
                 {s}
               </button>
             ))}
-            <div className="ml-auto">
+            <div className="ml-auto flex items-center gap-2">
+              <button onClick={() => setShowMXN(!showMXN)}
+                title="Cambiar moneda"
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${showMXN ? 'bg-amber-500/10 border-amber-500/30 text-amber-400' : 'bg-[#111] border-white/10 text-gray-500 hover:text-gray-300'}`}>
+                {showMXN ? '🇲🇽 MXN' : '🇺🇸 USD'}
+              </button>
               <select value={sort} onChange={(e) => setSort(e.target.value)}
                 className="bg-[#111] border border-white/10 text-gray-400 px-3 py-1.5 rounded-lg text-xs focus:outline-none focus:border-amber-500/50">
                 {SORTS.map((s) => <option key={s}>{s}</option>)}
               </select>
             </div>
           </div>
+          {showMXN && (
+            <p className="text-[10px] text-gray-600">Precios convertidos a MXN usando tipo de cambio de referencia $17.50 MXN/USD. Precios reales pueden variar.</p>
+          )}
         </div>
 
         {/* Resultados */}
@@ -230,25 +306,32 @@ export default function Marketplace() {
               <div key={item.id}
                 className="group bg-[#111] border border-white/5 hover:border-amber-500/30 rounded-2xl overflow-hidden cursor-pointer transition-all hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(245,158,11,0.08)]">
                 {/* Imagen */}
+                {(() => { const { isRC, isAuto, is1of1, numbered, gradeCo, gradeNum } = cardAttrs(item); return (
                 <div className="relative h-48 overflow-hidden">
                   <img src={IMG[item.imgKey]} alt={item.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#111] via-black/10 to-transparent" />
-                  {/* Badges */}
-                  {item.badge && (
-                    <div className={`absolute top-3 left-3 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider ${item.badge.includes('🔥') || item.badge.includes('🏆') ? 'bg-red-600 text-white' : item.badge.includes('🌍') ? 'bg-blue-600 text-white' : 'bg-amber-500 text-black'}`}>
-                      {item.badge}
-                    </div>
-                  )}
-                  {/* Tipo transacción */}
+                  {/* Badges top-left */}
+                  <div className="absolute top-3 left-3 flex flex-wrap gap-1 max-w-[calc(100%-70px)]">
+                    {item.badge && (
+                      <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wider ${item.badge.includes('🔥') || item.badge.includes('🏆') ? 'bg-red-600 text-white' : item.badge.includes('🌍') ? 'bg-blue-600 text-white' : 'bg-amber-500 text-black'}`}>
+                        {item.badge}
+                      </span>
+                    )}
+                    {isRC    && <span className="bg-purple-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase">RC</span>}
+                    {isAuto  && <span className="bg-blue-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase">Auto</span>}
+                    {is1of1  && <span className="bg-gradient-to-r from-amber-400 to-yellow-300 text-black text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase">1/1</span>}
+                    {numbered && !is1of1 && <span className="bg-white/10 backdrop-blur text-white text-[9px] font-black px-1.5 py-0.5 rounded-full">{numbered}</span>}
+                  </div>
+                  {/* Tipo transacción top-right */}
                   <div className={`absolute top-3 right-3 text-[10px] font-black px-2 py-0.5 rounded-full border uppercase ${txnCss[item.txn]}`}>
                     {txnMap[item.txn]}
                   </div>
                   {/* Footer de la imagen */}
-                  <div className="absolute bottom-2 left-3 right-3 flex items-center justify-between">
-                    {item.grade && (
-                      <span className="bg-black/70 backdrop-blur text-amber-400 text-[10px] font-bold px-2 py-0.5 rounded-lg border border-amber-500/30">
-                        {item.grade}
+                  <div className="absolute bottom-2 left-3 right-3 flex items-center justify-between gap-1">
+                    {gradeCo && gradeNum && (
+                      <span className="bg-black/70 backdrop-blur text-amber-400 text-[10px] font-bold px-2 py-0.5 rounded-lg border border-amber-500/30 shrink-0">
+                        <span className="text-gray-500">{gradeCo}</span> {gradeNum}
                       </span>
                     )}
                     <span className="bg-black/70 backdrop-blur text-gray-300 text-[10px] font-bold px-2 py-0.5 rounded-lg ml-auto">
@@ -256,6 +339,7 @@ export default function Marketplace() {
                     </span>
                   </div>
                 </div>
+                )})()}
 
                 {/* Contenido */}
                 <div className="p-4">
@@ -265,16 +349,31 @@ export default function Marketplace() {
 
                   <div className="flex items-end justify-between gap-2">
                     <div>
-                      <p className="text-white font-black text-lg leading-none">{item.price}</p>
+                      <p className="text-white font-black text-lg leading-none">{displayPrice(item.price)}</p>
                       <p className="text-gray-600 text-[10px]">{item.sub}</p>
                       {item.change && <p className="text-green-400 text-[10px] font-bold">{item.change}</p>}
                     </div>
-                    <button
-                      onClick={() => setCart((c) => [...c, item.id])}
-                      className="bg-amber-500/10 hover:bg-amber-500 border border-amber-500/30 hover:border-amber-500 text-amber-400 hover:text-black font-bold py-2 px-3 rounded-lg text-xs transition-all shrink-0"
-                    >
-                      {item.txn === 'auction' ? 'Pujar' : item.txn === 'trade' ? 'Tradear' : '+ Agregar'}
-                    </button>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {user && (
+                        <button
+                          onClick={() => toggleCollection(item)}
+                          disabled={savingId === item.id}
+                          title={savedIds.has(item.id) ? 'Quitar de colección' : 'Guardar en colección'}
+                          className={`p-2 rounded-lg border transition-all text-sm ${savedIds.has(item.id) ? 'bg-amber-500/20 border-amber-500/40 text-amber-400' : 'bg-white/5 border-white/10 text-gray-500 hover:text-amber-400 hover:border-amber-500/30'}`}>
+                          {savingId === item.id
+                            ? <div className="w-3.5 h-3.5 border border-amber-400 border-t-transparent rounded-full animate-spin" />
+                            : <svg className="w-3.5 h-3.5" fill={savedIds.has(item.id) ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                              </svg>
+                          }
+                        </button>
+                      )}
+                      <button
+                        onClick={() => { addToCart(item); setCartOpen(true) }}
+                        className="bg-amber-500/10 hover:bg-amber-500 border border-amber-500/30 hover:border-amber-500 text-amber-400 hover:text-black font-bold py-2 px-3 rounded-lg text-xs transition-all">
+                        {item.txn === 'auction' ? 'Pujar' : item.txn === 'trade' ? 'Tradear' : '+ Agregar'}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -282,6 +381,15 @@ export default function Marketplace() {
           </div>
         )}
       </div>
+
+      {cartOpen && (
+        <CartDrawer
+          items={cart}
+          onClose={() => setCartOpen(false)}
+          onRemove={removeOneFromCart}
+          onClear={() => setCart([])}
+        />
+      )}
     </div>
   )
 }
