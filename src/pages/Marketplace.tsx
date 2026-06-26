@@ -40,6 +40,7 @@ type UserListing = {
   min_bid: string | null
   grade: string | null
   condition: string | null
+  image_url: string | null
   active: boolean
   created_at: string
 }
@@ -152,11 +153,28 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
     txn_type: 'sale' as 'sale' | 'auction' | 'trade',
     price: '', min_bid: '', grade: '', condition: 'Sin gradear (Raw)',
   })
-  const [loading, setLoading] = useState(false)
-  const [error, setError]     = useState('')
-  const [done, setDone]       = useState(false)
+  const [imageFile,    setImageFile]    = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [uploading,    setUploading]    = useState(false)
+  const [loading,      setLoading]      = useState(false)
+  const [error,        setError]        = useState('')
+  const [done,         setDone]         = useState(false)
 
   const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }))
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (file.size > 8 * 1024 * 1024) { setError('La imagen no puede superar 8MB'); return }
+    setError('')
+    setImageFile(file)
+    setImagePreview(URL.createObjectURL(file))
+  }
+
+  const removeImage = () => {
+    if (imagePreview) URL.revokeObjectURL(imagePreview)
+    setImageFile(null); setImagePreview(null)
+  }
 
   const submit = async () => {
     if (!user) { onClose(); navigate('/login'); return }
@@ -165,6 +183,20 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
       setError('Ingresa un precio o puja mínima'); return
     }
     setLoading(true); setError('')
+
+    let image_url: string | null = null
+    if (imageFile) {
+      setUploading(true)
+      const ext  = imageFile.name.split('.').pop() || 'jpg'
+      const path = `${user.id}/${Date.now()}.${ext}`
+      const { error: uploadErr } = await supabase.storage.from('listing-images').upload(path, imageFile, { upsert: true })
+      if (!uploadErr) {
+        const { data: urlData } = supabase.storage.from('listing-images').getPublicUrl(path)
+        image_url = urlData.publicUrl
+      }
+      setUploading(false)
+    }
+
     const payload = {
       user_id:      user.id,
       display_name: profile?.display_name || user.id.slice(0, 8),
@@ -177,6 +209,7 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
       min_bid:      form.min_bid ? `$${form.min_bid}` : null,
       grade:        form.grade.trim() || null,
       condition:    form.condition,
+      image_url,
       active:       true,
     }
     const { data, error: err } = await supabase.from('listings').insert(payload).select().single()
@@ -188,9 +221,9 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={e => e.target === e.currentTarget && onClose()}>
-      <div className="w-full max-w-lg bg-[#111] border border-white/10 rounded-2xl shadow-2xl overflow-hidden max-h-[90dvh] overflow-y-auto">
+      <div className="w-full max-w-lg bg-[#111] border border-white/10 rounded-2xl shadow-2xl overflow-hidden max-h-[92dvh] flex flex-col">
         {done ? (
-          <div className="p-8 text-center">
+          <div className="p-10 text-center">
             <div className="w-16 h-16 bg-amber-500/20 border border-amber-500/30 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg className="w-8 h-8 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
             </div>
@@ -199,29 +232,29 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
           </div>
         ) : (
           <>
-            <div className="px-6 py-5 border-b border-white/5 flex items-center justify-between">
+            <div className="px-6 py-4 border-b border-white/5 flex items-center justify-between shrink-0">
               <div>
-                <p className="text-amber-500 text-xs font-bold uppercase tracking-widest mb-0.5">Nuevo anuncio</p>
+                <p className="text-amber-500 text-[10px] font-bold uppercase tracking-widest">Nuevo anuncio</p>
                 <h3 className="text-white font-black text-lg">Publicar en el Mercado</h3>
               </div>
-              <button onClick={onClose} className="text-gray-600 hover:text-white transition-colors">
+              <button onClick={onClose} className="text-gray-600 hover:text-white transition-colors p-1">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>
 
-            <div className="px-6 py-5 space-y-4">
-              {/* Tipo de transacción — selector grande */}
+            <div className="overflow-y-auto flex-1 px-6 py-5 space-y-4">
+              {/* ① Tipo de transacción */}
               <div>
-                <label className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2 block">¿Qué quieres hacer?</label>
+                <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-2 block">¿Qué quieres hacer?</label>
                 <div className="grid grid-cols-3 gap-2">
                   {([['sale','🛒','Vender'],['auction','🔨','Subastar'],['trade','🔄','Tradear']] as const).map(([val, ico, lbl]) => (
                     <button key={val} onClick={() => set('txn_type', val)}
                       className={`py-3 rounded-xl text-sm font-black border transition-all flex flex-col items-center gap-1 ${
                         form.txn_type === val
                           ? val === 'sale'    ? 'bg-amber-500 border-amber-500 text-black'
-                          : val === 'auction' ? 'bg-red-500/80 border-red-500 text-white'
-                                              : 'bg-blue-500/80 border-blue-500 text-white'
-                          : 'bg-[#1a1a1a] border-white/10 text-gray-500 hover:border-white/20'
+                          : val === 'auction' ? 'bg-red-500 border-red-500 text-white'
+                                              : 'bg-blue-500 border-blue-500 text-white'
+                          : 'bg-[#1a1a1a] border-white/10 text-gray-500 hover:border-white/20 hover:text-white'
                       }`}>
                       <span className="text-xl">{ico}</span>
                       <span>{lbl}</span>
@@ -230,27 +263,56 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
                 </div>
               </div>
 
-              {/* Título */}
+              {/* ② Foto — la más importante */}
               <div>
-                <label className="text-gray-400 text-xs mb-1 block">Título del anuncio *</label>
-                <input value={form.title} onChange={e => set('title', e.target.value)}
-                  placeholder="Ej: LeBron James RC 2003 Topps Chrome PSA 9..."
-                  className="w-full bg-[#1a1a1a] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-500/50" />
+                <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-2 block">
+                  Foto del artículo <span className="text-amber-500">📷</span>
+                </label>
+                {imagePreview ? (
+                  <div className="relative rounded-xl overflow-hidden border border-white/10 group">
+                    <img src={imagePreview} alt="preview" className="w-full h-48 object-cover" />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center">
+                      <button onClick={removeImage}
+                        className="opacity-0 group-hover:opacity-100 transition-opacity bg-red-500 hover:bg-red-600 text-white font-bold text-xs px-3 py-2 rounded-lg flex items-center gap-1.5">
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        Cambiar foto
+                      </button>
+                    </div>
+                    <div className="absolute bottom-2 right-2 bg-green-500/90 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">✓ Lista</div>
+                  </div>
+                ) : (
+                  <label className="flex flex-col items-center justify-center h-36 border-2 border-dashed border-white/10 rounded-xl cursor-pointer hover:border-amber-500/40 hover:bg-amber-500/3 transition-all group">
+                    <svg className="w-8 h-8 text-gray-600 group-hover:text-amber-500 transition-colors mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <p className="text-gray-500 text-sm group-hover:text-gray-300 transition-colors font-medium">Agregar foto del artículo</p>
+                    <p className="text-gray-600 text-[11px] mt-0.5">JPG · PNG · WEBP — máx. 8MB</p>
+                    <input type="file" accept="image/*" className="hidden" onChange={handleImageSelect} />
+                  </label>
+                )}
               </div>
 
-              {/* Descripción */}
+              {/* ③ Título */}
               <div>
-                <label className="text-gray-400 text-xs mb-1 block">Descripción (serial, variante, condición específica...)</label>
+                <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1 block">Título *</label>
+                <input value={form.title} onChange={e => set('title', e.target.value)}
+                  placeholder="Ej: LeBron James RC 2003 Topps Chrome PSA 9..."
+                  className="w-full bg-[#1a1a1a] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-500/50 placeholder-gray-700" />
+              </div>
+
+              {/* ④ Descripción */}
+              <div>
+                <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1 block">Descripción</label>
                 <textarea value={form.description} onChange={e => set('description', e.target.value)}
-                  placeholder="Cualquier detalle relevante para el comprador..."
+                  placeholder="Serial, variante, condición específica, incluye envío, etc..."
                   rows={2}
-                  className="w-full bg-[#1a1a1a] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-500/50 resize-none" />
+                  className="w-full bg-[#1a1a1a] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-500/50 resize-none placeholder-gray-700" />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 {/* Deporte */}
                 <div>
-                  <label className="text-gray-400 text-xs mb-1 block">Deporte / Franquicia</label>
+                  <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1 block">Deporte</label>
                   <select value={form.sport} onChange={e => set('sport', e.target.value)}
                     className="w-full bg-[#1a1a1a] border border-white/10 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none">
                     {SPORT_OPTIONS.map(s => <option key={s}>{s}</option>)}
@@ -258,7 +320,7 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
                 </div>
                 {/* Tipo */}
                 <div>
-                  <label className="text-gray-400 text-xs mb-1 block">Tipo de producto</label>
+                  <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1 block">Tipo</label>
                   <select value={form.kind} onChange={e => set('kind', e.target.value as any)}
                     className="w-full bg-[#1a1a1a] border border-white/10 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none">
                     <option value="card">🃏 Carta individual</option>
@@ -267,12 +329,12 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
                   </select>
                 </div>
 
-                {/* Precio (sale) */}
+                {/* Precio */}
                 {form.txn_type === 'sale' && (
                   <div>
-                    <label className="text-gray-400 text-xs mb-1 block">Precio (USD) *</label>
+                    <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1 block">Precio USD *</label>
                     <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-bold">$</span>
                       <input type="number" value={form.price} onChange={e => set('price', e.target.value)}
                         placeholder="500" min="0"
                         className="w-full bg-[#1a1a1a] border border-white/10 text-white rounded-xl pl-7 pr-4 py-2.5 text-sm focus:outline-none focus:border-amber-500/50" />
@@ -280,12 +342,12 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
                   </div>
                 )}
 
-                {/* Puja mínima (auction) */}
+                {/* Puja mínima */}
                 {form.txn_type === 'auction' && (
                   <div>
-                    <label className="text-gray-400 text-xs mb-1 block">Puja mínima (USD) *</label>
+                    <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1 block">Puja mínima USD *</label>
                     <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-bold">$</span>
                       <input type="number" value={form.min_bid} onChange={e => set('min_bid', e.target.value)}
                         placeholder="100" min="0"
                         className="w-full bg-[#1a1a1a] border border-white/10 text-white rounded-xl pl-7 pr-4 py-2.5 text-sm focus:outline-none focus:border-red-500/50" />
@@ -295,7 +357,7 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
 
                 {/* Condición */}
                 <div>
-                  <label className="text-gray-400 text-xs mb-1 block">Condición</label>
+                  <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1 block">Condición</label>
                   <select value={form.condition} onChange={e => set('condition', e.target.value)}
                     className="w-full bg-[#1a1a1a] border border-white/10 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none">
                     {CONDITION_OPTIONS.map(c => <option key={c}>{c}</option>)}
@@ -305,21 +367,26 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
                 {/* Grado */}
                 {form.kind === 'card' && (
                   <div>
-                    <label className="text-gray-400 text-xs mb-1 block">Grado (si está gradada)</label>
+                    <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1 block">Grado (si aplica)</label>
                     <input value={form.grade} onChange={e => set('grade', e.target.value)}
                       placeholder="PSA 10, BGS 9.5..."
-                      className="w-full bg-[#1a1a1a] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-500/50" />
+                      className="w-full bg-[#1a1a1a] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-500/50 placeholder-gray-700" />
                   </div>
                 )}
               </div>
 
               {error && <p className="text-red-400 text-xs bg-red-500/10 border border-red-500/20 px-3 py-2 rounded-lg">{error}</p>}
+            </div>
 
+            <div className="px-6 py-4 border-t border-white/5 shrink-0">
               <button onClick={submit} disabled={loading || !form.title.trim()}
-                className="w-full bg-amber-500 hover:bg-amber-400 disabled:opacity-40 text-black font-black py-3 rounded-xl transition-all">
-                {loading ? 'Publicando...' : 'Publicar anuncio'}
+                className="w-full bg-amber-500 hover:bg-amber-400 disabled:opacity-40 text-black font-black py-3 rounded-xl transition-all flex items-center justify-center gap-2">
+                {loading
+                  ? <><div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />{uploading ? 'Subiendo foto...' : 'Publicando...'}</>
+                  : <>📢 Publicar anuncio</>
+                }
               </button>
-              <p className="text-gray-600 text-[10px] text-center">Al publicar aceptas que PullStack puede moderar o retirar anuncios que incumplan las reglas.</p>
+              <p className="text-gray-600 text-[10px] text-center mt-2">Al publicar aceptas que PullStack puede moderar anuncios que incumplan las reglas.</p>
             </div>
           </>
         )}
@@ -680,10 +747,13 @@ export default function Marketplace() {
                 const isOwner = user?.id === listing.user_id
                 return (
                   <div key={listing.id} className="group bg-[#111] border border-white/5 hover:border-amber-500/30 rounded-2xl overflow-hidden transition-all hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(245,158,11,0.08)]">
-                    {/* Visual header con sport emoji */}
-                    <div className="relative h-36 bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] flex items-center justify-center overflow-hidden">
-                      <span className="text-6xl opacity-20 select-none">{LISTING_SPORT_ICON[listing.sport] || '🃏'}</span>
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#111] to-transparent" />
+                    {/* Visual header */}
+                    <div className="relative h-44 bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] flex items-center justify-center overflow-hidden">
+                      {listing.image_url
+                        ? <img src={listing.image_url} alt={listing.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        : <span className="text-7xl opacity-15 select-none">{LISTING_SPORT_ICON[listing.sport] || '🃏'}</span>
+                      }
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#111] via-transparent to-transparent" />
                       <div className="absolute top-3 left-3 flex gap-1.5 flex-wrap">
                         <span className="bg-amber-500/90 text-black text-[9px] font-black px-2 py-0.5 rounded-full uppercase">Particular</span>
                         {listing.grade && <span className="bg-black/70 backdrop-blur text-amber-400 text-[9px] font-bold px-2 py-0.5 rounded-full border border-amber-500/30">{listing.grade}</span>}
