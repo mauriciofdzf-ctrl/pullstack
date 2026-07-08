@@ -148,7 +148,7 @@ export default function Grading() {
 
         {!user && (
           <div className="bg-violet-500/10 border border-violet-500/20 rounded-2xl p-4 mb-6 flex items-center justify-between">
-            <p className="text-amber-300 text-sm font-medium">Inicia sesión para enviar tu solicitud</p>
+            <p className="text-violet-300 text-sm font-medium">Inicia sesión para enviar tu solicitud</p>
             <button onClick={() => navigate('/login', { state: { from: '/grading' } })}
               className="bg-violet-600 hover:bg-violet-500 text-white font-black px-4 py-2 rounded-xl text-sm transition-all shrink-0">
               Iniciar sesión

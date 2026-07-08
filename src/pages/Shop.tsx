@@ -75,7 +75,7 @@ export default function Shop() {
         <div className="bg-violet-600/5 border border-violet-500/20 rounded-xl p-4 mb-8 flex items-start gap-3">
           <span className="text-violet-400 text-xl shrink-0">ℹ️</span>
           <div>
-            <p className="text-amber-300 text-sm font-bold">Topps tiene licencia exclusiva NBA desde 2025-26</p>
+            <p className="text-violet-300 text-sm font-bold">Topps tiene licencia exclusiva NBA desde 2025-26</p>
             <p className="text-gray-500 text-xs mt-0.5">Las cajas NBA 2025-26 son de Topps, no Panini. Panini sigue siendo el proveedor oficial de NFL.</p>
           </div>
         </div>

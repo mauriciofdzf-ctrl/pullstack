@@ -786,12 +786,17 @@ export default function Marketplace() {
                 return (
                   <div key={listing.id} className="group bg-[#1a1a36] border border-white/5 hover:border-violet-500/30 rounded-2xl overflow-hidden transition-all hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(139,92,246,0.15)]">
                     {/* Visual header */}
-                    <div className="relative h-44 bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] flex items-center justify-center overflow-hidden">
+                    <div className="relative h-44 bg-gradient-to-br from-[#16162e] to-[#1a1a36] flex items-center justify-center overflow-hidden">
                       {listing.image_url
-                        ? <img src={listing.image_url} alt={listing.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                        : <span className="text-7xl opacity-15 select-none">{LISTING_SPORT_ICON[listing.sport] || '🃏'}</span>
+                        ? <img src={listing.image_url} alt={listing.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onError={e => { (e.target as HTMLImageElement).style.display='none' }} />
+                        : (
+                          <div className="flex flex-col items-center gap-2 opacity-25 select-none pointer-events-none">
+                            <span className="text-6xl">{LISTING_SPORT_ICON[listing.sport] || '🃏'}</span>
+                            <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Sin foto</span>
+                          </div>
+                        )
                       }
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#111] via-transparent to-transparent" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#111128]/80 via-transparent to-transparent" />
                       <div className="absolute top-3 left-3 flex gap-1.5 flex-wrap">
                         <span className="bg-violet-600/90 text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase">Particular</span>
                         {listing.grade && <span className="bg-black/70 backdrop-blur text-violet-400 text-[9px] font-bold px-2 py-0.5 rounded-full border border-violet-500/30">{listing.grade}</span>}
@@ -844,7 +849,7 @@ export default function Marketplace() {
                         </div>
                       ) : (
                         <button onClick={() => navigate('/messages')}
-                          className="w-full bg-violet-500/10 hover:bg-violet-600 border border-violet-500/30 hover:border-violet-500 text-violet-400 hover:text-black font-bold py-2 px-3 rounded-lg text-xs transition-all">
+                          className="w-full bg-violet-500/10 hover:bg-violet-600 border border-violet-500/30 hover:border-violet-500 text-violet-400 hover:text-white font-bold py-2 px-3 rounded-lg text-xs transition-all">
                           Contactar vendedor
                         </button>
                       )}
@@ -889,7 +894,7 @@ export default function Marketplace() {
                 <div className="relative h-48 overflow-hidden">
                   <img src={IMG[item.imgKey]} alt={item.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#111] via-black/10 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#111128]/90 via-black/10 to-transparent" />
                   {/* Badges top-left */}
                   <div className="absolute top-3 left-3 flex flex-wrap gap-1 max-w-[calc(100%-70px)]">
                     {item.badge && (
@@ -931,7 +936,7 @@ export default function Marketplace() {
                     <div>
                       <p className="text-white font-black text-lg leading-none">{displayPrice(item.price)}</p>
                       <p className="text-gray-600 text-[10px]">{item.sub}</p>
-                      {item.change && <p className="text-green-400 text-[10px] font-bold">{item.change}</p>}
+                      {item.change && <p className={`text-[10px] font-bold ${item.change.startsWith('-') ? 'text-red-400' : 'text-emerald-400'}`}>{item.change}</p>}
                     </div>
                     {user && (
                       <button onClick={() => toggleCollection(item)} disabled={savingId === item.id}

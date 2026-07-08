@@ -101,7 +101,7 @@ export default function Login() {
                 <p className="text-red-400 text-sm">{error}</p>
                 {errorType === 'confirm' && (
                   <button type="button" onClick={handleResendConfirmation}
-                    className={`text-xs font-bold transition-colors ${resendSent ? 'text-green-400' : 'text-violet-400 hover:text-amber-300 underline'}`}>
+                    className={`text-xs font-bold transition-colors ${resendSent ? 'text-green-400' : 'text-violet-400 hover:text-violet-300 underline'}`}>
                     {resendSent ? '✓ Email reenviado' : 'Reenviar email de confirmación →'}
                   </button>
                 )}

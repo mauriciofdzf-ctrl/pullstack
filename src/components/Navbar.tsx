@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { LogoIcon, LogoWordmark } from './Logo'
 
 const AVATAR_COLORS = [
   'from-violet-500 to-fuchsia-700',
@@ -56,11 +57,9 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2.5 shrink-0">
-            <div className="w-8 h-8 bg-gradient-to-br from-violet-500 to-fuchsia-600 rounded-lg flex items-center justify-center shadow-lg shadow-violet-500/30">
-              <span className="text-white font-black text-sm">PS</span>
-            </div>
-            <span className="text-white font-black text-xl tracking-tight">PullStack</span>
+          <Link to="/" className="flex items-center gap-2.5 shrink-0 group">
+            <LogoIcon size={34} />
+            <LogoWordmark />
           </Link>
 
           {/* Desktop Nav */}

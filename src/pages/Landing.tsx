@@ -160,7 +160,7 @@ export default function Landing() {
               <h2 className="text-4xl font-black text-white">Las cartas más hot 🔥</h2>
               <p className="text-gray-500 text-sm mt-1">Precios reales verificados · eBay, Goldin, PSA</p>
             </div>
-            <button onClick={() => navigate('/marketplace')} className="text-sm text-violet-400 hover:text-amber-300 font-semibold border border-violet-500/20 hover:border-violet-500/40 px-4 py-2 rounded-lg transition-all">
+            <button onClick={() => navigate('/marketplace')} className="text-sm text-violet-400 hover:text-violet-300 font-semibold border border-violet-500/20 hover:border-violet-500/40 px-4 py-2 rounded-lg transition-all">
               Ver todo →
             </button>
           </div>
