@@ -109,12 +109,12 @@ export default function Landing() {
             </div>
             <div className="flex gap-10 pt-8 border-t border-white/5">
               {[
-                { value: '50K+', label: 'Coleccionistas activos' },
-                { value: '$2M+', label: 'En transacciones' },
-                { value: '1M+',  label: 'Cartas listadas' },
+                { value: 'SPEI', label: 'OXXO · MercadoPago · Tarjeta', color: 'text-emerald-400' },
+                { value: '8%',   label: 'Comisión transparente',          color: 'text-amber-400' },
+                { value: 'MXN',  label: 'Precios en pesos disponibles',   color: 'text-violet-400' },
               ].map((s) => (
                 <div key={s.label}>
-                  <div className="text-3xl font-black text-violet-400">{s.value}</div>
+                  <div className={`text-3xl font-black ${s.color}`}>{s.value}</div>
                   <div className="text-gray-600 text-xs mt-1 uppercase tracking-wide">{s.label}</div>
                 </div>
               ))}

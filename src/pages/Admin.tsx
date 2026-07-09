@@ -78,23 +78,6 @@ function ImageSlot({ imgKey }: { imgKey: ImageKey }) {
   )
 }
 
-// ─── SQL de configuración ─────────────────────────────────────────────────────
-const SETUP_SQL = `-- 1. Tu cuenta como admin
-update profiles set role = 'admin'
-  where id = (select id from auth.users where email = 'mauriciofdzf@gmail.com');
-
--- 2. Admins pueden ver todos los perfiles
-create policy "admins_see_profiles" on profiles
-  for select using ((select role from profiles where id = auth.uid()) = 'admin');
-
--- 3. Admins gestionan todos los anuncios
-create policy "admins_manage_listings" on listings
-  for all using ((select role from profiles where id = auth.uid()) = 'admin');
-
--- 4. Admins gestionan todos los pedidos
-create policy "admins_manage_orders" on orders
-  for all using ((select role from profiles where id = auth.uid()) = 'admin');`
-
 const ORDER_STATUS  = ['pending','confirmed','paid','shipped','delivered','cancelled']
 const TXN_STATUS    = ['pending','verified','completed','cancelled']
 const TXN_STATUS_CSS: Record<string, string> = {
@@ -136,7 +119,6 @@ export default function Admin() {
   const { user } = useAuth()
   const navigate  = useNavigate()
   const [tab, setTab] = useState<Tab>('overview')
-  const [copied, setCopied] = useState(false)
 
   // Stats
   const [stats, setStats] = useState({ users: 0, listings: 0, orders: 0, grading: 0 })
@@ -316,11 +298,6 @@ export default function Admin() {
     setTimeout(() => setPaySaved(false), 2500)
   }
 
-  const copySQL = () => {
-    navigator.clipboard.writeText(SETUP_SQL)
-    setCopied(true); setTimeout(() => setCopied(false), 2000)
-  }
-
   const filteredUsers = users.filter(u =>
     !userSearch || (u.display_name || '').toLowerCase().includes(userSearch.toLowerCase())
   )
@@ -350,22 +327,6 @@ export default function Admin() {
           </div>
           <h1 className="text-3xl font-black text-white">Panel Admin</h1>
           <p className="text-gray-500 text-sm mt-0.5">Gestión completa de la plataforma</p>
-        </div>
-
-        {/* SQL setup notice */}
-        <div className="bg-yellow-500/5 border border-yellow-500/20 rounded-xl p-4 mb-6">
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex items-start gap-3 flex-1 min-w-0">
-              <span className="text-xl shrink-0 mt-0.5">⚠️</span>
-              <div>
-                <p className="text-yellow-300 font-bold text-sm mb-1">Primera vez: ejecuta este SQL en Supabase → SQL Editor</p>
-                <pre className="text-[10px] text-gray-400 bg-black/30 rounded-lg p-3 overflow-x-auto whitespace-pre leading-relaxed">{SETUP_SQL}</pre>
-              </div>
-            </div>
-            <button onClick={copySQL} className={`shrink-0 text-xs font-bold px-3 py-1.5 rounded-lg border transition-all ${copied ? 'bg-green-500/10 border-green-500/30 text-green-400' : 'border-yellow-500/30 text-yellow-400 hover:bg-yellow-500/10'}`}>
-              {copied ? '✓ Copiado' : '📋 Copiar'}
-            </button>
-          </div>
         </div>
 
         {/* Tabs */}

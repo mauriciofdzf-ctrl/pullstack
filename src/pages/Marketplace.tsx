@@ -733,6 +733,8 @@ export default function Marketplace() {
   const [contactModal,  setContactModal]  = useState<{ listing: UserListing; action: 'sale' | 'auction' | 'trade' } | null>(null)
   const [checkoutModal, setCheckoutModal] = useState<UserListing | null>(null)
   const [showCatalog,   setShowCatalog]   = useState(true)
+  const [minPrice,      setMinPrice]      = useState('')
+  const [maxPrice,      setMaxPrice]      = useState('')
 
   useEffect(() => {
     supabase.from('settings').select('value').eq('key', 'show_catalog').single()
@@ -791,12 +793,18 @@ export default function Marketplace() {
     setSavingId(null)
   }
 
+  const minP = minPrice ? parseFloat(minPrice) : null
+  const maxP = maxPrice ? parseFloat(maxPrice) : null
+
   const filteredListings = listings.filter(l => {
     const ms = sport === 'Todos' || l.sport === sport || l.sport === 'General'
     const mk = kind  === 'all'   || l.kind === kind
     const mt = txn   === 'Todos' || (txn === 'Venta' && l.txn_type === 'sale') || (txn === 'Subasta' && l.txn_type === 'auction') || (txn === 'Trading' && l.txn_type === 'trade')
     const mq = !query || l.title.toLowerCase().includes(query.toLowerCase()) || (l.description || '').toLowerCase().includes(query.toLowerCase())
-    return ms && mk && mt && mq
+    const p  = parsePrice(l.price || l.min_bid || '0')
+    const mpMin = minP === null || p >= minP
+    const mpMax = maxP === null || p <= maxP
+    return ms && mk && mt && mq && mpMin && mpMax
   })
 
   let results = CATALOG.filter((item) => {
@@ -804,7 +812,10 @@ export default function Marketplace() {
     const mk = kind  === 'all'   || item.kind  === kind
     const mt = txn   === 'Todos' || txnMap[item.txn] === txn
     const mq = !query || item.name.toLowerCase().includes(query.toLowerCase()) || item.brand.toLowerCase().includes(query.toLowerCase()) || item.detail.toLowerCase().includes(query.toLowerCase())
-    return ms && mk && mt && mq
+    const p  = parsePrice(item.price)
+    const mpMin = minP === null || p >= minP
+    const mpMax = maxP === null || p <= maxP
+    return ms && mk && mt && mq && mpMin && mpMax
   })
 
   if (sort === 'Precio: Mayor') results = [...results].sort((a, b) => parsePrice(b.price) - parsePrice(a.price))
@@ -936,6 +947,24 @@ export default function Marketplace() {
                 {SORTS.map((s) => <option key={s}>{s}</option>)}
               </select>
             </div>
+          </div>
+          {/* Rango de precio */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-gray-600 text-xs font-bold uppercase tracking-widest">Precio USD:</span>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600 text-xs">$</span>
+              <input type="number" value={minPrice} onChange={e => setMinPrice(e.target.value)} placeholder="Mín"
+                className="bg-[#1a1a36] border border-white/10 text-white pl-6 pr-3 py-1.5 rounded-lg text-xs w-24 focus:outline-none focus:border-violet-500/40 placeholder-gray-700" />
+            </div>
+            <span className="text-gray-700 text-xs">—</span>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600 text-xs">$</span>
+              <input type="number" value={maxPrice} onChange={e => setMaxPrice(e.target.value)} placeholder="Máx"
+                className="bg-[#1a1a36] border border-white/10 text-white pl-6 pr-3 py-1.5 rounded-lg text-xs w-24 focus:outline-none focus:border-violet-500/40 placeholder-gray-700" />
+            </div>
+            {(minPrice || maxPrice) && (
+              <button onClick={() => { setMinPrice(''); setMaxPrice('') }} className="text-xs text-gray-600 hover:text-gray-300 transition-colors">✕ limpiar</button>
+            )}
           </div>
           {showMXN && (
             <p className="text-[10px] text-gray-600">Precios convertidos a MXN usando tipo de cambio de referencia $17.50 MXN/USD. Precios reales pueden variar.</p>
