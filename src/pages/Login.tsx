@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
+import { LogoIcon } from '../components/Logo'
 
 function translateSignInError(msg: string): { text: string; type: 'confirm' | 'credentials' | 'rate' | 'generic' } {
   if (msg.includes('not confirmed') || msg.includes('email_not_confirmed'))
@@ -65,9 +66,7 @@ export default function Login() {
 
         <div className="text-center mb-10">
           <Link to="/" className="inline-flex items-center gap-2.5 mb-6">
-            <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-fuchsia-600 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/30">
-              <span className="text-black font-black text-base">PS</span>
-            </div>
+            <LogoIcon size={40} />
             <span className="text-white font-black text-2xl">PullStack</span>
           </Link>
           <h1 className="text-3xl font-black text-white mb-2">Bienvenido de vuelta</h1>

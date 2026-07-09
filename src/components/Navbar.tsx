@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { supabase } from '../lib/supabase'
 import { LogoIcon, LogoWordmark } from './Logo'
 
 const AVATAR_COLORS = [
@@ -16,21 +17,38 @@ function getColor(str: string) {
 }
 
 export default function Navbar() {
-  const [menuOpen, setMenuOpen] = useState(false)
-  const [dropOpen, setDropOpen] = useState(false)
+  const [menuOpen, setMenuOpen]     = useState(false)
+  const [dropOpen, setDropOpen]     = useState(false)
+  const [unreadDMs, setUnreadDMs]   = useState(0)
   const dropRef = useRef<HTMLDivElement>(null)
   const location = useLocation()
   const navigate = useNavigate()
   const { user, profile, isAdmin, signOut } = useAuth()
 
+  useEffect(() => {
+    if (!user) { setUnreadDMs(0); return }
+    const load = async () => {
+      const { count } = await supabase.from('direct_messages')
+        .select('id', { count: 'exact', head: true })
+        .eq('to_user_id', user.id).eq('read', false)
+      setUnreadDMs(count || 0)
+    }
+    load()
+    const ch = supabase.channel('dm-badge')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'direct_messages', filter: `to_user_id=eq.${user.id}` },
+        () => setUnreadDMs(p => p + 1))
+      .subscribe()
+    return () => { supabase.removeChannel(ch) }
+  }, [user])
+
   const links = [
     { to: '/marketplace', label: 'Mercado' },
     { to: '/aprende',     label: 'Aprende' },
-    { to: '/grading',     label: 'Grading',   grading: true },
-    { to: '/live',        label: 'En Vivo',   live: true },
+    { to: '/grading',     label: 'Grading', grading: true },
+    { to: '/live',        label: 'En Vivo',  live: true },
     { to: '/community',   label: 'Comunidad' },
     { to: '/raffles',     label: 'Rifas' },
-    { to: '/messages',    label: 'Mensajes' },
+    { to: '/messages',    label: 'Mensajes', badge: unreadDMs > 0 ? unreadDMs : 0 },
   ]
 
   const isActive = (path: string) => location.pathname === path
@@ -66,7 +84,7 @@ export default function Navbar() {
           <div className="hidden lg:flex items-center gap-1">
             {links.map((link) => (
               <Link key={link.to} to={link.to}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                className={`relative flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
                   link.grading
                     ? isActive(link.to)
                       ? 'bg-violet-500/20 text-violet-400 border border-violet-500/30'
@@ -77,6 +95,11 @@ export default function Navbar() {
                 }`}>
                 {link.live && <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />}
                 {link.label}
+                {('badge' in link) && (link.badge ?? 0) > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-black min-w-[16px] h-4 rounded-full flex items-center justify-center px-0.5">
+                    {(link.badge ?? 0) > 9 ? '9+' : link.badge}
+                  </span>
+                )}
               </Link>
             ))}
           </div>

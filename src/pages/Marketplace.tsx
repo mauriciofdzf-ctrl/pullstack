@@ -139,6 +139,119 @@ const LISTING_SPORT_ICON: Record<string, string> = {
   NBA:'🏀', NFL:'🏈', Soccer:'⚽', MLB:'⚾', 'Pokémon':'🃏', 'One Piece':'🏴‍☠️', General:'🛡️'
 }
 
+// ─── Contact Seller Modal ─────────────────────────────────────────────────────
+function ContactSellerModal({ listing, actionType, user, profile, onClose }: {
+  listing: UserListing
+  actionType: 'sale' | 'auction' | 'trade'
+  user: { id: string }
+  profile: { display_name?: string | null } | null
+  onClose: () => void
+}) {
+  const navigate = useNavigate()
+  const defaultMsg = {
+    sale:    `Hola ${listing.display_name}! Me interesa tu anuncio "${listing.title}"${listing.price ? ` (${listing.price})` : ''}. ¿Está disponible? ¿Tienes más fotos?`,
+    auction: `Hola ${listing.display_name}! Quiero hacer una puja por "${listing.title}". Mi oferta es: `,
+    trade:   `Hola ${listing.display_name}! Me interesa "${listing.title}" para un trade. Te ofrezco: `,
+  }
+  const [message,   setMessage]   = useState(defaultMsg[actionType])
+  const [bidAmount, setBidAmount] = useState('')
+  const [sending,   setSending]   = useState(false)
+  const [sent,      setSent]      = useState(false)
+
+  const send = async () => {
+    if (!message.trim()) return
+    setSending(true)
+    await supabase.from('direct_messages').insert({
+      from_user_id: user.id,
+      to_user_id:   listing.user_id,
+      from_name:    profile?.display_name || 'Usuario',
+      to_name:      listing.display_name,
+      content:      actionType === 'auction' && bidAmount ? `${message.trim()} — Puja: $${bidAmount}` : message.trim(),
+      listing_id:   listing.id,
+      listing_title: listing.title,
+      action_type:  actionType,
+      bid_amount:   actionType === 'auction' && bidAmount ? `$${bidAmount}` : null,
+      read:         false,
+    })
+    setSending(false); setSent(true)
+  }
+
+  const ICON = { sale: '🛒', auction: '🔨', trade: '🔄' }
+  const LABEL = { sale: 'Propuesta de compra', auction: 'Enviar puja', trade: 'Propuesta de trade' }
+  const COLOR = { sale: 'bg-violet-600 hover:bg-violet-500', auction: 'bg-red-500 hover:bg-red-400', trade: 'bg-blue-500 hover:bg-blue-400' }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="w-full max-w-md bg-[#1a1a36] border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
+        {sent ? (
+          <div className="p-10 text-center">
+            <div className="w-16 h-16 bg-emerald-500/15 border border-emerald-500/30 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+            </div>
+            <p className="text-white font-black text-xl mb-2">¡Mensaje enviado!</p>
+            <p className="text-gray-400 text-sm mb-6">El vendedor recibirá tu mensaje y te responderá pronto.</p>
+            <div className="flex gap-3">
+              <button onClick={onClose} className="flex-1 bg-white/5 border border-white/10 text-gray-300 font-bold py-2.5 rounded-xl text-sm transition-all hover:bg-white/10">Cerrar</button>
+              <button onClick={() => { onClose(); navigate('/messages') }}
+                className="flex-1 bg-violet-600 hover:bg-violet-500 text-white font-black py-2.5 rounded-xl text-sm transition-all">
+                Ver mensajes →
+              </button>
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between">
+              <div>
+                <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest">{ICON[actionType]} {LABEL[actionType]}</p>
+                <p className="text-white font-black text-base truncate">{listing.title}</p>
+              </div>
+              <button onClick={onClose} className="text-gray-600 hover:text-white transition-colors p-1">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <div className="p-5 space-y-4">
+              <div className="bg-[#21213e] border border-white/5 rounded-xl p-3 flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-600 flex items-center justify-center text-white font-black text-xs shrink-0">
+                  {listing.display_name.slice(0, 2).toUpperCase()}
+                </div>
+                <div>
+                  <p className="text-gray-400 text-[10px]">Enviando a</p>
+                  <p className="text-white font-bold text-sm">{listing.display_name}</p>
+                </div>
+                {listing.price && <p className="ml-auto text-emerald-400 font-black text-sm">{listing.price}</p>}
+              </div>
+
+              {actionType === 'auction' && (
+                <div>
+                  <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1.5 block">Tu puja (USD) *</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-bold">$</span>
+                    <input type="number" value={bidAmount} onChange={e => setBidAmount(e.target.value)} placeholder="0.00"
+                      className="w-full bg-[#21213e] border border-red-500/30 text-white pl-7 pr-4 py-2.5 rounded-xl text-sm focus:outline-none focus:border-red-500/60 font-black placeholder-gray-700" />
+                  </div>
+                  {listing.min_bid && <p className="text-red-400 text-[10px] mt-1">Puja mínima: {listing.min_bid}</p>}
+                </div>
+              )}
+
+              <div>
+                <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1.5 block">Mensaje</label>
+                <textarea value={message} onChange={e => setMessage(e.target.value)} rows={4}
+                  className="w-full bg-[#21213e] border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-violet-500/50 resize-none placeholder-gray-700" />
+              </div>
+
+              <button onClick={send} disabled={sending || !message.trim() || (actionType === 'auction' && !bidAmount)}
+                className={`w-full py-3 rounded-xl text-white font-black text-sm transition-all disabled:opacity-50 flex items-center justify-center gap-2 ${COLOR[actionType]}`}>
+                {sending && <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+                {ICON[actionType]} {sending ? 'Enviando...' : LABEL[actionType]}
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
 // ─── Publish Modal ────────────────────────────────────────────────────────────
 function PublishModal({ onClose, user, profile, onSuccess }: {
   onClose: () => void
@@ -588,6 +701,7 @@ export default function Marketplace() {
   const [listings,      setListings]      = useState<UserListing[]>([])
   const [showPublish,   setShowPublish]   = useState(false)
   const [deletingId,    setDeletingId]    = useState<number | null>(null)
+  const [contactModal,  setContactModal]  = useState<{ listing: UserListing; action: 'sale' | 'auction' | 'trade' } | null>(null)
 
   const MXN_RATE = 17.5
   const fmtMXN = (usdStr: string) => {
@@ -834,15 +948,18 @@ export default function Marketplace() {
 
                       {listing.kind === 'card' ? (
                         <div className="grid grid-cols-3 gap-1.5">
-                          <button onClick={() => { if (!user) { navigate('/login'); return }; alert('Contacta al vendedor en Mensajes para coordinar la compra.') }}
+                          <button
+                            onClick={() => { if (!user) { navigate('/login'); return }; setContactModal({ listing, action: 'sale' }) }}
                             className={`py-2 rounded-lg text-[11px] font-bold transition-all text-center ${listing.txn_type === 'sale' ? 'bg-violet-600 hover:bg-violet-500 text-white' : 'bg-[#21213e] border border-white/10 text-gray-500 hover:border-violet-500/30 hover:text-violet-400'}`}>
                             🛒 Comprar
                           </button>
-                          <button onClick={() => { if (!user) { navigate('/login'); return }; alert('Envía tu puja al vendedor por Mensajes.') }}
+                          <button
+                            onClick={() => { if (!user) { navigate('/login'); return }; setContactModal({ listing, action: 'auction' }) }}
                             className={`py-2 rounded-lg text-[11px] font-bold transition-all text-center ${listing.txn_type === 'auction' ? 'bg-red-500/80 hover:bg-red-500 text-white' : 'bg-[#21213e] border border-white/10 text-gray-500 hover:border-red-500/30 hover:text-red-400'}`}>
                             🔨 Pujar
                           </button>
-                          <button onClick={() => { if (!user) { navigate('/login'); return }; alert('Propón tu trade al vendedor en Mensajes.') }}
+                          <button
+                            onClick={() => { if (!user) { navigate('/login'); return }; setContactModal({ listing, action: 'trade' }) }}
                             className={`py-2 rounded-lg text-[11px] font-bold transition-all text-center ${listing.txn_type === 'trade' ? 'bg-blue-500/80 hover:bg-blue-500 text-white' : 'bg-[#21213e] border border-white/10 text-gray-500 hover:border-blue-500/30 hover:text-blue-400'}`}>
                             🔄 Trade
                           </button>
@@ -998,6 +1115,15 @@ export default function Marketplace() {
       {bidItem   && <BidModal   item={bidItem}   onClose={() => setBidItem(null)}   user={user} navigate={navigate} />}
       {tradeItem && <TradeModal item={tradeItem} onClose={() => setTradeItem(null)} user={user} navigate={navigate} />}
       {showPublish && <PublishModal onClose={() => setShowPublish(false)} user={user} profile={profile} onSuccess={l => setListings(prev => [l, ...prev])} />}
+      {contactModal && user && (
+        <ContactSellerModal
+          listing={contactModal.listing}
+          actionType={contactModal.action}
+          user={user}
+          profile={profile}
+          onClose={() => setContactModal(null)}
+        />
+      )}
     </div>
   )
 }

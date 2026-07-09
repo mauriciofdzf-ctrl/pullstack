@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { LogoIcon } from '../components/Logo'
 
 function translateError(msg: string): string {
   if (msg.includes('already registered') || msg.includes('already exists') || msg.includes('already been registered'))
@@ -16,6 +17,7 @@ function translateError(msg: string): string {
 
 export default function Register() {
   const { signUp } = useAuth()
+  const navigate = useNavigate()
 
   const [name, setName]         = useState('')
   const [email, setEmail]       = useState('')
@@ -31,9 +33,14 @@ export default function Register() {
     if (password !== confirm) { setError('Las contraseñas no coinciden'); return }
     if (password.length < 6) { setError('La contraseña debe tener al menos 6 caracteres'); return }
     setLoading(true)
-    const { error } = await signUp(email, password, name)
+    const { data, error } = await signUp(email, password, name)
     setLoading(false)
     if (error) { setError(translateError(error.message)); return }
+    // Si Supabase devuelve sesión inmediata (email confirmation desactivado), redirigir
+    if (data?.session) {
+      navigate('/')
+      return
+    }
     setSuccess(true)
   }
 
@@ -70,9 +77,7 @@ export default function Register() {
         {/* Logo */}
         <div className="text-center mb-10">
           <Link to="/" className="inline-flex items-center gap-2.5 mb-6">
-            <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-fuchsia-600 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/30">
-              <span className="text-black font-black text-base">PS</span>
-            </div>
+            <LogoIcon size={40} />
             <span className="text-white font-black text-2xl">PullStack</span>
           </Link>
           <h1 className="text-3xl font-black text-white mb-2">Únete a PullStack</h1>
