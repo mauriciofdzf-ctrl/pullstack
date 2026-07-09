@@ -11,6 +11,7 @@ import {
 type AdminUser    = { id: string; display_name: string | null; role: string; created_at: string }
 type AdminListing = { id: number; user_id: string; display_name: string; title: string; sport: string; txn_type: string; price: string | null; active: boolean; created_at: string }
 type AdminOrder   = { id: number; contact_name: string; total: string; status: string; created_at: string }
+type AdminTxn     = { id: number; buyer_name: string; seller_name: string; listing_title: string; sale_price: string; commission_pct: number; commission_amt: number; total_paid: number; payment_method: string; payment_reference: string; status: string; created_at: string }
 
 // ─── Sub-componentes ──────────────────────────────────────────────────────────
 function StatCard({ label, value, icon, accent }: { label: string; value: number | string; icon: string; accent: string }) {
@@ -93,6 +94,25 @@ create policy "admins_manage_orders" on orders
   for all using ((select role from profiles where id = auth.uid()) = 'admin');`
 
 const ORDER_STATUS  = ['pending','confirmed','paid','shipped','delivered','cancelled']
+const TXN_STATUS    = ['pending','verified','completed','cancelled']
+const TXN_STATUS_CSS: Record<string, string> = {
+  pending:   'bg-yellow-500/15 text-yellow-400 border-yellow-500/30',
+  verified:  'bg-blue-500/15 text-blue-400 border-blue-500/30',
+  completed: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
+  cancelled: 'bg-red-500/15 text-red-400 border-red-500/30',
+}
+const TXN_STATUS_LABEL: Record<string, string> = {
+  pending:   '⏳ Pendiente',
+  verified:  '✅ Verificado',
+  completed: '🎉 Completado',
+  cancelled: '❌ Cancelado',
+}
+const METHOD_LABEL: Record<string, string> = {
+  spei: '🏦 SPEI',
+  mercadopago: '💳 MercadoPago',
+  oxxo: '🏪 OXXO',
+  tarjeta: '💰 Tarjeta',
+}
 const STATUS_CSS: Record<string, string> = {
   pending:   'bg-yellow-500/15 text-yellow-400 border-yellow-500/30',
   confirmed: 'bg-blue-500/15 text-blue-400 border-blue-500/30',
@@ -107,7 +127,7 @@ const TXN_CSS: Record<string, string> = {
   trade:   'text-blue-400',
 }
 
-type Tab = 'overview' | 'users' | 'listings' | 'orders' | 'images'
+type Tab = 'overview' | 'users' | 'listings' | 'orders' | 'transactions' | 'images'
 
 // ─── Panel principal ──────────────────────────────────────────────────────────
 export default function Admin() {
@@ -132,6 +152,10 @@ export default function Admin() {
   const [orders, setOrders]         = useState<AdminOrder[]>([])
   const [ordersLoading, setOL]      = useState(false)
 
+  // Transactions
+  const [txns, setTxns]             = useState<AdminTxn[]>([])
+  const [txnsLoading, setTL]        = useState(false)
+
   // Images
   const [imgSection, setImgSection]   = useState(IMAGE_SECTIONS[0].label)
   const [overridesCount, setOvCount]  = useState(Object.keys(getOverrides()).length)
@@ -140,19 +164,21 @@ export default function Admin() {
   useEffect(() => { loadStats() }, [])
 
   useEffect(() => {
-    if (tab === 'users')    loadUsers()
-    if (tab === 'listings') loadListings()
-    if (tab === 'orders')   loadOrders()
+    if (tab === 'users')        loadUsers()
+    if (tab === 'listings')     loadListings()
+    if (tab === 'orders')       loadOrders()
+    if (tab === 'transactions') loadTxns()
   }, [tab])
 
   const loadStats = async () => {
-    const [u, l, o, g] = await Promise.all([
+    const [u, l, o, t] = await Promise.all([
       supabase.from('profiles').select('id', { count: 'exact', head: true }),
       supabase.from('listings').select('id', { count: 'exact', head: true }),
       supabase.from('orders').select('id', { count: 'exact', head: true }),
-      supabase.from('grading_submissions').select('id', { count: 'exact', head: true }),
+      supabase.from('transactions').select('commission_amt').eq('status', 'completed'),
     ])
-    setStats({ users: u.count || 0, listings: l.count || 0, orders: o.count || 0, grading: g.count || 0 })
+    const totalCommission = (t.data || []).reduce((s, r) => s + (r.commission_amt || 0), 0)
+    setStats({ users: u.count || 0, listings: l.count || 0, orders: o.count || 0, grading: totalCommission })
   }
 
   const loadUsers = async () => {
@@ -197,6 +223,22 @@ export default function Admin() {
     setOrders(prev => prev.map(o => o.id === id ? { ...o, status } : o))
   }
 
+  const loadTxns = async () => {
+    setTL(true)
+    const { data } = await supabase.from('transactions')
+      .select('id, buyer_name, seller_name, listing_title, sale_price, commission_pct, commission_amt, total_paid, payment_method, payment_reference, status, created_at')
+      .order('created_at', { ascending: false })
+      .limit(300)
+    setTxns((data || []) as AdminTxn[])
+    setTL(false)
+  }
+
+  const updateTxnStatus = async (id: number, status: string) => {
+    await supabase.from('transactions').update({ status, ...(status === 'verified' || status === 'completed' ? { verified_at: new Date().toISOString() } : {}) }).eq('id', id)
+    setTxns(prev => prev.map(t => t.id === id ? { ...t, status } : t))
+    if (status === 'completed') loadStats()
+  }
+
   const copySQL = () => {
     navigator.clipboard.writeText(SETUP_SQL)
     setCopied(true); setTimeout(() => setCopied(false), 2000)
@@ -206,12 +248,15 @@ export default function Admin() {
     !userSearch || (u.display_name || '').toLowerCase().includes(userSearch.toLowerCase())
   )
 
-  const TABS: { id: Tab; label: string; icon: string }[] = [
-    { id: 'overview',  label: 'Resumen',   icon: '📊' },
-    { id: 'users',     label: 'Usuarios',  icon: '👥' },
-    { id: 'listings',  label: 'Anuncios',  icon: '🏷️' },
-    { id: 'orders',    label: 'Pedidos',   icon: '📦' },
-    { id: 'images',    label: 'Imágenes',  icon: '🖼️' },
+  const pendingTxns = txns.filter(t => t.status === 'pending').length
+
+  const TABS: { id: Tab; label: string; icon: string; badge?: number }[] = [
+    { id: 'overview',      label: 'Resumen',        icon: '📊' },
+    { id: 'users',         label: 'Usuarios',       icon: '👥' },
+    { id: 'listings',      label: 'Anuncios',       icon: '🏷️' },
+    { id: 'orders',        label: 'Pedidos',        icon: '📦' },
+    { id: 'transactions',  label: 'Transacciones',  icon: '💸', badge: pendingTxns },
+    { id: 'images',        label: 'Imágenes',       icon: '🖼️' },
   ]
 
   return (
@@ -248,13 +293,18 @@ export default function Admin() {
         <div className="flex gap-1 mb-8 overflow-x-auto pb-1 scrollbar-none">
           {TABS.map(t => (
             <button key={t.id} onClick={() => setTab(t.id)}
-              className={`flex items-center gap-1.5 px-3 sm:px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all shrink-0 ${
+              className={`relative flex items-center gap-1.5 px-3 sm:px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all shrink-0 ${
                 tab === t.id
                   ? 'bg-violet-600 text-white shadow-lg shadow-violet-500/20'
                   : 'bg-[#1a1a36] border border-white/10 text-gray-400 hover:border-violet-500/30 hover:text-violet-400'
               }`}>
               <span>{t.icon}</span>
               <span>{t.label}</span>
+              {(t.badge ?? 0) > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[9px] font-black min-w-[16px] h-4 rounded-full flex items-center justify-center px-1">
+                  {t.badge}
+                </span>
+              )}
             </button>
           ))}
         </div>
@@ -263,10 +313,10 @@ export default function Admin() {
         {tab === 'overview' && (
           <div className="space-y-6">
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <StatCard label="Usuarios"         value={stats.users}    icon="👤" accent="border-violet-500/20" />
-              <StatCard label="Anuncios activos" value={stats.listings}  icon="🏷️" accent="border-blue-500/20" />
-              <StatCard label="Pedidos totales"  value={stats.orders}   icon="📦" accent="border-emerald-500/20" />
-              <StatCard label="Grading requests" value={stats.grading}  icon="🔬" accent="border-yellow-500/20" />
+              <StatCard label="Usuarios"            value={stats.users}    icon="👤" accent="border-violet-500/20" />
+              <StatCard label="Anuncios activos"    value={stats.listings} icon="🏷️" accent="border-blue-500/20" />
+              <StatCard label="Pedidos totales"     value={stats.orders}   icon="📦" accent="border-emerald-500/20" />
+              <StatCard label="Comisiones cobradas" value={`$${stats.grading.toLocaleString('es-MX', { minimumFractionDigits: 0 })}`} icon="💸" accent="border-yellow-500/20" />
             </div>
 
             <div className="grid sm:grid-cols-2 gap-4">
@@ -416,6 +466,70 @@ export default function Admin() {
                         <select value={o.status} onChange={e => updateOrderStatus(o.id, e.target.value)}
                           className="bg-[#21213e] border border-white/10 text-gray-300 rounded-lg px-2 py-1 text-[10px] focus:outline-none cursor-pointer">
                           {ORDER_STATUS.map(s => <option key={s} value={s}>{s}</option>)}
+                        </select>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )
+            }
+          </div>
+        )}
+
+        {/* ── TRANSACCIONES ── */}
+        {tab === 'transactions' && (
+          <div>
+            <div className="flex items-center justify-between mb-5">
+              <p className="text-gray-600 text-sm">{txns.length} transacciones · {txns.filter(t => t.status === 'pending').length} pendientes</p>
+              <div className="flex items-center gap-2 text-xs text-gray-500">
+                <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-1 rounded-lg font-bold">
+                  Comisión total: ${txns.filter(t => t.status === 'completed').reduce((s, t) => s + t.commission_amt, 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                </span>
+              </div>
+            </div>
+            {txnsLoading
+              ? <div className="flex justify-center py-20"><div className="w-8 h-8 border-2 border-violet-500 border-t-transparent rounded-full animate-spin"/></div>
+              : txns.length === 0
+              ? <div className="text-center py-16"><p className="text-5xl mb-3">💸</p><p className="text-gray-500 text-sm">Sin transacciones aún</p></div>
+              : (
+                <div className="space-y-3">
+                  {txns.map(t => (
+                    <div key={t.id} className={`bg-[#1a1a36] border rounded-2xl p-4 transition-all ${t.status === 'pending' ? 'border-yellow-500/20' : t.status === 'completed' ? 'border-emerald-500/15' : 'border-white/5'}`}>
+                      <div className="flex items-start justify-between gap-3 mb-3">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-white font-bold text-sm truncate">{t.listing_title}</p>
+                          <p className="text-gray-500 text-[10px] mt-0.5">
+                            {t.buyer_name} → {t.seller_name} · {new Date(t.created_at).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                          </p>
+                        </div>
+                        <span className={`text-[10px] font-black px-2 py-0.5 rounded-full border shrink-0 ${TXN_STATUS_CSS[t.status] || TXN_STATUS_CSS.pending}`}>
+                          {TXN_STATUS_LABEL[t.status] || t.status}
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-3 gap-2 mb-3 bg-[#21213e] rounded-xl p-3 text-xs">
+                        <div>
+                          <p className="text-gray-600 mb-0.5">Precio venta</p>
+                          <p className="text-white font-bold">{t.sale_price}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-600 mb-0.5">Comisión {t.commission_pct}%</p>
+                          <p className="text-violet-400 font-bold">${t.commission_amt.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-600 mb-0.5">Total cobrado</p>
+                          <p className="text-emerald-400 font-black">${t.total_paid.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-2 text-[10px] text-gray-500">
+                          <span className="bg-[#21213e] px-2 py-1 rounded-lg">{METHOD_LABEL[t.payment_method] || t.payment_method}</span>
+                          <span className="font-mono text-gray-600">Ref: PS-{t.payment_reference}</span>
+                        </div>
+                        <select value={t.status} onChange={e => updateTxnStatus(t.id, e.target.value)}
+                          className="bg-[#21213e] border border-white/10 text-gray-300 rounded-lg px-2 py-1 text-[10px] focus:outline-none cursor-pointer">
+                          {TXN_STATUS.map(s => <option key={s} value={s}>{TXN_STATUS_LABEL[s]}</option>)}
                         </select>
                       </div>
                     </div>
