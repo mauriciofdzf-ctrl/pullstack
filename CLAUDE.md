@@ -58,7 +58,7 @@ Valor = jugador + carta correcta + escasez + condición + marca + timing + liqui
 - **Frontend:** React 19 + TypeScript + Vite 8
 - **Estilos:** Tailwind CSS 4 (vanilla, sin componentes externos)
 - **Backend:** Supabase (auth + PostgreSQL + RLS)
-- **Deploy:** Netlify (SPA redirect configurado en netlify.toml)
+- **Deploy:** Vercel (SPA rewrite configurado en vercel.json)
 - **Linting:** Oxlint
 
 ## Estructura
@@ -117,7 +117,7 @@ VITE_SUPABASE_URL=...
 VITE_SUPABASE_ANON_KEY=...
 ```
 
-En producción: Netlify → Site configuration → Environment variables.  
+En producción: Vercel → Project → Settings → Environment Variables.  
 En local: archivo `.env.local` (no commitear).
 
 ## Decisiones de diseño importantes
