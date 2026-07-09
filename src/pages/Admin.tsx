@@ -11,7 +11,7 @@ import {
 type AdminUser    = { id: string; display_name: string | null; role: string; created_at: string }
 type AdminListing = { id: number; user_id: string; display_name: string; title: string; sport: string; txn_type: string; price: string | null; active: boolean; created_at: string }
 type AdminOrder   = { id: number; contact_name: string; total: string; status: string; created_at: string }
-type AdminTxn     = { id: number; buyer_name: string; seller_name: string; listing_title: string; sale_price: string; commission_pct: number; commission_amt: number; total_paid: number; payment_method: string; payment_reference: string; status: string; created_at: string }
+type AdminTxn     = { id: number; buyer_name: string; seller_name: string; listing_title: string; sale_price: string; commission_pct: number; commission_amt: number; total_paid: number; payment_method: string; payment_reference: string; status: string; created_at: string; tracking_number: string | null; tracking_carrier: string | null; tracking_url: string | null; estimated_delivery: string | null }
 
 // ─── Sub-componentes ──────────────────────────────────────────────────────────
 function StatCard({ label, value, icon, accent }: { label: string; value: number | string; icon: string; accent: string }) {
@@ -155,6 +155,13 @@ export default function Admin() {
   // Transactions
   const [txns, setTxns]             = useState<AdminTxn[]>([])
   const [txnsLoading, setTL]        = useState(false)
+  const [trackingOpen, setTrackingOpen] = useState<number | null>(null)
+  const [trackingForm, setTrackingForm] = useState({ tracking_number: '', tracking_carrier: '', tracking_url: '', estimated_delivery: '' })
+  const [trackingSaving, setTrackingSaving] = useState(false)
+
+  // Catalog visibility
+  const [showCatalog, setShowCatalog] = useState(true)
+  const [catalogSaving, setCatalogSaving] = useState(false)
 
   // Pagos config
   const [payConfig, setPayConfig] = useState({
@@ -237,11 +244,16 @@ export default function Admin() {
   const loadTxns = async () => {
     setTL(true)
     const { data } = await supabase.from('transactions')
-      .select('id, buyer_name, seller_name, listing_title, sale_price, commission_pct, commission_amt, total_paid, payment_method, payment_reference, status, created_at')
+      .select('id, buyer_name, seller_name, listing_title, sale_price, commission_pct, commission_amt, total_paid, payment_method, payment_reference, status, created_at, tracking_number, tracking_carrier, tracking_url, estimated_delivery')
       .order('created_at', { ascending: false })
       .limit(300)
     setTxns((data || []) as AdminTxn[])
     setTL(false)
+  }
+
+  const saveTracking = async (id: number, tracking: { tracking_number: string; tracking_carrier: string; tracking_url: string; estimated_delivery: string }) => {
+    await supabase.from('transactions').update(tracking).eq('id', id)
+    setTxns(prev => prev.map(t => t.id === id ? { ...t, ...tracking } : t))
   }
 
   const updateTxnStatus = async (id: number, status: string) => {
@@ -257,8 +269,16 @@ export default function Admin() {
       const map: Record<string, string> = {}
       data.forEach(r => { map[r.key] = r.value || '' })
       setPayConfig(prev => ({ ...prev, ...map }))
+      if ('show_catalog' in map) setShowCatalog(map.show_catalog !== 'false')
     }
     setPL(false)
+  }
+
+  const toggleCatalog = async (val: boolean) => {
+    setCatalogSaving(true)
+    setShowCatalog(val)
+    await supabase.from('settings').upsert({ key: 'show_catalog', value: String(val), updated_at: new Date().toISOString() })
+    setCatalogSaving(false)
   }
 
   const savePayConfig = async () => {
@@ -554,16 +574,77 @@ export default function Admin() {
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center justify-between gap-3 flex-wrap">
                         <div className="flex items-center gap-2 text-[10px] text-gray-500">
                           <span className="bg-[#21213e] px-2 py-1 rounded-lg">{METHOD_LABEL[t.payment_method] || t.payment_method}</span>
                           <span className="font-mono text-gray-600">Ref: PS-{t.payment_reference}</span>
                         </div>
-                        <select value={t.status} onChange={e => updateTxnStatus(t.id, e.target.value)}
-                          className="bg-[#21213e] border border-white/10 text-gray-300 rounded-lg px-2 py-1 text-[10px] focus:outline-none cursor-pointer">
-                          {TXN_STATUS.map(s => <option key={s} value={s}>{TXN_STATUS_LABEL[s]}</option>)}
-                        </select>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => {
+                              if (trackingOpen === t.id) { setTrackingOpen(null); return }
+                              setTrackingOpen(t.id)
+                              setTrackingForm({
+                                tracking_number:   t.tracking_number   || '',
+                                tracking_carrier:  t.tracking_carrier  || '',
+                                tracking_url:      t.tracking_url      || '',
+                                estimated_delivery: t.estimated_delivery || '',
+                              })
+                            }}
+                            className={`text-[10px] font-bold px-2.5 py-1 rounded-lg border transition-all ${t.tracking_number ? 'border-cyan-500/30 text-cyan-400 bg-cyan-500/10' : 'border-white/10 text-gray-500 hover:border-cyan-500/30 hover:text-cyan-400'}`}>
+                            {t.tracking_number ? '📦 Ver guía' : '📦 Agregar guía'}
+                          </button>
+                          <select value={t.status} onChange={e => updateTxnStatus(t.id, e.target.value)}
+                            className="bg-[#21213e] border border-white/10 text-gray-300 rounded-lg px-2 py-1 text-[10px] focus:outline-none cursor-pointer">
+                            {TXN_STATUS.map(s => <option key={s} value={s}>{TXN_STATUS_LABEL[s]}</option>)}
+                          </select>
+                        </div>
                       </div>
+
+                      {/* Tracking form */}
+                      {trackingOpen === t.id && (
+                        <div className="mt-3 border-t border-white/5 pt-3 space-y-2">
+                          <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-2">Información de envío</p>
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <label className="text-gray-600 text-[9px] font-bold uppercase mb-1 block">Número de guía</label>
+                              <input value={trackingForm.tracking_number} onChange={e => setTrackingForm(f => ({ ...f, tracking_number: e.target.value }))}
+                                placeholder="Ej: 1Z999AA10123456784"
+                                className="w-full bg-[#111128] border border-white/10 text-white px-3 py-2 rounded-lg text-xs focus:outline-none focus:border-cyan-500/50 font-mono placeholder-gray-700" />
+                            </div>
+                            <div>
+                              <label className="text-gray-600 text-[9px] font-bold uppercase mb-1 block">Paquetería</label>
+                              <input value={trackingForm.tracking_carrier} onChange={e => setTrackingForm(f => ({ ...f, tracking_carrier: e.target.value }))}
+                                placeholder="DHL, FedEx, Estafeta..."
+                                className="w-full bg-[#111128] border border-white/10 text-white px-3 py-2 rounded-lg text-xs focus:outline-none focus:border-cyan-500/50 placeholder-gray-700" />
+                            </div>
+                            <div>
+                              <label className="text-gray-600 text-[9px] font-bold uppercase mb-1 block">URL de rastreo</label>
+                              <input value={trackingForm.tracking_url} onChange={e => setTrackingForm(f => ({ ...f, tracking_url: e.target.value }))}
+                                placeholder="https://track.dhl.com/..."
+                                className="w-full bg-[#111128] border border-white/10 text-white px-3 py-2 rounded-lg text-xs focus:outline-none focus:border-cyan-500/50 font-mono placeholder-gray-700" />
+                            </div>
+                            <div>
+                              <label className="text-gray-600 text-[9px] font-bold uppercase mb-1 block">Entrega estimada</label>
+                              <input value={trackingForm.estimated_delivery} onChange={e => setTrackingForm(f => ({ ...f, estimated_delivery: e.target.value }))}
+                                placeholder="Ej: 2-4 días hábiles"
+                                className="w-full bg-[#111128] border border-white/10 text-white px-3 py-2 rounded-lg text-xs focus:outline-none focus:border-cyan-500/50 placeholder-gray-700" />
+                            </div>
+                          </div>
+                          <button
+                            disabled={trackingSaving}
+                            onClick={async () => {
+                              setTrackingSaving(true)
+                              await saveTracking(t.id, trackingForm)
+                              setTrackingSaving(false)
+                              setTrackingOpen(null)
+                            }}
+                            className="mt-1 px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-[10px] font-black rounded-lg transition-all disabled:opacity-50 flex items-center gap-1.5">
+                            {trackingSaving && <div className="w-3 h-3 border border-white/30 border-t-white rounded-full animate-spin" />}
+                            Guardar guía de envío
+                          </button>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -578,6 +659,23 @@ export default function Admin() {
             {payLoading
               ? <div className="flex justify-center py-20"><div className="w-8 h-8 border-2 border-violet-500 border-t-transparent rounded-full animate-spin"/></div>
               : <>
+                {/* Catálogo estático */}
+                <div className="bg-[#1a1a36] border border-white/5 rounded-2xl p-5">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-white font-black">Catálogo de ejemplo</h3>
+                      <p className="text-gray-500 text-xs mt-0.5">Las 36 cartas de demo que vienen por defecto en el Mercado</p>
+                    </div>
+                    <button onClick={() => toggleCatalog(!showCatalog)} disabled={catalogSaving}
+                      className={`relative w-12 h-6 rounded-full transition-all ${showCatalog ? 'bg-violet-600' : 'bg-white/10'} disabled:opacity-50`}>
+                      <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all ${showCatalog ? 'left-7' : 'left-1'}`} />
+                    </button>
+                  </div>
+                  <p className={`text-xs mt-2 font-bold ${showCatalog ? 'text-violet-400' : 'text-gray-600'}`}>
+                    {showCatalog ? '● Visible en el mercado' : '○ Oculto — solo aparecen anuncios de usuarios'}
+                  </p>
+                </div>
+
                 {/* SPEI */}
                 <div className="bg-[#1a1a36] border border-white/5 rounded-2xl p-5 space-y-4">
                   <div className="flex items-center gap-2 mb-1">

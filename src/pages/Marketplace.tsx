@@ -706,6 +706,12 @@ export default function Marketplace() {
   const [deletingId,    setDeletingId]    = useState<number | null>(null)
   const [contactModal,  setContactModal]  = useState<{ listing: UserListing; action: 'sale' | 'auction' | 'trade' } | null>(null)
   const [checkoutModal, setCheckoutModal] = useState<UserListing | null>(null)
+  const [showCatalog,   setShowCatalog]   = useState(true)
+
+  useEffect(() => {
+    supabase.from('settings').select('value').eq('key', 'show_catalog').single()
+      .then(({ data }) => { if (data) setShowCatalog(data.value !== 'false') })
+  }, [])
 
   const MXN_RATE = 17.5
   const fmtMXN = (usdStr: string) => {
@@ -902,7 +908,7 @@ export default function Marketplace() {
                 const displayListing = listing.price || listing.min_bid || (listing.txn_type === 'trade' ? 'A convenir' : '—')
                 const isOwner = user?.id === listing.user_id
                 return (
-                  <div key={listing.id} className="group bg-[#1a1a36] border border-white/5 hover:border-violet-500/30 rounded-2xl overflow-hidden transition-all hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(139,92,246,0.15)]">
+                  <div key={listing.id} onClick={() => navigate(`/listing/${listing.id}`)} className="group bg-[#1a1a36] border border-white/5 hover:border-violet-500/30 rounded-2xl overflow-hidden transition-all hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(139,92,246,0.15)] cursor-pointer">
                     {/* Visual header */}
                     <div className="relative bg-[#0d0d1a] flex items-center justify-center overflow-hidden" style={{ aspectRatio: '5/7' }}>
                       {listing.image_url
@@ -983,29 +989,37 @@ export default function Marketplace() {
         )}
 
         {/* ── Catálogo PullStack ──────────────────────────────── */}
-        <div className="flex items-center gap-3 mb-5">
+        {!showCatalog && (
+          <div className="text-center py-16 text-gray-600">
+            <p className="text-4xl mb-3">🃏</p>
+            <p className="font-bold">Solo se muestran anuncios de usuarios</p>
+          </div>
+        )}
+        {showCatalog && <div className="flex items-center gap-3 mb-5">
           <div className="flex-1 h-px bg-white/5" />
           <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">Catálogo PullStack</span>
           <div className="flex-1 h-px bg-white/5" />
-        </div>
+        </div>}
 
         {/* Resultados */}
-        <p className="text-gray-600 text-sm mb-6">
-          <span className="text-white font-bold">{results.length}</span> resultados en catálogo
-          {query && <span> para "<span className="text-violet-400">{query}</span>"</span>}
-        </p>
+        {showCatalog && (
+          <>
+          <p className="text-gray-600 text-sm mb-6">
+            <span className="text-white font-bold">{results.length}</span> resultados en catálogo
+            {query && <span> para "<span className="text-violet-400">{query}</span>"</span>}
+          </p>
 
-        {results.length === 0 ? (
-          <div className="text-center py-24">
-            <p className="text-gray-600 text-5xl mb-4">🔍</p>
-            <p className="text-gray-400 font-bold text-lg">Sin resultados</p>
-            <p className="text-gray-600 text-sm mt-1">Intenta con otros filtros o un término diferente</p>
-            <button onClick={() => { setSport('Todos'); setKind('all'); setTxn('Todos'); setQuery('') }}
-              className="mt-4 bg-violet-500/10 hover:bg-violet-500/20 border border-violet-500/30 text-violet-400 text-sm font-bold px-4 py-2 rounded-lg transition-all">
-              Limpiar filtros
-            </button>
-          </div>
-        ) : (
+          {results.length === 0 ? (
+            <div className="text-center py-24">
+              <p className="text-gray-600 text-5xl mb-4">🔍</p>
+              <p className="text-gray-400 font-bold text-lg">Sin resultados</p>
+              <p className="text-gray-600 text-sm mt-1">Intenta con otros filtros o un término diferente</p>
+              <button onClick={() => { setSport('Todos'); setKind('all'); setTxn('Todos'); setQuery('') }}
+                className="mt-4 bg-violet-500/10 hover:bg-violet-500/20 border border-violet-500/30 text-violet-400 text-sm font-bold px-4 py-2 rounded-lg transition-all">
+                Limpiar filtros
+              </button>
+            </div>
+          ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {results.map((item) => (
               <div key={item.id}
@@ -1105,6 +1119,8 @@ export default function Marketplace() {
               </div>
             ))}
           </div>
+          )}
+          </>
         )}
       </div>
 

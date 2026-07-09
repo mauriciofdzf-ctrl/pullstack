@@ -18,6 +18,7 @@ import Wallet from './pages/Wallet'
 import Aprende from './pages/Aprende'
 import Grading from './pages/Grading'
 import Chat from './pages/Chat'
+import ListingDetail from './pages/ListingDetail'
 import './index.css'
 
 function App() {
@@ -42,6 +43,7 @@ function App() {
             <Route path="/aprende"        element={<Aprende />} />
             <Route path="/grading"        element={<Grading />} />
             <Route path="/chat"           element={<Chat />} />
+            <Route path="/listing/:id" element={<ListingDetail />} />
             <Route path="/admin"       element={<AdminRoute><Admin /></AdminRoute>} />
           </Routes>
           <ChatBot />
