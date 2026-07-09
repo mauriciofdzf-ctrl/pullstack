@@ -190,13 +190,13 @@ export default function ListingDetail() {
   }
 
   if (loading) return (
-    <div className="min-h-screen bg-[#0d0d0d] flex items-center justify-center">
+    <div className="min-h-screen bg-[#090c14] flex items-center justify-center">
       <div className="w-10 h-10 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
     </div>
   )
 
   if (!listing) return (
-    <div className="min-h-screen bg-[#0d0d0d] flex flex-col items-center justify-center gap-4">
+    <div className="min-h-screen bg-[#090c14] flex flex-col items-center justify-center gap-4">
       <p className="text-5xl">🃏</p>
       <p className="text-white font-black text-xl">Anuncio no encontrado</p>
       <button onClick={() => navigate('/marketplace')} className="text-violet-400 hover:text-violet-300 text-sm">← Volver al mercado</button>
@@ -212,7 +212,7 @@ export default function ListingDetail() {
   const isOwner = user?.id === listing.user_id
 
   return (
-    <div className="min-h-screen bg-[#0d0d0d] pt-20 pb-16 px-4">
+    <div className="min-h-screen bg-[#090c14] pt-20 pb-16 px-4">
       <div className="max-w-5xl mx-auto">
 
         {/* Breadcrumb */}
@@ -226,7 +226,7 @@ export default function ListingDetail() {
 
           {/* ── Imagen ── */}
           <div>
-            <div className="bg-[#0a0a0a] rounded-2xl overflow-hidden border border-white/5 relative" style={{ aspectRatio: '5/7' }}>
+            <div className="bg-[#070910] rounded-2xl overflow-hidden border border-white/5 relative" style={{ aspectRatio: '5/7' }}>
               {listing.txn_type === 'auction' && !countdown.ended && (
                 <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5 bg-red-600/90 backdrop-blur text-white text-[10px] font-black px-2.5 py-1.5 rounded-full">
                   <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
@@ -265,13 +265,13 @@ export default function ListingDetail() {
             {(listing.grade || listing.condition) && (
               <div className="grid grid-cols-2 gap-3">
                 {listing.grade && (
-                  <div className="bg-[#1a1a1a] border border-white/5 rounded-xl p-3">
+                  <div className="bg-[#12161f] border border-white/5 rounded-xl p-3">
                     <p className="text-gray-600 text-[10px] font-bold uppercase mb-1">Grado</p>
                     <p className="text-violet-400 font-black">{listing.grade}</p>
                   </div>
                 )}
                 {listing.condition && (
-                  <div className="bg-[#1a1a1a] border border-white/5 rounded-xl p-3">
+                  <div className="bg-[#12161f] border border-white/5 rounded-xl p-3">
                     <p className="text-gray-600 text-[10px] font-bold uppercase mb-1">Condición</p>
                     <p className="text-white font-bold text-sm">{listing.condition}</p>
                   </div>
@@ -280,7 +280,7 @@ export default function ListingDetail() {
             )}
 
             {/* Vendedor */}
-            <div className="flex items-center gap-3 bg-[#1a1a1a] border border-white/5 rounded-xl p-3">
+            <div className="flex items-center gap-3 bg-[#12161f] border border-white/5 rounded-xl p-3">
               <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-600 flex items-center justify-center text-white font-black text-xs shrink-0">
                 {listing.display_name.slice(0, 2).toUpperCase()}
               </div>
@@ -293,7 +293,7 @@ export default function ListingDetail() {
 
             {/* ── VENTA ── */}
             {listing.txn_type === 'sale' && (
-              <div className="bg-[#1a1a1a] border border-violet-500/20 rounded-2xl p-5">
+              <div className="bg-[#12161f] border border-violet-500/20 rounded-2xl p-5">
                 <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1">Precio</p>
                 <p className="text-white font-black text-4xl mb-4">{listing.price || '—'}</p>
                 {isOwner
@@ -309,7 +309,7 @@ export default function ListingDetail() {
 
             {/* ── SUBASTA ── */}
             {listing.txn_type === 'auction' && (
-              <div className={`bg-[#1a1a1a] border rounded-2xl ${countdown.ended ? 'border-gray-500/20' : 'border-red-500/25'}`}>
+              <div className={`bg-[#12161f] border rounded-2xl ${countdown.ended ? 'border-gray-500/20' : 'border-red-500/25'}`}>
 
                 {/* Timer */}
                 {listing.ends_at && (
@@ -329,7 +329,7 @@ export default function ListingDetail() {
                             { v: countdown.m, label: 'min' },
                             { v: countdown.s, label: 'seg' },
                           ].map(({ v, label }) => (
-                            <div key={label} className="bg-[#0a0a0a] border border-red-500/15 rounded-xl p-2 text-center">
+                            <div key={label} className="bg-[#070910] border border-red-500/15 rounded-xl p-2 text-center">
                               <p className="text-white font-black text-2xl tabular-nums leading-none">{String(v).padStart(2, '0')}</p>
                               <p className="text-red-400/60 text-[9px] font-bold uppercase mt-1">{label}</p>
                             </div>
@@ -409,7 +409,7 @@ export default function ListingDetail() {
                   ) : (
                     <div className="space-y-1.5 max-h-52 overflow-y-auto">
                       {bids.map((b, i) => (
-                        <div key={b.id} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all ${i === 0 ? 'bg-red-500/10 border border-red-500/20' : 'bg-[#1d1d1d]'}`}>
+                        <div key={b.id} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all ${i === 0 ? 'bg-red-500/10 border border-red-500/20' : 'bg-[#191d28]'}`}>
                           <div className={`w-6 h-6 rounded-lg flex items-center justify-center text-xs font-black shrink-0 ${
                             i === 0 ? 'bg-yellow-400 text-black' :
                             i === 1 ? 'bg-gray-400 text-black' :
@@ -470,7 +470,7 @@ export default function ListingDetail() {
                             type="number" value={bidAmount}
                             onChange={e => { setBidAmount(e.target.value); setBidError('') }}
                             placeholder={minNext.toString()}
-                            className="w-full bg-[#1d1d1d] border border-red-500/30 text-white pl-7 pr-4 py-3 rounded-xl text-sm focus:outline-none focus:border-red-500/60 font-black placeholder-gray-700"
+                            className="w-full bg-[#191d28] border border-red-500/30 text-white pl-7 pr-4 py-3 rounded-xl text-sm focus:outline-none focus:border-red-500/60 font-black placeholder-gray-700"
                           />
                         </div>
                         <button onClick={placeBid} disabled={bidding || !bidAmount}
@@ -488,7 +488,7 @@ export default function ListingDetail() {
 
             {/* ── TRADE ── */}
             {listing.txn_type === 'trade' && (
-              <div className="bg-[#1a1a1a] border border-blue-500/20 rounded-2xl p-5 space-y-4">
+              <div className="bg-[#12161f] border border-blue-500/20 rounded-2xl p-5 space-y-4">
                 <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest">🔄 Propuesta de trade</p>
                 {tradeSent ? (
                   <div className="text-center py-4">
@@ -505,7 +505,7 @@ export default function ListingDetail() {
                     <textarea
                       value={tradeMsg || `Hola ${listing.display_name}! Me interesa tu "${listing.title}" para un trade. Te ofrezco: `}
                       onChange={e => setTradeMsg(e.target.value)} rows={4}
-                      className="w-full bg-[#1d1d1d] border border-blue-500/20 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500/40 resize-none"
+                      className="w-full bg-[#191d28] border border-blue-500/20 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500/40 resize-none"
                     />
                     <button onClick={sendTrade} disabled={tradeSending}
                       className="w-full bg-blue-500 hover:bg-blue-400 text-white font-black py-3 rounded-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2">
@@ -519,7 +519,7 @@ export default function ListingDetail() {
 
             {/* ── MI PEDIDO ── */}
             {myTxn && (
-              <div className="bg-[#1a1a1a] border border-cyan-500/20 rounded-2xl p-5 space-y-3">
+              <div className="bg-[#12161f] border border-cyan-500/20 rounded-2xl p-5 space-y-3">
                 <div className="flex items-center justify-between">
                   <p className="text-cyan-400 text-[10px] font-bold uppercase tracking-widest">📦 Mi pedido</p>
                   <span className={`text-[10px] font-black px-2.5 py-1 rounded-full border ${
@@ -535,11 +535,11 @@ export default function ListingDetail() {
                   </span>
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-xs">
-                  <div className="bg-[#1d1d1d] rounded-xl p-3">
+                  <div className="bg-[#191d28] rounded-xl p-3">
                     <p className="text-gray-600 text-[9px] font-bold uppercase mb-1">Referencia</p>
                     <p className="text-violet-400 font-black font-mono">PS-{myTxn.payment_reference}</p>
                   </div>
-                  <div className="bg-[#1d1d1d] rounded-xl p-3">
+                  <div className="bg-[#191d28] rounded-xl p-3">
                     <p className="text-gray-600 text-[9px] font-bold uppercase mb-1">Total pagado</p>
                     <p className="text-white font-black">${myTxn.total_paid.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</p>
                   </div>
@@ -565,7 +565,7 @@ export default function ListingDetail() {
                     )}
                   </div>
                 ) : myTxn.status === 'verified' || myTxn.status === 'completed' ? (
-                  <div className="bg-[#1d1d1d] border border-white/5 rounded-xl p-3 text-center">
+                  <div className="bg-[#191d28] border border-white/5 rounded-xl p-3 text-center">
                     <p className="text-gray-400 text-xs">El equipo de PullStack está coordinando el envío.</p>
                     <p className="text-gray-600 text-xs mt-0.5">Recibirás la guía de rastreo pronto.</p>
                   </div>

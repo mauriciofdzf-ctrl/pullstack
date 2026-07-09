@@ -179,7 +179,7 @@ export default function Messages() {
 
   // ── Unauthenticated ───────────────────────────────────────────────────────────
   if (!user) return (
-    <div className="min-h-screen bg-[#0d0d0d] pt-24 pb-16 px-4 flex items-center justify-center">
+    <div className="min-h-screen bg-[#090c14] pt-24 pb-16 px-4 flex items-center justify-center">
       <div className="text-center">
         <div className="text-5xl mb-4">💬</div>
         <h2 className="text-white text-2xl font-black mb-2">Mensajes</h2>
@@ -193,7 +193,7 @@ export default function Messages() {
   )
 
   return (
-    <div className="bg-[#0d0d0d] pt-16" style={{ height: '100dvh', display: 'flex', flexDirection: 'column' }}>
+    <div className="bg-[#090c14] pt-16" style={{ height: '100dvh', display: 'flex', flexDirection: 'column' }}>
       <div className="max-w-4xl mx-auto w-full flex flex-col flex-1 min-h-0">
 
         {/* Tabs */}
@@ -297,12 +297,12 @@ export default function Messages() {
                               <span className="text-[9px] text-gray-600 mb-0.5 px-1">{ACTION_LABEL[m.action_type] || m.action_type}</span>
                             )}
                             {m.listing_title && (
-                              <div className="bg-[#1d1d1d] border border-violet-500/20 rounded-xl px-3 py-2 mb-1 text-[10px] text-violet-400 font-bold">
+                              <div className="bg-[#191d28] border border-violet-500/20 rounded-xl px-3 py-2 mb-1 text-[10px] text-violet-400 font-bold">
                                 📋 {m.listing_title}
                                 {m.bid_amount && <span className="ml-2 text-red-400">Puja: {m.bid_amount}</span>}
                               </div>
                             )}
-                            <div className={`px-3.5 py-2.5 rounded-2xl text-sm leading-relaxed ${isMe ? 'bg-violet-600 text-white rounded-br-md' : 'bg-[#1d1d1d] border border-white/5 text-gray-200 rounded-bl-md'}`}>
+                            <div className={`px-3.5 py-2.5 rounded-2xl text-sm leading-relaxed ${isMe ? 'bg-violet-600 text-white rounded-br-md' : 'bg-[#191d28] border border-white/5 text-gray-200 rounded-bl-md'}`}>
                               {m.content}
                             </div>
                             <span className="text-gray-700 text-[9px] mt-0.5 px-1">
@@ -323,7 +323,7 @@ export default function Messages() {
                         onChange={e => setReplyInput(e.target.value)}
                         onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendReply() } }}
                         placeholder="Escribe tu respuesta..."
-                        className="flex-1 bg-[#1d1d1d] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-violet-500/50"
+                        className="flex-1 bg-[#191d28] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-violet-500/50"
                       />
                       <button onClick={sendReply} disabled={!replyInput.trim() || replySending}
                         className="bg-violet-600 hover:bg-violet-500 disabled:opacity-40 text-white px-4 py-2.5 rounded-xl transition-all shrink-0">
@@ -364,7 +364,7 @@ export default function Messages() {
                     </div>
                   )}
                   <div className={`max-w-xs lg:max-w-sm px-4 py-3 rounded-2xl text-sm leading-relaxed ${
-                    m.from_admin ? 'bg-[#1d1d1d] border border-white/5 text-gray-300 rounded-tl-md' : 'bg-violet-600 text-white font-medium rounded-tr-md'
+                    m.from_admin ? 'bg-[#191d28] border border-white/5 text-gray-300 rounded-tl-md' : 'bg-violet-600 text-white font-medium rounded-tr-md'
                   }`}>
                     {m.content}
                   </div>
@@ -379,7 +379,7 @@ export default function Messages() {
                 <div className="flex flex-wrap gap-2">
                   {QUICK.map(q => (
                     <button key={q} onClick={() => setSupportInput(q)}
-                      className="bg-[#1d1d1d] border border-white/10 hover:border-violet-500/30 text-gray-400 hover:text-violet-400 text-xs px-3 py-1.5 rounded-lg transition-all">
+                      className="bg-[#191d28] border border-white/10 hover:border-violet-500/30 text-gray-400 hover:text-violet-400 text-xs px-3 py-1.5 rounded-lg transition-all">
                       {q}
                     </button>
                   ))}
@@ -392,7 +392,7 @@ export default function Messages() {
                 <input value={supportInput} onChange={e => setSupportInput(e.target.value)}
                   onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendSupport() } }}
                   placeholder="Escribe tu mensaje..."
-                  className="flex-1 bg-[#1d1d1d] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-violet-500/50 transition-colors"
+                  className="flex-1 bg-[#191d28] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-violet-500/50 transition-colors"
                 />
                 <button onClick={sendSupport} disabled={!supportInput.trim() || supportSending}
                   className="bg-violet-600 hover:bg-violet-500 disabled:opacity-40 text-white font-black px-4 py-2.5 rounded-xl transition-all">

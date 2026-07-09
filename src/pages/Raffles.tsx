@@ -97,7 +97,7 @@ function RaffleCard({ raffle, onEnter, entered, loading }: {
   const isUrgent = new Date(raffle.ends_at).getTime() - Date.now() < 24 * 60 * 60 * 1000
 
   return (
-    <div className="bg-[#1a1a1a] border border-white/5 hover:border-violet-500/20 rounded-2xl overflow-hidden transition-all group">
+    <div className="bg-[#12161f] border border-white/5 hover:border-violet-500/20 rounded-2xl overflow-hidden transition-all group">
       <div className="aspect-video overflow-hidden relative">
         <img src={raffle.image} alt={raffle.title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
@@ -121,7 +121,7 @@ function RaffleCard({ raffle, onEnter, entered, loading }: {
             <span className="text-gray-500">{raffle.sold_tickets} / {raffle.max_tickets} boletos</span>
             <span className={`font-bold ${pct >= 80 ? 'text-red-400' : 'text-violet-400'}`}>{pct}% vendido</span>
           </div>
-          <div className="w-full bg-[#1d1d1d] rounded-full h-1.5">
+          <div className="w-full bg-[#191d28] rounded-full h-1.5">
             <div className={`h-1.5 rounded-full transition-all ${pct >= 80 ? 'bg-red-500' : 'bg-violet-600'}`} style={{ width: `${pct}%` }} />
           </div>
         </div>
@@ -174,7 +174,7 @@ export default function Raffles() {
   }, [user, navigate, enteredIds])
 
   return (
-    <div className="min-h-screen bg-[#0d0d0d] pt-24 pb-16 px-4">
+    <div className="min-h-screen bg-[#090c14] pt-24 pb-16 px-4">
       <div className="max-w-5xl mx-auto">
 
         <div className="mb-8">
@@ -210,14 +210,14 @@ export default function Raffles() {
           ))}
         </div>
 
-        <div className="bg-[#1a1a1a] border border-white/5 rounded-2xl p-6">
+        <div className="bg-[#12161f] border border-white/5 rounded-2xl p-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div>
               <h3 className="text-white font-bold text-lg mb-1">¿Tienes una carta para rifar?</h3>
               <p className="text-gray-500 text-sm">Abrimos rifas a vendedores verificados. Comisión de solo 5%. Sin riesgo de no-shows.</p>
             </div>
             <a href="/messages"
-              className="bg-[#1d1d1d] border border-white/10 hover:border-violet-500/30 text-gray-300 hover:text-violet-400 font-bold px-5 py-2.5 rounded-xl text-sm transition-all whitespace-nowrap">
+              className="bg-[#191d28] border border-white/10 hover:border-violet-500/30 text-gray-300 hover:text-violet-400 font-bold px-5 py-2.5 rounded-xl text-sm transition-all whitespace-nowrap">
               Contactar para listar →
             </a>
           </div>

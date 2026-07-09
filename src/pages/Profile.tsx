@@ -114,11 +114,11 @@ export default function Profile() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0d0d0d] pt-20 pb-16 px-4 sm:px-6">
+    <div className="min-h-screen bg-[#090c14] pt-20 pb-16 px-4 sm:px-6">
       <div className="max-w-4xl mx-auto">
 
         {/* Header card */}
-        <div className="bg-[#1a1a1a] border border-white/5 rounded-2xl overflow-hidden mb-6">
+        <div className="bg-[#12161f] border border-white/5 rounded-2xl overflow-hidden mb-6">
           {/* Banner */}
           <div className={`h-32 bg-gradient-to-r ${color} opacity-30`} />
 
@@ -150,7 +150,7 @@ export default function Profile() {
               <div className="flex gap-2 mt-4">
                 {!editing ? (
                   <button onClick={() => setEditing(true)}
-                    className="flex items-center gap-2 bg-[#1d1d1d] border border-white/10 hover:border-violet-500/30 text-gray-300 hover:text-violet-400 px-4 py-2 rounded-lg text-sm font-bold transition-all">
+                    className="flex items-center gap-2 bg-[#191d28] border border-white/10 hover:border-violet-500/30 text-gray-300 hover:text-violet-400 px-4 py-2 rounded-lg text-sm font-bold transition-all">
                     ✏️ Editar perfil
                   </button>
                 ) : (
@@ -170,10 +170,10 @@ export default function Profile() {
               <div className="space-y-3">
                 <input value={displayName} onChange={(e) => setDisplayName(e.target.value)}
                   placeholder="Tu nombre"
-                  className="w-full bg-[#1d1d1d] border border-white/10 text-white px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:border-violet-500/50" />
+                  className="w-full bg-[#191d28] border border-white/10 text-white px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:border-violet-500/50" />
                 <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={3}
                   placeholder="Cuéntanos sobre tu colección..."
-                  className="w-full bg-[#1d1d1d] border border-white/10 text-white px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:border-violet-500/50 resize-none" />
+                  className="w-full bg-[#191d28] border border-white/10 text-white px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:border-violet-500/50 resize-none" />
               </div>
             ) : (
               <div>
@@ -207,7 +207,7 @@ export default function Profile() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 mb-6 bg-[#1a1a1a] border border-white/5 rounded-xl p-1">
+        <div className="flex gap-1 mb-6 bg-[#12161f] border border-white/5 rounded-xl p-1">
           {(['activity', 'collection', 'settings'] as const).map((tab) => (
             <button key={tab} onClick={() => setActiveTab(tab)}
               className={`flex-1 py-2 px-3 rounded-lg text-sm font-bold transition-all capitalize ${activeTab === tab ? 'bg-violet-600 text-white' : 'text-gray-500 hover:text-gray-300'}`}>
@@ -218,7 +218,7 @@ export default function Profile() {
 
         {/* Activity */}
         {activeTab === 'activity' && (
-          <div className="bg-[#1a1a1a] border border-white/5 rounded-2xl divide-y divide-white/5">
+          <div className="bg-[#12161f] border border-white/5 rounded-2xl divide-y divide-white/5">
             {recentActivity.length === 0 ? (
               <div className="p-8 text-center">
                 <div className="text-3xl mb-3">📋</div>
@@ -231,7 +231,7 @@ export default function Profile() {
             ) : (
               recentActivity.map((a, i) => (
                 <div key={i} className="flex items-center gap-4 p-4">
-                  <div className="w-9 h-9 rounded-xl bg-[#1d1d1d] flex items-center justify-center text-lg shrink-0">{a.icon}</div>
+                  <div className="w-9 h-9 rounded-xl bg-[#191d28] flex items-center justify-center text-lg shrink-0">{a.icon}</div>
                   <div className="flex-1 min-w-0">
                     <p className="text-white text-sm font-medium truncate">{a.desc}</p>
                     <p className="text-gray-600 text-xs mt-0.5">{a.time}</p>
@@ -245,7 +245,7 @@ export default function Profile() {
 
         {/* Collection */}
         {activeTab === 'collection' && (
-          <div className="bg-[#1a1a1a] border border-white/5 rounded-2xl p-8 text-center">
+          <div className="bg-[#12161f] border border-white/5 rounded-2xl p-8 text-center">
             <div className="text-5xl mb-4">🃏</div>
             <h3 className="text-white font-bold text-lg mb-2">Mi Colección</h3>
             <p className="text-gray-500 text-sm mb-6">Gestiona todas las cartas que has guardado, ve su valor estimado total y filtra por deporte.</p>
@@ -253,7 +253,7 @@ export default function Profile() {
               <button onClick={() => navigate('/wallet')} className="bg-violet-600 hover:bg-violet-500 text-white font-black px-6 py-2.5 rounded-xl transition-all text-sm">
                 Ver mi colección completa
               </button>
-              <button onClick={() => navigate('/marketplace')} className="bg-[#1d1d1d] border border-white/10 hover:border-violet-500/30 text-gray-300 font-bold px-6 py-2.5 rounded-xl transition-all text-sm">
+              <button onClick={() => navigate('/marketplace')} className="bg-[#191d28] border border-white/10 hover:border-violet-500/30 text-gray-300 font-bold px-6 py-2.5 rounded-xl transition-all text-sm">
                 Explorar cartas
               </button>
             </div>
@@ -263,7 +263,7 @@ export default function Profile() {
         {/* Modal avatar */}
         {avatarEdit && (
           <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center px-4">
-            <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-6 w-full max-w-sm shadow-2xl">
+            <div className="bg-[#12161f] border border-white/10 rounded-2xl p-6 w-full max-w-sm shadow-2xl">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-white font-black text-lg">Foto de perfil</h3>
                 <button onClick={() => { setAvatarEdit(false); setAvatarFile(null); if (avatarFilePreview) URL.revokeObjectURL(avatarFilePreview); setAvatarFilePreview(null) }}
@@ -273,7 +273,7 @@ export default function Profile() {
               </div>
 
               {/* Tabs */}
-              <div className="flex gap-1 bg-[#1d1d1d] rounded-xl p-1 mb-4">
+              <div className="flex gap-1 bg-[#191d28] rounded-xl p-1 mb-4">
                 {(['upload', 'url'] as const).map(t => (
                   <button key={t} onClick={() => setAvatarTab(t)}
                     className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${avatarTab === t ? 'bg-violet-600 text-white' : 'text-gray-500 hover:text-gray-300'}`}>
@@ -308,7 +308,7 @@ export default function Profile() {
                   <input type="url" value={avatarUrl}
                     onChange={e => { setAvatarUrl(e.target.value); setAvatarPreviewError(false) }}
                     placeholder="https://... (Unsplash, Imgur, Cloudinary)"
-                    className="w-full bg-[#1d1d1d] border border-white/10 text-white placeholder-gray-600 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-violet-500/50 font-mono mb-2" />
+                    className="w-full bg-[#191d28] border border-white/10 text-white placeholder-gray-600 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-violet-500/50 font-mono mb-2" />
                   {avatarUrl && !avatarPreviewError && (
                     <div className="flex justify-center">
                       <div className="w-20 h-20 rounded-2xl overflow-hidden border-2 border-violet-500/30">
@@ -339,14 +339,14 @@ export default function Profile() {
         {/* Settings */}
         {activeTab === 'settings' && (
           <div className="space-y-4">
-            <div className="bg-[#1a1a1a] border border-white/5 rounded-2xl p-6 space-y-4">
+            <div className="bg-[#12161f] border border-white/5 rounded-2xl p-6 space-y-4">
               <h3 className="text-white font-bold">Cuenta</h3>
               <div className="flex items-center justify-between py-3 border-b border-white/5">
                 <div>
                   <p className="text-white text-sm font-medium">Email</p>
                   <p className="text-gray-500 text-xs">{user?.email}</p>
                 </div>
-                <span className="text-xs text-gray-600 bg-[#1d1d1d] px-2 py-1 rounded-lg">Verificado</span>
+                <span className="text-xs text-gray-600 bg-[#191d28] px-2 py-1 rounded-lg">Verificado</span>
               </div>
               <div className="flex items-center justify-between py-3">
                 <div>
@@ -367,7 +367,7 @@ export default function Profile() {
               </div>
             )}
 
-            <div className="bg-[#1a1a1a] border border-red-500/10 rounded-2xl p-6">
+            <div className="bg-[#12161f] border border-red-500/10 rounded-2xl p-6">
               <h3 className="text-red-400 font-bold mb-1">Cerrar sesión</h3>
               <p className="text-gray-500 text-sm mb-4">Se cerrará tu sesión en este dispositivo.</p>
               <button onClick={handleSignOut} className="bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 font-bold px-4 py-2 rounded-lg text-sm transition-all">

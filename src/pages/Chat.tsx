@@ -108,7 +108,7 @@ export default function Chat() {
   }
 
   if (!user) return (
-    <div className="min-h-screen bg-[#0d0d0d] pt-24 pb-16 px-4 flex items-center justify-center">
+    <div className="min-h-screen bg-[#090c14] pt-24 pb-16 px-4 flex items-center justify-center">
       <div className="text-center">
         <div className="text-5xl mb-4">💬</div>
         <h2 className="text-white text-2xl font-black mb-2">Chat de Coleccionistas</h2>
@@ -124,11 +124,11 @@ export default function Chat() {
   const currentRoom = ROOMS.find(r => r.id === room)
 
   return (
-    <div className="bg-[#0d0d0d] pt-16" style={{ height: '100dvh', display: 'flex', flexDirection: 'column' }}>
+    <div className="bg-[#090c14] pt-16" style={{ height: '100dvh', display: 'flex', flexDirection: 'column' }}>
       <div className="flex flex-1 min-h-0 max-w-6xl mx-auto w-full">
 
         {/* Sidebar de rooms */}
-        <div className="w-16 sm:w-52 border-r border-white/5 bg-[#0d0d0d] flex flex-col shrink-0">
+        <div className="w-16 sm:w-52 border-r border-white/5 bg-[#090c14] flex flex-col shrink-0">
           <div className="p-3 sm:p-4 border-b border-white/5">
             <p className="text-white font-black text-sm hidden sm:block">Chat</p>
             <p className="text-gray-600 text-[10px] hidden sm:block mt-0.5">
@@ -195,7 +195,7 @@ export default function Chat() {
                       <div className={`px-3.5 py-2.5 rounded-2xl text-sm leading-relaxed ${
                         isMe
                           ? 'bg-violet-600 text-white font-medium rounded-tr-md'
-                          : 'bg-[#1d1d1d] border border-white/5 text-gray-200 rounded-tl-md'
+                          : 'bg-[#191d28] border border-white/5 text-gray-200 rounded-tl-md'
                       }`}>
                         {m.content}
                       </div>
@@ -216,7 +216,7 @@ export default function Chat() {
                 onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() } }}
                 placeholder={`Mensaje en #${currentRoom?.label}...`}
                 maxLength={500}
-                className="flex-1 bg-[#1d1d1d] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-violet-500/50 transition-colors"
+                className="flex-1 bg-[#191d28] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-violet-500/50 transition-colors"
               />
               <button onClick={send} disabled={!input.trim() || sending}
                 className="bg-violet-600 hover:bg-violet-500 disabled:opacity-40 text-black font-black px-4 py-2.5 rounded-xl transition-all shrink-0">
