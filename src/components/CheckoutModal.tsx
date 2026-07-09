@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import { COMMISSION_PCT, PAYMENT_METHODS, type PaymentMethod } from '../lib/paymentConfig'
+import { COMMISSION_PCT, type PaymentMethod } from '../lib/paymentConfig'
 
 type UserListing = {
   id: number
@@ -29,6 +29,20 @@ function genRef(): string {
 
 type Step = 'method' | 'payment' | 'done'
 
+type PayCfg = {
+  spei_banco: string; spei_clabe: string; spei_beneficiario: string
+  mp_usuario: string; mp_link: string
+  oxxo_link: string
+  tarjeta_link: string
+}
+
+const STATIC_METHODS: { id: PaymentMethod; label: string; icon: string; detail: string }[] = [
+  { id: 'spei',        label: 'SPEI / Transferencia',      icon: '🏦', detail: 'Transferencia bancaria inmediata' },
+  { id: 'mercadopago', label: 'MercadoPago',               icon: '💳', detail: 'Tarjeta, saldo MP o cuotas' },
+  { id: 'oxxo',        label: 'OXXO Pay',                  icon: '🏪', detail: 'Paga en efectivo en cualquier OXXO' },
+  { id: 'tarjeta',     label: 'Tarjeta de crédito/débito', icon: '💰', detail: 'Visa, Mastercard, Amex' },
+]
+
 export default function CheckoutModal({ listing, user, profile, onClose }: {
   listing: UserListing
   user: { id: string }
@@ -36,19 +50,74 @@ export default function CheckoutModal({ listing, user, profile, onClose }: {
   onClose: () => void
 }) {
   const navigate = useNavigate()
-  const [step, setStep]           = useState<Step>('method')
-  const [method, setMethod]       = useState<PaymentMethod | null>(null)
-  const [ref]                     = useState(genRef)
+  const [step, setStep]             = useState<Step>('method')
+  const [method, setMethod]         = useState<PaymentMethod | null>(null)
+  const [ref]                       = useState(genRef)
   const [confirming, setConfirming] = useState(false)
-  const [txnId, setTxnId]         = useState<number | null>(null)
-  const [error, setError]         = useState('')
+  const [txnId, setTxnId]           = useState<number | null>(null)
+  const [error, setError]           = useState('')
+  const [payCfg, setPayCfg]         = useState<PayCfg | null>(null)
+
+  useEffect(() => {
+    supabase.from('settings').select('key, value').then(({ data }) => {
+      if (data) {
+        const m: Record<string, string> = {}
+        data.forEach(r => { m[r.key] = r.value || '' })
+        setPayCfg({
+          spei_banco: m.spei_banco || '', spei_clabe: m.spei_clabe || '',
+          spei_beneficiario: m.spei_beneficiario || 'PullStack',
+          mp_usuario: m.mp_usuario || '', mp_link: m.mp_link || '',
+          oxxo_link: m.oxxo_link || '',
+          tarjeta_link: m.tarjeta_link || '',
+        })
+      }
+    })
+  }, [])
+
+  const getInstructions = (m: PaymentMethod, total: string, r: string): string[] => {
+    if (!payCfg) return []
+    if (m === 'spei') return [
+      `Banco: ${payCfg.spei_banco || '—'}`,
+      `CLABE: ${payCfg.spei_clabe || '—'}`,
+      `Beneficiario: ${payCfg.spei_beneficiario || 'PullStack'}`,
+      `Monto exacto: ${total}`,
+      `Concepto / Referencia: PS-${r}`,
+    ]
+    if (m === 'mercadopago') return [
+      payCfg.mp_usuario ? `Envía el pago a: ${payCfg.mp_usuario}` : '',
+      payCfg.mp_link    ? `O usa este link: ${payCfg.mp_link}` : '',
+      `Monto: ${total}`,
+      `Referencia en el mensaje: PS-${r}`,
+    ].filter(Boolean)
+    if (m === 'oxxo') return [
+      payCfg.oxxo_link ? `Genera tu ficha en: ${payCfg.oxxo_link}` : '—',
+      `Monto: ${total}`,
+      `Referencia: PS-${r}`,
+      `Válido por 72 horas`,
+    ]
+    if (m === 'tarjeta') return [
+      payCfg.tarjeta_link ? `Link de pago seguro: ${payCfg.tarjeta_link}` : '—',
+      `Monto: ${total}`,
+      `Referencia: PS-${r}`,
+    ]
+    return []
+  }
+
+  const isMethodReady = (m: PaymentMethod): boolean => {
+    if (!payCfg) return false
+    if (m === 'spei')        return !!(payCfg.spei_banco && payCfg.spei_clabe)
+    if (m === 'mercadopago') return !!(payCfg.mp_usuario || payCfg.mp_link)
+    if (m === 'oxxo')        return !!payCfg.oxxo_link
+    if (m === 'tarjeta')     return !!payCfg.tarjeta_link
+    return false
+  }
 
   const rawPrice  = listing.txn_type === 'auction' ? (listing.min_bid ?? listing.price) : listing.price
   const priceNum  = parsePrice(rawPrice)
   const commission = Math.round(priceNum * COMMISSION_PCT) / 100
   const total     = priceNum + commission
 
-  const selectedMethod = PAYMENT_METHODS.find(m => m.id === method)
+  const selectedMethod = STATIC_METHODS.find(m => m.id === method)
 
   const confirmPayment = async () => {
     if (!method) return
@@ -137,28 +206,31 @@ export default function CheckoutModal({ listing, user, profile, onClose }: {
             <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest">Elige método de pago</p>
 
             <div className="space-y-2">
-              {PAYMENT_METHODS.map(m => (
-                <button key={m.id} onClick={() => setMethod(m.id)}
-                  className={`w-full flex items-center gap-3 p-3.5 rounded-xl border transition-all text-left ${
-                    method === m.id
-                      ? 'border-violet-500/60 bg-violet-500/10'
-                      : 'border-white/5 bg-[#21213e] hover:border-white/15'
-                  }`}>
-                  <span className="text-2xl">{m.icon}</span>
-                  <div className="flex-1">
-                    <p className="text-white font-bold text-sm">{m.label}</p>
-                    <p className="text-gray-500 text-[10px]">{m.detail}</p>
-                  </div>
-                  {!m.available && (
-                    <span className="text-[9px] bg-yellow-500/15 text-yellow-400 border border-yellow-500/20 px-2 py-0.5 rounded-full font-bold shrink-0">Próximamente</span>
-                  )}
-                  {method === m.id && (
-                    <div className="w-4 h-4 rounded-full border-2 border-violet-500 bg-violet-500 flex items-center justify-center shrink-0">
-                      <div className="w-1.5 h-1.5 rounded-full bg-white" />
+              {STATIC_METHODS.map(m => {
+                const ready = isMethodReady(m.id)
+                return (
+                  <button key={m.id} onClick={() => setMethod(m.id)}
+                    className={`w-full flex items-center gap-3 p-3.5 rounded-xl border transition-all text-left ${
+                      method === m.id
+                        ? 'border-violet-500/60 bg-violet-500/10'
+                        : 'border-white/5 bg-[#21213e] hover:border-white/15'
+                    }`}>
+                    <span className="text-2xl">{m.icon}</span>
+                    <div className="flex-1">
+                      <p className="text-white font-bold text-sm">{m.label}</p>
+                      <p className="text-gray-500 text-[10px]">{m.detail}</p>
                     </div>
-                  )}
-                </button>
-              ))}
+                    {!ready && (
+                      <span className="text-[9px] bg-yellow-500/15 text-yellow-400 border border-yellow-500/20 px-2 py-0.5 rounded-full font-bold shrink-0">Próximamente</span>
+                    )}
+                    {method === m.id && (
+                      <div className="w-4 h-4 rounded-full border-2 border-violet-500 bg-violet-500 flex items-center justify-center shrink-0">
+                        <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                      </div>
+                    )}
+                  </button>
+                )
+              })}
             </div>
 
             <button onClick={() => method && setStep('payment')}
@@ -184,10 +256,10 @@ export default function CheckoutModal({ listing, user, profile, onClose }: {
               </div>
             </div>
 
-            {selectedMethod.available ? (
+            {method && isMethodReady(method) ? (
               <div className="bg-[#21213e] border border-white/5 rounded-xl p-4 space-y-2.5">
                 <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-3">Datos de pago</p>
-                {selectedMethod.instructions(formatMXN(total), ref).map((line, i) => (
+                {getInstructions(method, formatMXN(total), ref).map((line, i) => (
                   <div key={i} className="flex items-start gap-2">
                     <span className="text-violet-400 font-black text-xs shrink-0 mt-0.5">{i + 1}.</span>
                     <p className="text-gray-300 text-sm font-mono break-all">{line}</p>
@@ -201,7 +273,7 @@ export default function CheckoutModal({ listing, user, profile, onClose }: {
               </div>
             )}
 
-            {selectedMethod.available && (
+            {method && isMethodReady(method) && (
               <>
                 <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-3 text-xs text-blue-300 flex gap-2">
                   <span className="shrink-0">ℹ️</span>
@@ -218,7 +290,7 @@ export default function CheckoutModal({ listing, user, profile, onClose }: {
               </>
             )}
 
-            {!selectedMethod.available && (
+            {method && !isMethodReady(method) && (
               <button onClick={() => setStep('method')}
                 className="w-full py-3 rounded-xl text-white font-black text-sm bg-violet-600 hover:bg-violet-500 transition-all">
                 ← Elegir otro método

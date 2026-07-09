@@ -127,7 +127,7 @@ const TXN_CSS: Record<string, string> = {
   trade:   'text-blue-400',
 }
 
-type Tab = 'overview' | 'users' | 'listings' | 'orders' | 'transactions' | 'images'
+type Tab = 'overview' | 'users' | 'listings' | 'orders' | 'transactions' | 'pagos' | 'images'
 
 // ─── Panel principal ──────────────────────────────────────────────────────────
 export default function Admin() {
@@ -156,6 +156,16 @@ export default function Admin() {
   const [txns, setTxns]             = useState<AdminTxn[]>([])
   const [txnsLoading, setTL]        = useState(false)
 
+  // Pagos config
+  const [payConfig, setPayConfig] = useState({
+    spei_banco: '', spei_clabe: '', spei_beneficiario: 'PullStack',
+    mp_usuario: '', mp_link: '',
+    oxxo_link: '',
+    tarjeta_link: '',
+  })
+  const [payLoading, setPL]   = useState(false)
+  const [paySaved, setPaySaved] = useState(false)
+
   // Images
   const [imgSection, setImgSection]   = useState(IMAGE_SECTIONS[0].label)
   const [overridesCount, setOvCount]  = useState(Object.keys(getOverrides()).length)
@@ -168,6 +178,7 @@ export default function Admin() {
     if (tab === 'listings')     loadListings()
     if (tab === 'orders')       loadOrders()
     if (tab === 'transactions') loadTxns()
+    if (tab === 'pagos')        loadPayConfig()
   }, [tab])
 
   const loadStats = async () => {
@@ -239,6 +250,26 @@ export default function Admin() {
     if (status === 'completed') loadStats()
   }
 
+  const loadPayConfig = async () => {
+    setPL(true)
+    const { data } = await supabase.from('settings').select('key, value')
+    if (data) {
+      const map: Record<string, string> = {}
+      data.forEach(r => { map[r.key] = r.value || '' })
+      setPayConfig(prev => ({ ...prev, ...map }))
+    }
+    setPL(false)
+  }
+
+  const savePayConfig = async () => {
+    const entries = Object.entries(payConfig)
+    await Promise.all(entries.map(([key, value]) =>
+      supabase.from('settings').upsert({ key, value, updated_at: new Date().toISOString() })
+    ))
+    setPaySaved(true)
+    setTimeout(() => setPaySaved(false), 2500)
+  }
+
   const copySQL = () => {
     navigator.clipboard.writeText(SETUP_SQL)
     setCopied(true); setTimeout(() => setCopied(false), 2000)
@@ -256,6 +287,7 @@ export default function Admin() {
     { id: 'listings',      label: 'Anuncios',       icon: '🏷️' },
     { id: 'orders',        label: 'Pedidos',        icon: '📦' },
     { id: 'transactions',  label: 'Transacciones',  icon: '💸', badge: pendingTxns },
+    { id: 'pagos',         label: 'Métodos de Pago', icon: '⚙️' },
     { id: 'images',        label: 'Imágenes',       icon: '🖼️' },
   ]
 
@@ -536,6 +568,92 @@ export default function Admin() {
                   ))}
                 </div>
               )
+            }
+          </div>
+        )}
+
+        {/* ── MÉTODOS DE PAGO ── */}
+        {tab === 'pagos' && (
+          <div className="max-w-2xl space-y-6">
+            {payLoading
+              ? <div className="flex justify-center py-20"><div className="w-8 h-8 border-2 border-violet-500 border-t-transparent rounded-full animate-spin"/></div>
+              : <>
+                {/* SPEI */}
+                <div className="bg-[#1a1a36] border border-white/5 rounded-2xl p-5 space-y-4">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-2xl">🏦</span>
+                    <h3 className="text-white font-black">SPEI / Transferencia</h3>
+                  </div>
+                  {[
+                    { key: 'spei_banco',        label: 'Banco',        placeholder: 'Ej: BBVA, Banorte, HSBC' },
+                    { key: 'spei_clabe',         label: 'CLABE (18 dígitos)', placeholder: '012345678901234567' },
+                    { key: 'spei_beneficiario',  label: 'Beneficiario', placeholder: 'PullStack' },
+                  ].map(f => (
+                    <div key={f.key}>
+                      <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1.5 block">{f.label}</label>
+                      <input value={payConfig[f.key as keyof typeof payConfig]}
+                        onChange={e => setPayConfig(p => ({ ...p, [f.key]: e.target.value }))}
+                        placeholder={f.placeholder}
+                        className="w-full bg-[#21213e] border border-white/10 text-white placeholder-gray-700 px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:border-violet-500/50 font-mono" />
+                    </div>
+                  ))}
+                </div>
+
+                {/* MercadoPago */}
+                <div className="bg-[#1a1a36] border border-white/5 rounded-2xl p-5 space-y-4">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-2xl">💳</span>
+                    <h3 className="text-white font-black">MercadoPago</h3>
+                  </div>
+                  {[
+                    { key: 'mp_usuario', label: 'Usuario / alias MP', placeholder: '@pullstack' },
+                    { key: 'mp_link',    label: 'Link de cobro MP',   placeholder: 'https://mpago.la/...' },
+                  ].map(f => (
+                    <div key={f.key}>
+                      <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1.5 block">{f.label}</label>
+                      <input value={payConfig[f.key as keyof typeof payConfig]}
+                        onChange={e => setPayConfig(p => ({ ...p, [f.key]: e.target.value }))}
+                        placeholder={f.placeholder}
+                        className="w-full bg-[#21213e] border border-white/10 text-white placeholder-gray-700 px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:border-violet-500/50 font-mono" />
+                    </div>
+                  ))}
+                </div>
+
+                {/* OXXO */}
+                <div className="bg-[#1a1a36] border border-white/5 rounded-2xl p-5 space-y-4">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-2xl">🏪</span>
+                    <h3 className="text-white font-black">OXXO Pay</h3>
+                  </div>
+                  <div>
+                    <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1.5 block">Link para generar ficha OXXO</label>
+                    <input value={payConfig.oxxo_link}
+                      onChange={e => setPayConfig(p => ({ ...p, oxxo_link: e.target.value }))}
+                      placeholder="https://mpago.la/... (lo genera MercadoPago)"
+                      className="w-full bg-[#21213e] border border-white/10 text-white placeholder-gray-700 px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:border-violet-500/50 font-mono" />
+                  </div>
+                </div>
+
+                {/* Tarjeta */}
+                <div className="bg-[#1a1a36] border border-white/5 rounded-2xl p-5 space-y-4">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-2xl">💰</span>
+                    <h3 className="text-white font-black">Tarjeta (Stripe / MP)</h3>
+                  </div>
+                  <div>
+                    <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1.5 block">Link de pago con tarjeta</label>
+                    <input value={payConfig.tarjeta_link}
+                      onChange={e => setPayConfig(p => ({ ...p, tarjeta_link: e.target.value }))}
+                      placeholder="https://buy.stripe.com/... o https://mpago.la/..."
+                      className="w-full bg-[#21213e] border border-white/10 text-white placeholder-gray-700 px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:border-violet-500/50 font-mono" />
+                  </div>
+                </div>
+
+                <button onClick={savePayConfig}
+                  className={`w-full py-3 rounded-xl font-black text-sm transition-all ${paySaved ? 'bg-emerald-600 text-white' : 'bg-violet-600 hover:bg-violet-500 text-white'}`}>
+                  {paySaved ? '✅ Guardado — compradores ya ven tus datos' : 'Guardar configuración de pagos'}
+                </button>
+              </>
             }
           </div>
         )}
