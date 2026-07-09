@@ -44,6 +44,7 @@ type UserListing = {
   image_url: string | null
   active: boolean
   created_at: string
+  ends_at: string | null
 }
 
 // ─── Catálogo completo ────────────────────────────────────────────────────────
@@ -266,6 +267,7 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
     sport: 'NBA', kind: 'card' as 'card' | 'box' | 'accessory',
     txn_type: 'sale' as 'sale' | 'auction' | 'trade',
     price: '', min_bid: '', grade: '', condition: 'Sin gradear (Raw)',
+    duration_days: '3',
   })
   const [imageFile,    setImageFile]    = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
@@ -328,6 +330,10 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
       setUploading(false)
     }
 
+    const ends_at = form.txn_type === 'auction'
+      ? new Date(Date.now() + parseInt(form.duration_days) * 86400000).toISOString()
+      : null
+
     const payload = {
       user_id:      user.id,
       display_name: profile?.display_name || user.id.slice(0, 8),
@@ -342,6 +348,7 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
       condition:    form.condition,
       image_url,
       active:       true,
+      ends_at,
     }
     const { data, error: err } = await supabase.from('listings').insert(payload).select().single()
     setLoading(false)
@@ -506,6 +513,21 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
                         placeholder="100" min="0"
                         className="w-full bg-[#21213e] border border-white/10 text-white rounded-xl pl-7 pr-4 py-2.5 text-sm focus:outline-none focus:border-red-500/50" />
                     </div>
+                  </div>
+                )}
+
+                {/* Duración subasta */}
+                {form.txn_type === 'auction' && (
+                  <div>
+                    <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1 block">Duración de la subasta</label>
+                    <select value={form.duration_days} onChange={e => set('duration_days', e.target.value)}
+                      className="w-full bg-[#21213e] border border-red-500/20 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none">
+                      <option value="1">⏱ 1 día</option>
+                      <option value="3">⏱ 3 días</option>
+                      <option value="7">⏱ 7 días</option>
+                      <option value="14">⏱ 14 días</option>
+                      <option value="30">⏱ 30 días</option>
+                    </select>
                   </div>
                 )}
 

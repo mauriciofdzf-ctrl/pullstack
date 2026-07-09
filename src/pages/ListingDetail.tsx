@@ -20,6 +20,7 @@ type Listing = {
   image_url: string | null
   active: boolean
   created_at: string
+  ends_at: string | null
 }
 
 type Bid = {
@@ -51,29 +52,66 @@ function timeAgo(date: string) {
   return `hace ${Math.floor(s / 86400)} días`
 }
 
+function useCountdown(endsAt: string | null) {
+  const [parts, setParts] = useState({ d: 0, h: 0, m: 0, s: 0, ended: false, label: '' })
+
+  useEffect(() => {
+    if (!endsAt) return
+    const tick = () => {
+      const diff = new Date(endsAt).getTime() - Date.now()
+      if (diff <= 0) {
+        setParts({ d: 0, h: 0, m: 0, s: 0, ended: true, label: 'Subasta finalizada' })
+        return
+      }
+      const d = Math.floor(diff / 86400000)
+      const h = Math.floor((diff % 86400000) / 3600000)
+      const m = Math.floor((diff % 3600000) / 60000)
+      const s = Math.floor((diff % 60000) / 1000)
+      setParts({ d, h, m, s, ended: false, label: '' })
+    }
+    tick()
+    const iv = setInterval(tick, 1000)
+    return () => clearInterval(iv)
+  }, [endsAt])
+
+  return parts
+}
+
 export default function ListingDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { user, profile } = useAuth()
 
-  const [listing, setListing]   = useState<Listing | null>(null)
-  const [bids, setBids]         = useState<Bid[]>([])
-  const [loading, setLoading]   = useState(true)
-  const [bidAmount, setBidAmount] = useState('')
-  const [bidding, setBidding]   = useState(false)
-  const [bidError, setBidError] = useState('')
+  const [listing, setListing]       = useState<Listing | null>(null)
+  const [bids, setBids]             = useState<Bid[]>([])
+  const [loading, setLoading]       = useState(true)
+  const [bidAmount, setBidAmount]   = useState('')
+  const [bidding, setBidding]       = useState(false)
+  const [bidError, setBidError]     = useState('')
   const [bidSuccess, setBidSuccess] = useState(false)
   const [showCheckout, setShowCheckout] = useState(false)
-  const [tradeMsg, setTradeMsg] = useState('')
-  const [tradeSent, setTradeSent] = useState(false)
+  const [tradeMsg, setTradeMsg]     = useState('')
+  const [tradeSent, setTradeSent]   = useState(false)
   const [tradeSending, setTradeSending] = useState(false)
-  const [myTxn, setMyTxn] = useState<MyTxn | null>(null)
+  const [myTxn, setMyTxn]           = useState<MyTxn | null>(null)
+  const [, setLiveCount]            = useState(0)
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null)
+
+  const countdown = useCountdown(listing?.ends_at ?? null)
 
   useEffect(() => {
     if (!id) return
     loadListing()
   }, [id])
+
+  useEffect(() => {
+    if (!user || !id) return
+    supabase.from('transactions')
+      .select('id, status, payment_reference, total_paid, payment_method, tracking_number, tracking_carrier, tracking_url, estimated_delivery, created_at')
+      .eq('listing_id', id).eq('buyer_id', user.id)
+      .order('created_at', { ascending: false }).limit(1).single()
+      .then(({ data }) => { if (data) setMyTxn(data as MyTxn) })
+  }, [user, id])
 
   const loadListing = async () => {
     setLoading(true)
@@ -84,29 +122,20 @@ export default function ListingDetail() {
     setLoading(false)
   }
 
-  useEffect(() => {
-    if (!user || !id) return
-    supabase.from('transactions')
-      .select('id, status, payment_reference, total_paid, payment_method, tracking_number, tracking_carrier, tracking_url, estimated_delivery, created_at')
-      .eq('listing_id', id)
-      .eq('buyer_id', user.id)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .single()
-      .then(({ data }) => { if (data) setMyTxn(data as MyTxn) })
-  }, [user, id])
-
   const loadBids = async (listingId: number) => {
     const { data } = await supabase.from('bids')
       .select('*').eq('listing_id', listingId).order('amount', { ascending: false })
     setBids((data || []) as Bid[])
 
-    channelRef.current = supabase.channel(`bids-${listingId}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'bids', filter: `listing_id=eq.${listingId}` },
-        payload => {
-          const b = payload.new as Bid
-          setBids(prev => [b, ...prev].sort((a, z) => z.amount - a.amount))
-        })
+    channelRef.current = supabase.channel(`bids-live-${listingId}`)
+      .on('postgres_changes', {
+        event: 'INSERT', schema: 'public', table: 'bids',
+        filter: `listing_id=eq.${listingId}`,
+      }, payload => {
+        const b = payload.new as Bid
+        setBids(prev => [b, ...prev].sort((a, z) => z.amount - a.amount))
+        setLiveCount(n => n + 1)
+      })
       .subscribe()
   }
 
@@ -121,17 +150,11 @@ export default function ListingDetail() {
 
   const placeBid = async () => {
     if (!user || !listing) return
+    if (countdown.ended) return
     const amt = parseFloat(bidAmount)
-    if (!amt || amt < minNext) {
-      setBidError(`La puja mínima es $${minNext.toLocaleString()}`)
-      return
-    }
-    if (topBid?.bidder_id === user.id) {
-      setBidError('Ya tienes la puja más alta')
-      return
-    }
-    setBidding(true)
-    setBidError('')
+    if (!amt || amt < minNext) { setBidError(`Puja mínima: $${minNext.toLocaleString()}`); return }
+    if (topBid?.bidder_id === user.id) { setBidError('Ya tienes la puja más alta'); return }
+    setBidding(true); setBidError('')
     const { error } = await supabase.from('bids').insert({
       listing_id:  listing.id,
       bidder_id:   user.id,
@@ -177,7 +200,11 @@ export default function ListingDetail() {
     </div>
   )
 
-  const TXN_COLOR = { sale: 'bg-violet-600/15 text-violet-400 border-violet-500/30', auction: 'bg-red-500/15 text-red-400 border-red-500/30', trade: 'bg-blue-500/15 text-blue-400 border-blue-500/30' }
+  const TXN_COLOR = {
+    sale:    'bg-violet-600/15 text-violet-400 border-violet-500/30',
+    auction: 'bg-red-500/15 text-red-400 border-red-500/30',
+    trade:   'bg-blue-500/15 text-blue-400 border-blue-500/30',
+  }
   const TXN_LABEL = { sale: 'Venta', auction: 'Subasta', trade: 'Trade' }
   const isOwner = user?.id === listing.user_id
 
@@ -196,7 +223,13 @@ export default function ListingDetail() {
 
           {/* ── Imagen ── */}
           <div>
-            <div className="bg-[#0d0d1a] rounded-2xl overflow-hidden border border-white/5" style={{ aspectRatio: '5/7' }}>
+            <div className="bg-[#0d0d1a] rounded-2xl overflow-hidden border border-white/5 relative" style={{ aspectRatio: '5/7' }}>
+              {listing.txn_type === 'auction' && !countdown.ended && (
+                <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5 bg-red-600/90 backdrop-blur text-white text-[10px] font-black px-2.5 py-1.5 rounded-full">
+                  <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+                  EN VIVO
+                </div>
+              )}
               {listing.image_url
                 ? <img src={listing.image_url} alt={listing.title} className="w-full h-full object-contain" />
                 : (
@@ -207,6 +240,42 @@ export default function ListingDetail() {
                 )
               }
             </div>
+
+            {/* Live bid feed debajo de la imagen */}
+            {listing.txn_type === 'auction' && bids.length > 0 && (
+              <div className="mt-4 bg-[#1a1a36] border border-red-500/15 rounded-2xl overflow-hidden">
+                <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/5 bg-red-500/5">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                    <p className="text-red-400 text-xs font-black uppercase tracking-widest">Pujas en vivo</p>
+                  </div>
+                  <span className="text-gray-600 text-[10px] font-bold">{bids.length} puja{bids.length !== 1 ? 's' : ''}</span>
+                </div>
+                <div className="divide-y divide-white/5 max-h-64 overflow-y-auto">
+                  {bids.map((b, i) => (
+                    <div key={b.id} className={`flex items-center gap-3 px-4 py-3 transition-all ${i === 0 ? 'bg-red-500/8' : ''}`}>
+                      <div className={`w-7 h-7 rounded-lg flex items-center justify-center font-black text-xs shrink-0 ${
+                        i === 0 ? 'bg-gradient-to-br from-yellow-400 to-orange-500 text-black' :
+                        i === 1 ? 'bg-gradient-to-br from-gray-300 to-gray-500 text-black' :
+                        i === 2 ? 'bg-gradient-to-br from-orange-700 to-orange-900 text-white' :
+                        'bg-white/5 text-gray-500'
+                      }`}>
+                        {i === 0 ? '🏆' : `${i + 1}`}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-sm font-black truncate ${i === 0 ? 'text-white' : 'text-gray-400'}`}>
+                          {b.bidder_id === user?.id ? (i === 0 ? '⭐ Tú (líder)' : 'Tú') : b.bidder_name}
+                        </p>
+                        <p className="text-gray-700 text-[9px]">{timeAgo(b.created_at)}</p>
+                      </div>
+                      <p className={`font-black text-sm tabular-nums ${i === 0 ? 'text-yellow-400' : 'text-gray-500'}`}>
+                        ${b.amount.toLocaleString('es-MX')}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* ── Info + Acciones ── */}
@@ -225,20 +294,22 @@ export default function ListingDetail() {
             </div>
 
             {/* Detalles */}
-            <div className="grid grid-cols-2 gap-3">
-              {listing.grade && (
-                <div className="bg-[#1a1a36] border border-white/5 rounded-xl p-3">
-                  <p className="text-gray-600 text-[10px] font-bold uppercase mb-1">Grado</p>
-                  <p className="text-violet-400 font-black">{listing.grade}</p>
-                </div>
-              )}
-              {listing.condition && (
-                <div className="bg-[#1a1a36] border border-white/5 rounded-xl p-3">
-                  <p className="text-gray-600 text-[10px] font-bold uppercase mb-1">Condición</p>
-                  <p className="text-white font-bold text-sm">{listing.condition}</p>
-                </div>
-              )}
-            </div>
+            {(listing.grade || listing.condition) && (
+              <div className="grid grid-cols-2 gap-3">
+                {listing.grade && (
+                  <div className="bg-[#1a1a36] border border-white/5 rounded-xl p-3">
+                    <p className="text-gray-600 text-[10px] font-bold uppercase mb-1">Grado</p>
+                    <p className="text-violet-400 font-black">{listing.grade}</p>
+                  </div>
+                )}
+                {listing.condition && (
+                  <div className="bg-[#1a1a36] border border-white/5 rounded-xl p-3">
+                    <p className="text-gray-600 text-[10px] font-bold uppercase mb-1">Condición</p>
+                    <p className="text-white font-bold text-sm">{listing.condition}</p>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Vendedor */}
             <div className="flex items-center gap-3 bg-[#1a1a36] border border-white/5 rounded-xl p-3">
@@ -270,81 +341,104 @@ export default function ListingDetail() {
 
             {/* ── SUBASTA ── */}
             {listing.txn_type === 'auction' && (
-              <div className="bg-[#1a1a36] border border-red-500/20 rounded-2xl p-5 space-y-4">
-                <div className="flex items-end justify-between">
-                  <div>
-                    <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1">
-                      {topBid ? 'Puja más alta' : 'Puja inicial'}
-                    </p>
-                    <p className="text-white font-black text-4xl">
-                      ${(topBid?.amount || parseFloat((listing.min_bid || '0').replace(/[^0-9.]/g, ''))).toLocaleString()}
-                    </p>
+              <div className={`border rounded-2xl overflow-hidden ${countdown.ended ? 'border-gray-500/20' : 'border-red-500/25'}`}>
+
+                {/* Timer */}
+                {listing.ends_at && (
+                  <div className={`px-5 py-4 ${countdown.ended ? 'bg-gray-500/10' : 'bg-red-500/8'}`}>
+                    {countdown.ended ? (
+                      <div className="text-center">
+                        <p className="text-gray-400 font-black text-lg">🔒 Subasta finalizada</p>
+                      </div>
+                    ) : (
+                      <>
+                        <p className="text-red-400 text-[10px] font-bold uppercase tracking-widest mb-3 flex items-center gap-1.5">
+                          <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
+                          Tiempo restante
+                        </p>
+                        <div className="grid grid-cols-4 gap-2">
+                          {[
+                            { v: countdown.d, label: 'días' },
+                            { v: countdown.h, label: 'horas' },
+                            { v: countdown.m, label: 'min' },
+                            { v: countdown.s, label: 'seg' },
+                          ].map(({ v, label }) => (
+                            <div key={label} className="bg-[#0d0d1a] border border-red-500/15 rounded-xl p-2 text-center">
+                              <p className="text-white font-black text-2xl tabular-nums leading-none">
+                                {String(v).padStart(2, '0')}
+                              </p>
+                              <p className="text-red-400/60 text-[9px] font-bold uppercase mt-1">{label}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </>
+                    )}
                   </div>
-                  {topBid && (
-                    <div className="text-right">
-                      <p className="text-gray-600 text-[10px]">por</p>
-                      <p className="text-emerald-400 font-black text-sm">
-                        {topBid.bidder_id === user?.id ? '🏆 Tú lideras' : topBid.bidder_name}
+                )}
+
+                <div className="bg-[#1a1a36] p-5 space-y-4">
+                  {/* Puja más alta */}
+                  <div className="flex items-end justify-between">
+                    <div>
+                      <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1">
+                        {topBid ? 'Puja más alta' : 'Puja inicial'}
+                      </p>
+                      <p className="text-white font-black text-4xl">
+                        ${(topBid?.amount || parseFloat((listing.min_bid || '0').replace(/[^0-9.]/g, ''))).toLocaleString('es-MX')}
                       </p>
                     </div>
-                  )}
-                </div>
-
-                {isOwner ? (
-                  <p className="text-gray-600 text-sm text-center">Este es tu anuncio — {bids.length} puja(s)</p>
-                ) : !user ? (
-                  <Link to="/login" className="block w-full text-center bg-red-500 hover:bg-red-400 text-white font-black py-3 rounded-xl transition-all">Inicia sesión para pujar</Link>
-                ) : (
-                  <>
-                    {bidSuccess && (
-                      <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 text-center text-emerald-400 font-bold text-sm">
-                        ✅ ¡Puja registrada!
+                    {topBid && (
+                      <div className="text-right">
+                        <p className="text-gray-600 text-[10px]">por</p>
+                        <p className={`font-black text-sm ${topBid.bidder_id === user?.id ? 'text-yellow-400' : 'text-emerald-400'}`}>
+                          {topBid.bidder_id === user?.id ? '🏆 Tú lideras' : topBid.bidder_name}
+                        </p>
+                        <p className="text-gray-700 text-[10px]">{bids.length} puja{bids.length !== 1 ? 's' : ''} en total</p>
                       </div>
                     )}
-                    <div>
-                      <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1.5 block">
-                        Tu puja (mínimo ${minNext.toLocaleString()})
-                      </label>
-                      <div className="flex gap-2">
-                        <div className="relative flex-1">
-                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-bold">$</span>
-                          <input type="number" value={bidAmount} onChange={e => { setBidAmount(e.target.value); setBidError('') }}
-                            placeholder={minNext.toString()}
-                            className="w-full bg-[#21213e] border border-red-500/30 text-white pl-7 pr-4 py-3 rounded-xl text-sm focus:outline-none focus:border-red-500/60 font-black placeholder-gray-700" />
-                        </div>
-                        <button onClick={placeBid} disabled={bidding || !bidAmount}
-                          className="bg-red-500 hover:bg-red-400 text-white font-black px-5 py-3 rounded-xl transition-all disabled:opacity-50 flex items-center gap-2">
-                          {bidding && <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
-                          Pujar
-                        </button>
-                      </div>
-                      {bidError && <p className="text-red-400 text-xs mt-1.5">{bidError}</p>}
-                    </div>
-                  </>
-                )}
-
-                {/* Historial de pujas */}
-                {bids.length > 0 && (
-                  <div>
-                    <p className="text-gray-600 text-[10px] font-bold uppercase tracking-widest mb-2">{bids.length} puja(s)</p>
-                    <div className="space-y-1.5 max-h-48 overflow-y-auto">
-                      {bids.map((b, i) => (
-                        <div key={b.id} className={`flex items-center justify-between px-3 py-2 rounded-lg ${i === 0 ? 'bg-red-500/10 border border-red-500/20' : 'bg-[#21213e]'}`}>
-                          <div className="flex items-center gap-2">
-                            {i === 0 && <span className="text-xs">🏆</span>}
-                            <p className="text-white text-xs font-bold">
-                              {b.bidder_id === user?.id ? 'Tú' : b.bidder_name}
-                            </p>
-                          </div>
-                          <div className="text-right">
-                            <p className={`font-black text-sm ${i === 0 ? 'text-emerald-400' : 'text-gray-400'}`}>${b.amount.toLocaleString()}</p>
-                            <p className="text-gray-700 text-[9px]">{timeAgo(b.created_at)}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
                   </div>
-                )}
+
+                  {/* Formulario de puja */}
+                  {countdown.ended ? (
+                    <div className="bg-gray-500/10 border border-gray-500/20 rounded-xl p-3 text-center">
+                      <p className="text-gray-400 text-sm font-bold">Esta subasta ya terminó</p>
+                    </div>
+                  ) : isOwner ? (
+                    <p className="text-gray-600 text-sm text-center">Este es tu anuncio — {bids.length} puja(s)</p>
+                  ) : !user ? (
+                    <Link to="/login" className="block w-full text-center bg-red-500 hover:bg-red-400 text-white font-black py-3 rounded-xl transition-all">Inicia sesión para pujar</Link>
+                  ) : (
+                    <>
+                      {bidSuccess && (
+                        <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 text-center text-emerald-400 font-bold text-sm animate-pulse">
+                          ✅ ¡Puja registrada! Ahora lideras.
+                        </div>
+                      )}
+                      <div>
+                        <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1.5 block">
+                          Tu puja — mínimo <span className="text-red-400">${minNext.toLocaleString('es-MX')}</span>
+                        </label>
+                        <div className="flex gap-2">
+                          <div className="relative flex-1">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-bold">$</span>
+                            <input
+                              type="number" value={bidAmount}
+                              onChange={e => { setBidAmount(e.target.value); setBidError('') }}
+                              placeholder={minNext.toString()}
+                              className="w-full bg-[#21213e] border border-red-500/30 text-white pl-7 pr-4 py-3 rounded-xl text-sm focus:outline-none focus:border-red-500/60 font-black placeholder-gray-700"
+                            />
+                          </div>
+                          <button onClick={placeBid} disabled={bidding || !bidAmount}
+                            className="bg-red-500 hover:bg-red-400 text-white font-black px-5 py-3 rounded-xl transition-all disabled:opacity-50 flex items-center gap-2 whitespace-nowrap">
+                            {bidding && <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+                            🔨 Pujar
+                          </button>
+                        </div>
+                        {bidError && <p className="text-red-400 text-xs mt-1.5">{bidError}</p>}
+                      </div>
+                    </>
+                  )}
+                </div>
               </div>
             )}
 
@@ -364,9 +458,11 @@ export default function ListingDetail() {
                   <Link to="/login" className="block w-full text-center bg-blue-500 hover:bg-blue-400 text-white font-black py-3 rounded-xl transition-all">Inicia sesión para tradear</Link>
                 ) : (
                   <>
-                    <textarea value={tradeMsg || `Hola ${listing.display_name}! Me interesa tu "${listing.title}" para un trade. Te ofrezco: `}
+                    <textarea
+                      value={tradeMsg || `Hola ${listing.display_name}! Me interesa tu "${listing.title}" para un trade. Te ofrezco: `}
                       onChange={e => setTradeMsg(e.target.value)} rows={4}
-                      className="w-full bg-[#21213e] border border-blue-500/20 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500/40 resize-none" />
+                      className="w-full bg-[#21213e] border border-blue-500/20 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500/40 resize-none"
+                    />
                     <button onClick={sendTrade} disabled={tradeSending}
                       className="w-full bg-blue-500 hover:bg-blue-400 text-white font-black py-3 rounded-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2">
                       {tradeSending && <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
@@ -377,7 +473,7 @@ export default function ListingDetail() {
               </div>
             )}
 
-            {/* ── MI PEDIDO (si el usuario compró esto) ── */}
+            {/* ── MI PEDIDO ── */}
             {myTxn && (
               <div className="bg-[#1a1a36] border border-cyan-500/20 rounded-2xl p-5 space-y-3">
                 <div className="flex items-center justify-between">
@@ -394,7 +490,6 @@ export default function ListingDetail() {
                      '⏳ Pendiente de verificación'}
                   </span>
                 </div>
-
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div className="bg-[#21213e] rounded-xl p-3">
                     <p className="text-gray-600 text-[9px] font-bold uppercase mb-1">Referencia</p>
@@ -405,7 +500,6 @@ export default function ListingDetail() {
                     <p className="text-white font-black">${myTxn.total_paid.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</p>
                   </div>
                 </div>
-
                 {myTxn.tracking_number ? (
                   <div className="bg-cyan-500/5 border border-cyan-500/20 rounded-xl p-4 space-y-2.5">
                     <p className="text-cyan-400 text-[10px] font-bold uppercase tracking-widest">Guía de envío</p>
@@ -434,7 +528,7 @@ export default function ListingDetail() {
                 ) : (
                   <div className="bg-yellow-500/5 border border-yellow-500/20 rounded-xl p-3">
                     <p className="text-yellow-400 text-xs font-bold">Verificando tu pago</p>
-                    <p className="text-gray-500 text-xs mt-0.5">El equipo de PullStack confirmará tu pago en máx. 24 hrs.</p>
+                    <p className="text-gray-500 text-xs mt-0.5">El equipo confirmará tu pago en máx. 24 hrs.</p>
                   </div>
                 )}
               </div>
