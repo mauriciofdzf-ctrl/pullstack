@@ -589,7 +589,11 @@ function BidModal({ item, onClose, user, navigate }: {
     const n = parseFloat(amount)
     if (isNaN(n) || n < minBid) { setError(`La puja mínima es $${minBid.toLocaleString()} USD`); return }
     setLoading(true); setError('')
-    await supabase.from('bids').insert({ user_id: user.id, item_id: item.id, item_name: item.name, amount: n })
+    await supabase.from('messages').insert({
+      user_id: user.id,
+      content: `🔨 Puja de $${n.toLocaleString()} USD por "${item.name}" — ${item.detail} (${item.price})`,
+      from_admin: false,
+    })
     setLoading(false); setDone(true)
     setTimeout(onClose, 1800)
   }
