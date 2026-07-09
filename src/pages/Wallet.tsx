@@ -185,7 +185,9 @@ function NewListingInline({ user, profile, onCreated }: {
       <div className="mb-3">
         {imagePreview ? (
           <div className="relative rounded-xl overflow-hidden border border-white/10">
-            <img src={imagePreview} className="w-full h-32 object-cover" alt="preview" />
+            <div className="w-full bg-[#0d0d1a]" style={{ aspectRatio: '5/7' }}>
+              <img src={imagePreview} className="w-full h-full object-contain" alt="preview" />
+            </div>
             <button onClick={() => { setImageFile(null); setImagePreview(null) }}
               className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-lg hover:bg-red-500/80 transition-colors">
               ✕ Cambiar
@@ -515,9 +517,9 @@ export default function Wallet() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {myListings.map(listing => (
                   <div key={listing.id} className={`group bg-[#1a1a36] border rounded-2xl overflow-hidden transition-all ${listing.active ? 'border-white/5 hover:border-violet-500/20' : 'border-white/5 opacity-55'}`}>
-                    <div className="relative h-44 bg-[#21213e] overflow-hidden">
+                    <div className="relative bg-[#0d0d1a] overflow-hidden" style={{ aspectRatio: '5/7' }}>
                       {listing.image_url
-                        ? <img src={listing.image_url} alt={listing.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        ? <img src={listing.image_url} alt={listing.title} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" />
                         : (
                           <div className="w-full h-full flex flex-col items-center justify-center gap-2">
                             <span className="text-5xl opacity-20">{SPORT_ICONS[listing.sport] || '🃏'}</span>

@@ -11,7 +11,7 @@ PullStack es la **plataforma de confianza para coleccionistas de trading cards d
 4. ¿Cómo la vendo sin que me estafen?
 5. ¿Cómo construyo una colección con estrategia?
 
-**URL de producción:** https://pullstack.netlify.app  
+**URL de producción:** https://pullstack.vercel.app  
 **Owner:** Mauricio Fernández (mauriciofdzf@gmail.com)
 
 ## Contexto del negocio (crítico para tomar decisiones)

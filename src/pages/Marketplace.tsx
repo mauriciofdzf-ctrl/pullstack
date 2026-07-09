@@ -400,7 +400,9 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
                 </label>
                 {imagePreview ? (
                   <div className="relative rounded-xl overflow-hidden border border-white/10 group">
-                    <img src={imagePreview} alt="preview" className="w-full h-48 object-cover" />
+                    <div className="w-full bg-[#0d0d1a]" style={{ aspectRatio: '5/7' }}>
+                      <img src={imagePreview} alt="preview" className="w-full h-full object-contain" />
+                    </div>
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center">
                       <button onClick={removeImage}
                         className="opacity-0 group-hover:opacity-100 transition-opacity bg-red-500 hover:bg-red-600 text-white font-bold text-xs px-3 py-2 rounded-lg flex items-center gap-1.5">
@@ -900,9 +902,9 @@ export default function Marketplace() {
                 return (
                   <div key={listing.id} className="group bg-[#1a1a36] border border-white/5 hover:border-violet-500/30 rounded-2xl overflow-hidden transition-all hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(139,92,246,0.15)]">
                     {/* Visual header */}
-                    <div className="relative h-44 bg-gradient-to-br from-[#16162e] to-[#1a1a36] flex items-center justify-center overflow-hidden">
+                    <div className="relative bg-[#0d0d1a] flex items-center justify-center overflow-hidden" style={{ aspectRatio: '5/7' }}>
                       {listing.image_url
-                        ? <img src={listing.image_url} alt={listing.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onError={e => { (e.target as HTMLImageElement).style.display='none' }} />
+                        ? <img src={listing.image_url} alt={listing.title} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" onError={e => { (e.target as HTMLImageElement).style.display='none' }} />
                         : (
                           <div className="flex flex-col items-center gap-2 opacity-25 select-none pointer-events-none">
                             <span className="text-6xl">{LISTING_SPORT_ICON[listing.sport] || '🃏'}</span>
