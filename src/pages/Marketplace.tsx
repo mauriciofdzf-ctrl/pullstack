@@ -967,7 +967,7 @@ export default function Marketplace() {
                           {listing.condition && listing.grade && <p className="text-gray-500 text-[10px]">{listing.condition}</p>}
                         </div>
                         {isOwner && (
-                          <button onClick={() => deleteMyListing(listing.id)} disabled={deletingId === listing.id}
+                          <button onClick={e => { e.stopPropagation(); deleteMyListing(listing.id) }} disabled={deletingId === listing.id}
                             title="Retirar anuncio"
                             className="text-gray-600 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100 p-1.5 rounded-lg hover:bg-red-500/10">
                             {deletingId === listing.id
@@ -981,25 +981,25 @@ export default function Marketplace() {
                       {listing.kind === 'card' ? (
                         <div className="grid grid-cols-3 gap-1.5">
                           <button
-                            onClick={() => { if (!user) { navigate('/login'); return }; setCheckoutModal(listing) }}
+                            onClick={e => { e.stopPropagation(); if (!user) { navigate('/login'); return }; if (listing.txn_type === 'sale') setCheckoutModal(listing); else navigate(`/listing/${listing.id}`) }}
                             className={`py-2 rounded-lg text-[11px] font-bold transition-all text-center ${listing.txn_type === 'sale' ? 'bg-violet-600 hover:bg-violet-500 text-white' : 'bg-[#21213e] border border-white/10 text-gray-500 hover:border-violet-500/30 hover:text-violet-400'}`}>
                             🛒 Comprar
                           </button>
                           <button
-                            onClick={() => { if (!user) { navigate('/login'); return }; setContactModal({ listing, action: 'auction' }) }}
+                            onClick={e => { e.stopPropagation(); navigate(`/listing/${listing.id}`) }}
                             className={`py-2 rounded-lg text-[11px] font-bold transition-all text-center ${listing.txn_type === 'auction' ? 'bg-red-500/80 hover:bg-red-500 text-white' : 'bg-[#21213e] border border-white/10 text-gray-500 hover:border-red-500/30 hover:text-red-400'}`}>
                             🔨 Pujar
                           </button>
                           <button
-                            onClick={() => { if (!user) { navigate('/login'); return }; setContactModal({ listing, action: 'trade' }) }}
+                            onClick={e => { e.stopPropagation(); navigate(`/listing/${listing.id}`) }}
                             className={`py-2 rounded-lg text-[11px] font-bold transition-all text-center ${listing.txn_type === 'trade' ? 'bg-blue-500/80 hover:bg-blue-500 text-white' : 'bg-[#21213e] border border-white/10 text-gray-500 hover:border-blue-500/30 hover:text-blue-400'}`}>
                             🔄 Trade
                           </button>
                         </div>
                       ) : (
-                        <button onClick={() => navigate('/messages')}
+                        <button onClick={e => { e.stopPropagation(); navigate(`/listing/${listing.id}`) }}
                           className="w-full bg-violet-500/10 hover:bg-violet-600 border border-violet-500/30 hover:border-violet-500 text-violet-400 hover:text-white font-bold py-2 px-3 rounded-lg text-xs transition-all">
-                          Contactar vendedor
+                          Ver detalle →
                         </button>
                       )}
                     </div>

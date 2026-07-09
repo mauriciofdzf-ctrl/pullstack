@@ -241,41 +241,6 @@ export default function ListingDetail() {
               }
             </div>
 
-            {/* Live bid feed debajo de la imagen */}
-            {listing.txn_type === 'auction' && bids.length > 0 && (
-              <div className="mt-4 bg-[#1a1a36] border border-red-500/15 rounded-2xl overflow-hidden">
-                <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/5 bg-red-500/5">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-                    <p className="text-red-400 text-xs font-black uppercase tracking-widest">Pujas en vivo</p>
-                  </div>
-                  <span className="text-gray-600 text-[10px] font-bold">{bids.length} puja{bids.length !== 1 ? 's' : ''}</span>
-                </div>
-                <div className="divide-y divide-white/5 max-h-64 overflow-y-auto">
-                  {bids.map((b, i) => (
-                    <div key={b.id} className={`flex items-center gap-3 px-4 py-3 transition-all ${i === 0 ? 'bg-red-500/8' : ''}`}>
-                      <div className={`w-7 h-7 rounded-lg flex items-center justify-center font-black text-xs shrink-0 ${
-                        i === 0 ? 'bg-gradient-to-br from-yellow-400 to-orange-500 text-black' :
-                        i === 1 ? 'bg-gradient-to-br from-gray-300 to-gray-500 text-black' :
-                        i === 2 ? 'bg-gradient-to-br from-orange-700 to-orange-900 text-white' :
-                        'bg-white/5 text-gray-500'
-                      }`}>
-                        {i === 0 ? '🏆' : `${i + 1}`}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className={`text-sm font-black truncate ${i === 0 ? 'text-white' : 'text-gray-400'}`}>
-                          {b.bidder_id === user?.id ? (i === 0 ? '⭐ Tú (líder)' : 'Tú') : b.bidder_name}
-                        </p>
-                        <p className="text-gray-700 text-[9px]">{timeAgo(b.created_at)}</p>
-                      </div>
-                      <p className={`font-black text-sm tabular-nums ${i === 0 ? 'text-yellow-400' : 'text-gray-500'}`}>
-                        ${b.amount.toLocaleString('es-MX')}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
 
           {/* ── Info + Acciones ── */}
@@ -341,15 +306,13 @@ export default function ListingDetail() {
 
             {/* ── SUBASTA ── */}
             {listing.txn_type === 'auction' && (
-              <div className={`border rounded-2xl overflow-hidden ${countdown.ended ? 'border-gray-500/20' : 'border-red-500/25'}`}>
+              <div className={`bg-[#1a1a36] border rounded-2xl ${countdown.ended ? 'border-gray-500/20' : 'border-red-500/25'}`}>
 
                 {/* Timer */}
                 {listing.ends_at && (
-                  <div className={`px-5 py-4 ${countdown.ended ? 'bg-gray-500/10' : 'bg-red-500/8'}`}>
+                  <div className={`px-5 py-4 border-b border-white/5 rounded-t-2xl ${countdown.ended ? 'bg-gray-500/10' : 'bg-red-500/8'}`}>
                     {countdown.ended ? (
-                      <div className="text-center">
-                        <p className="text-gray-400 font-black text-lg">🔒 Subasta finalizada</p>
-                      </div>
+                      <p className="text-gray-400 font-black text-center">🔒 Subasta finalizada</p>
                     ) : (
                       <>
                         <p className="text-red-400 text-[10px] font-bold uppercase tracking-widest mb-3 flex items-center gap-1.5">
@@ -364,9 +327,7 @@ export default function ListingDetail() {
                             { v: countdown.s, label: 'seg' },
                           ].map(({ v, label }) => (
                             <div key={label} className="bg-[#0d0d1a] border border-red-500/15 rounded-xl p-2 text-center">
-                              <p className="text-white font-black text-2xl tabular-nums leading-none">
-                                {String(v).padStart(2, '0')}
-                              </p>
+                              <p className="text-white font-black text-2xl tabular-nums leading-none">{String(v).padStart(2, '0')}</p>
                               <p className="text-red-400/60 text-[9px] font-bold uppercase mt-1">{label}</p>
                             </div>
                           ))}
@@ -376,66 +337,106 @@ export default function ListingDetail() {
                   </div>
                 )}
 
-                <div className="bg-[#1a1a36] p-5 space-y-4">
-                  {/* Puja más alta */}
-                  <div className="flex items-end justify-between">
-                    <div>
-                      <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1">
-                        {topBid ? 'Puja más alta' : 'Puja inicial'}
-                      </p>
-                      <p className="text-white font-black text-4xl">
-                        ${(topBid?.amount || parseFloat((listing.min_bid || '0').replace(/[^0-9.]/g, ''))).toLocaleString('es-MX')}
+                {/* Puja más alta */}
+                <div className="px-5 pt-5 pb-4 border-b border-white/5 flex items-end justify-between gap-3">
+                  <div>
+                    <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1">
+                      {topBid ? 'Puja más alta' : 'Puja inicial'}
+                    </p>
+                    <p className="text-white font-black text-4xl tabular-nums">
+                      ${(topBid?.amount || parseFloat((listing.min_bid || '0').replace(/[^0-9.]/g, ''))).toLocaleString('es-MX')}
+                    </p>
+                  </div>
+                  {topBid ? (
+                    <div className="text-right shrink-0">
+                      <p className="text-gray-600 text-[10px]">por</p>
+                      <p className={`font-black text-sm ${topBid.bidder_id === user?.id ? 'text-yellow-400' : 'text-emerald-400'}`}>
+                        {topBid.bidder_id === user?.id ? '🏆 Tú lideras' : topBid.bidder_name}
                       </p>
                     </div>
-                    {topBid && (
-                      <div className="text-right">
-                        <p className="text-gray-600 text-[10px]">por</p>
-                        <p className={`font-black text-sm ${topBid.bidder_id === user?.id ? 'text-yellow-400' : 'text-emerald-400'}`}>
-                          {topBid.bidder_id === user?.id ? '🏆 Tú lideras' : topBid.bidder_name}
-                        </p>
-                        <p className="text-gray-700 text-[10px]">{bids.length} puja{bids.length !== 1 ? 's' : ''} en total</p>
-                      </div>
-                    )}
-                  </div>
+                  ) : (
+                    <span className="text-gray-600 text-xs shrink-0">Sin pujas aún</span>
+                  )}
+                </div>
 
-                  {/* Formulario de puja */}
+                {/* Historial de pujas — siempre visible */}
+                <div className="px-5 py-3 border-b border-white/5">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-gray-600 text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
+                      Pujas en vivo ({bids.length})
+                    </p>
+                  </div>
+                  {bids.length === 0 ? (
+                    <p className="text-gray-700 text-xs text-center py-4">Sé el primero en pujar 🔨</p>
+                  ) : (
+                    <div className="space-y-1.5 max-h-52 overflow-y-auto">
+                      {bids.map((b, i) => (
+                        <div key={b.id} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all ${i === 0 ? 'bg-red-500/10 border border-red-500/20' : 'bg-[#21213e]'}`}>
+                          <div className={`w-6 h-6 rounded-lg flex items-center justify-center text-xs font-black shrink-0 ${
+                            i === 0 ? 'bg-yellow-400 text-black' :
+                            i === 1 ? 'bg-gray-400 text-black' :
+                            i === 2 ? 'bg-orange-700 text-white' :
+                            'bg-white/5 text-gray-600'
+                          }`}>
+                            {i < 3 ? ['🥇','🥈','🥉'][i] : i + 1}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className={`text-sm font-black truncate ${i === 0 ? 'text-white' : 'text-gray-400'}`}>
+                              {b.bidder_id === user?.id ? (i === 0 ? '⭐ Tú (líder)' : 'Tú') : b.bidder_name}
+                            </p>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <p className={`font-black text-sm tabular-nums ${i === 0 ? 'text-yellow-400' : 'text-gray-500'}`}>
+                              ${b.amount.toLocaleString('es-MX')}
+                            </p>
+                            <p className="text-gray-700 text-[9px]">{timeAgo(b.created_at)}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Formulario de puja */}
+                <div className="px-5 py-4">
                   {countdown.ended ? (
                     <div className="bg-gray-500/10 border border-gray-500/20 rounded-xl p-3 text-center">
                       <p className="text-gray-400 text-sm font-bold">Esta subasta ya terminó</p>
                     </div>
                   ) : isOwner ? (
-                    <p className="text-gray-600 text-sm text-center">Este es tu anuncio — {bids.length} puja(s)</p>
+                    <p className="text-gray-600 text-sm text-center py-2">Este es tu anuncio</p>
                   ) : !user ? (
-                    <Link to="/login" className="block w-full text-center bg-red-500 hover:bg-red-400 text-white font-black py-3 rounded-xl transition-all">Inicia sesión para pujar</Link>
+                    <Link to="/login" className="block w-full text-center bg-red-500 hover:bg-red-400 text-white font-black py-3 rounded-xl transition-all">
+                      Inicia sesión para pujar
+                    </Link>
                   ) : (
                     <>
                       {bidSuccess && (
-                        <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 text-center text-emerald-400 font-bold text-sm animate-pulse">
-                          ✅ ¡Puja registrada! Ahora lideras.
+                        <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 text-center text-emerald-400 font-bold text-sm mb-3">
+                          ✅ ¡Puja registrada!
                         </div>
                       )}
-                      <div>
-                        <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1.5 block">
-                          Tu puja — mínimo <span className="text-red-400">${minNext.toLocaleString('es-MX')}</span>
-                        </label>
-                        <div className="flex gap-2">
-                          <div className="relative flex-1">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-bold">$</span>
-                            <input
-                              type="number" value={bidAmount}
-                              onChange={e => { setBidAmount(e.target.value); setBidError('') }}
-                              placeholder={minNext.toString()}
-                              className="w-full bg-[#21213e] border border-red-500/30 text-white pl-7 pr-4 py-3 rounded-xl text-sm focus:outline-none focus:border-red-500/60 font-black placeholder-gray-700"
-                            />
-                          </div>
-                          <button onClick={placeBid} disabled={bidding || !bidAmount}
-                            className="bg-red-500 hover:bg-red-400 text-white font-black px-5 py-3 rounded-xl transition-all disabled:opacity-50 flex items-center gap-2 whitespace-nowrap">
-                            {bidding && <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
-                            🔨 Pujar
-                          </button>
+                      <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1.5 block">
+                        Tu puja — mínimo <span className="text-red-400 font-black">${minNext.toLocaleString('es-MX')}</span>
+                      </label>
+                      <div className="flex gap-2">
+                        <div className="relative flex-1">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-bold">$</span>
+                          <input
+                            type="number" value={bidAmount}
+                            onChange={e => { setBidAmount(e.target.value); setBidError('') }}
+                            placeholder={minNext.toString()}
+                            className="w-full bg-[#21213e] border border-red-500/30 text-white pl-7 pr-4 py-3 rounded-xl text-sm focus:outline-none focus:border-red-500/60 font-black placeholder-gray-700"
+                          />
                         </div>
-                        {bidError && <p className="text-red-400 text-xs mt-1.5">{bidError}</p>}
+                        <button onClick={placeBid} disabled={bidding || !bidAmount}
+                          className="bg-red-500 hover:bg-red-400 text-white font-black px-5 py-3 rounded-xl transition-all disabled:opacity-50 flex items-center gap-2 whitespace-nowrap">
+                          {bidding && <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+                          🔨 Pujar
+                        </button>
                       </div>
+                      {bidError && <p className="text-red-400 text-xs mt-1.5">{bidError}</p>}
                     </>
                   )}
                 </div>
