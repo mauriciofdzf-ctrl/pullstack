@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getImages, type ImageKey } from '../lib/imageConfig'
 import CartDrawer, { type CartEntry } from '../components/CartDrawer'
+import CheckoutModal from '../components/CheckoutModal'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
 
@@ -704,6 +705,7 @@ export default function Marketplace() {
   const [showPublish,   setShowPublish]   = useState(false)
   const [deletingId,    setDeletingId]    = useState<number | null>(null)
   const [contactModal,  setContactModal]  = useState<{ listing: UserListing; action: 'sale' | 'auction' | 'trade' } | null>(null)
+  const [checkoutModal, setCheckoutModal] = useState<UserListing | null>(null)
 
   const MXN_RATE = 17.5
   const fmtMXN = (usdStr: string) => {
@@ -951,7 +953,7 @@ export default function Marketplace() {
                       {listing.kind === 'card' ? (
                         <div className="grid grid-cols-3 gap-1.5">
                           <button
-                            onClick={() => { if (!user) { navigate('/login'); return }; setContactModal({ listing, action: 'sale' }) }}
+                            onClick={() => { if (!user) { navigate('/login'); return }; setCheckoutModal(listing) }}
                             className={`py-2 rounded-lg text-[11px] font-bold transition-all text-center ${listing.txn_type === 'sale' ? 'bg-violet-600 hover:bg-violet-500 text-white' : 'bg-[#21213e] border border-white/10 text-gray-500 hover:border-violet-500/30 hover:text-violet-400'}`}>
                             🛒 Comprar
                           </button>
@@ -1124,6 +1126,14 @@ export default function Marketplace() {
           user={user}
           profile={profile}
           onClose={() => setContactModal(null)}
+        />
+      )}
+      {checkoutModal && user && (
+        <CheckoutModal
+          listing={checkoutModal}
+          user={user}
+          profile={profile}
+          onClose={() => setCheckoutModal(null)}
         />
       )}
     </div>
