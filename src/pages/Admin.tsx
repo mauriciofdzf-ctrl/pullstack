@@ -223,10 +223,6 @@ export default function Admin() {
     setListings(prev => prev.filter(l => l.id !== id))
   }
 
-  const toggleListing = async (id: number, active: boolean) => {
-    await supabase.from('listings').update({ active }).eq('id', id)
-    setListings(prev => prev.map(l => l.id === id ? { ...l, active } : l))
-  }
 
   const loadOrders = async () => {
     setOL(true)
@@ -489,12 +485,12 @@ export default function Admin() {
               : (
                 <div className="space-y-2">
                   {listings.map(l => (
-                    <div key={l.id} className={`flex items-center gap-3 bg-[#12161f] border rounded-xl px-4 py-3 transition-all ${l.active ? 'border-white/5' : 'border-red-500/10 opacity-50'}`}>
+                    <div key={l.id} className="flex items-center gap-3 bg-[#12161f] border border-white/5 rounded-xl px-4 py-3 hover:border-white/10 transition-all">
                       <div className="flex-1 min-w-0">
                         <p className="text-white text-sm font-medium truncate">{l.title}</p>
-                        <p className="text-gray-600 text-[10px]">
+                        <p className="text-gray-600 text-[10px] mt-0.5">
                           {l.display_name} · {l.sport} ·
-                          <span className={` font-bold ml-1 ${TXN_CSS[l.txn_type] || 'text-gray-400'}`}>{l.txn_type}</span>
+                          <span className={`font-bold ml-1 ${TXN_CSS[l.txn_type] || 'text-gray-400'}`}>{l.txn_type}</span>
                           {l.price && <span className="text-emerald-400 font-bold ml-2">{l.price}</span>}
                         </p>
                       </div>
@@ -502,13 +498,9 @@ export default function Admin() {
                         <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${l.active ? 'bg-emerald-500/15 text-emerald-400' : 'bg-red-500/15 text-red-400'}`}>
                           {l.active ? '● Activo' : '○ Pausado'}
                         </span>
-                        <button onClick={() => toggleListing(l.id, !l.active)}
-                          className="text-[10px] font-bold px-2.5 py-1 rounded-lg border border-white/10 text-gray-500 hover:border-white/20 hover:text-white transition-all">
-                          {l.active ? 'Pausar' : 'Activar'}
-                        </button>
                         <button onClick={() => deleteListing(l.id)}
-                          className="text-[10px] font-bold px-2.5 py-1 rounded-lg border border-red-500/20 text-red-400 hover:bg-red-500/10 transition-all">
-                          ✕
+                          className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 hover:border-red-500/50 transition-all">
+                          🗑️ Eliminar
                         </button>
                       </div>
                     </div>
