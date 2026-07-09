@@ -90,7 +90,7 @@ export default function CartDrawer({ items, onClose, onRemove, onClear }: Props)
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40" onClick={onClose} />
 
       {/* Drawer */}
-      <div className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-[#1a1a36] border-l border-white/10 z-50 flex flex-col shadow-2xl">
+      <div className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-[#1a1a1a] border-l border-white/10 z-50 flex flex-col shadow-2xl">
 
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-white/5 shrink-0">
@@ -132,7 +132,7 @@ export default function CartDrawer({ items, onClose, onRemove, onClear }: Props)
               ) : (
                 <div className="p-4 space-y-3">
                   {items.map((item, i) => (
-                    <div key={`${item.id}-${i}`} className="flex items-center gap-3 bg-[#21213e] border border-white/5 rounded-xl p-3">
+                    <div key={`${item.id}-${i}`} className="flex items-center gap-3 bg-[#1d1d1d] border border-white/5 rounded-xl p-3">
                       <div className="w-10 h-10 bg-[#222] rounded-lg flex items-center justify-center text-lg shrink-0">
                         {item.kind === 'box' ? '📦' : item.kind === 'accessory' ? '🛡️' : '🃏'}
                       </div>
@@ -152,7 +152,7 @@ export default function CartDrawer({ items, onClose, onRemove, onClear }: Props)
             </div>
 
             {items.length > 0 && (
-              <div className="border-t border-white/5 p-5 space-y-4 shrink-0 bg-[#16162e]">
+              <div className="border-t border-white/5 p-5 space-y-4 shrink-0 bg-[#141414]">
                 <div className="flex items-center justify-between">
                   <span className="text-gray-400 text-sm">Subtotal ({items.length} {items.length === 1 ? 'artículo' : 'artículos'})</span>
                   <span className="text-white font-black text-xl">${total.toLocaleString()}</span>
@@ -187,21 +187,21 @@ export default function CartDrawer({ items, onClose, onRemove, onClear }: Props)
                 <label className="block text-gray-400 text-sm font-medium mb-1.5">Nombre completo *</label>
                 <input value={contactName} onChange={(e) => setContactName(e.target.value)} required
                   placeholder="Tu nombre"
-                  className="w-full bg-[#21213e] border border-white/10 text-white placeholder-gray-600 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-violet-500/50" />
+                  className="w-full bg-[#1d1d1d] border border-white/10 text-white placeholder-gray-600 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-violet-500/50" />
               </div>
 
               <div>
                 <label className="block text-gray-400 text-sm font-medium mb-1.5">Teléfono / WhatsApp *</label>
                 <input value={phone} onChange={(e) => setPhone(e.target.value)} required
                   placeholder="+52 55 1234 5678"
-                  className="w-full bg-[#21213e] border border-white/10 text-white placeholder-gray-600 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-violet-500/50" />
+                  className="w-full bg-[#1d1d1d] border border-white/10 text-white placeholder-gray-600 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-violet-500/50" />
               </div>
 
               <div>
                 <label className="block text-gray-400 text-sm font-medium mb-1.5">Dirección *</label>
                 <input value={address} onChange={(e) => setAddress(e.target.value)} required
                   placeholder="Calle, número, colonia"
-                  className="w-full bg-[#21213e] border border-white/10 text-white placeholder-gray-600 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-violet-500/50" />
+                  className="w-full bg-[#1d1d1d] border border-white/10 text-white placeholder-gray-600 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-violet-500/50" />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -209,12 +209,12 @@ export default function CartDrawer({ items, onClose, onRemove, onClear }: Props)
                   <label className="block text-gray-400 text-sm font-medium mb-1.5">Ciudad *</label>
                   <input value={city} onChange={(e) => setCity(e.target.value)} required
                     placeholder="Ciudad"
-                    className="w-full bg-[#21213e] border border-white/10 text-white placeholder-gray-600 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-violet-500/50" />
+                    className="w-full bg-[#1d1d1d] border border-white/10 text-white placeholder-gray-600 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-violet-500/50" />
                 </div>
                 <div>
                   <label className="block text-gray-400 text-sm font-medium mb-1.5">Estado / País</label>
                   <select value={state} onChange={(e) => setState(e.target.value)}
-                    className="w-full bg-[#21213e] border border-white/10 text-white px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-violet-500/50">
+                    className="w-full bg-[#1d1d1d] border border-white/10 text-white px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-violet-500/50">
                     {MEXICO_STATES.map((s) => <option key={s}>{s}</option>)}
                   </select>
                 </div>
@@ -224,10 +224,10 @@ export default function CartDrawer({ items, onClose, onRemove, onClear }: Props)
                 <label className="block text-gray-400 text-sm font-medium mb-1.5">Notas adicionales (opcional)</label>
                 <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2}
                   placeholder="Instrucciones de entrega, horario, etc."
-                  className="w-full bg-[#21213e] border border-white/10 text-white placeholder-gray-600 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-violet-500/50 resize-none" />
+                  className="w-full bg-[#1d1d1d] border border-white/10 text-white placeholder-gray-600 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-violet-500/50 resize-none" />
               </div>
 
-              <div className="bg-[#21213e] border border-white/5 rounded-xl p-4 space-y-2 text-xs text-gray-500">
+              <div className="bg-[#1d1d1d] border border-white/5 rounded-xl p-4 space-y-2 text-xs text-gray-500">
                 <p className="text-white font-bold text-sm mb-2">💳 Pago</p>
                 <p>Te contactaremos vía WhatsApp para coordinar el pago. Métodos disponibles:</p>
                 <div className="flex flex-wrap gap-2 mt-2">
@@ -242,7 +242,7 @@ export default function CartDrawer({ items, onClose, onRemove, onClear }: Props)
               )}
             </div>
 
-            <div className="border-t border-white/5 p-5 shrink-0 bg-[#16162e]">
+            <div className="border-t border-white/5 p-5 shrink-0 bg-[#141414]">
               <div className="flex items-center justify-between mb-4">
                 <span className="text-gray-400 text-sm">Total del pedido</span>
                 <span className="text-white font-black text-xl">${total.toLocaleString()}</span>

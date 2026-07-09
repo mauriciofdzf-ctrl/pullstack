@@ -4,12 +4,12 @@ export function LogoIcon({ size = 32, className = '' }: { size?: number; classNa
     <svg width={size} height={size} viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
       <defs>
         <linearGradient id={id} x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#7c3aed" />
-          <stop offset="100%" stopColor="#d946ef" />
+          <stop offset="0%" stopColor="#f59e0b" />
+          <stop offset="100%" stopColor="#f97316" />
         </linearGradient>
         <linearGradient id={`${id}b`} x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#6d28d9" />
-          <stop offset="100%" stopColor="#c026d3" />
+          <stop offset="0%" stopColor="#d97706" />
+          <stop offset="100%" stopColor="#ea580c" />
         </linearGradient>
       </defs>
       {/* Back card */}
@@ -40,7 +40,7 @@ export function LogoWordmark({ className = '' }: { className?: string }) {
       <span className="text-white">Pull</span>
       <span
         className="bg-clip-text text-transparent"
-        style={{ backgroundImage: 'linear-gradient(135deg, #a78bfa 0%, #e879f9 100%)' }}
+        style={{ backgroundImage: 'linear-gradient(135deg, #fbbf24 0%, #f97316 100%)' }}
       >
         Stack
       </span>

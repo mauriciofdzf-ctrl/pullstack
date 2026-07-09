@@ -45,7 +45,7 @@ export default function Register() {
   }
 
   if (success) return (
-    <div className="min-h-screen bg-[#111128] flex items-center justify-center px-4">
+    <div className="min-h-screen bg-[#0d0d0d] flex items-center justify-center px-4">
       <div className="text-center max-w-sm">
         <div className="w-20 h-20 bg-violet-500/10 border border-violet-500/20 rounded-full flex items-center justify-center text-4xl mx-auto mb-6">✉️</div>
         <h2 className="text-2xl font-black text-white mb-3">¡Revisa tu email!</h2>
@@ -56,7 +56,7 @@ export default function Register() {
           Haz clic en "Confirm your email" para activar tu cuenta. Si no lo ves,{' '}
           <strong className="text-violet-400">revisa la carpeta spam</strong>.
         </p>
-        <div className="bg-[#1a1a36] border border-white/5 rounded-xl p-4 text-left mb-6 space-y-2">
+        <div className="bg-[#1a1a1a] border border-white/5 rounded-xl p-4 text-left mb-6 space-y-2">
           {['Abre tu bandeja de entrada', 'Busca email de "noreply@mail.app.supabase.io"', 'Haz clic en "Confirm your email"', 'Listo — ya puedes iniciar sesión'].map((s, i) => (
             <div key={i} className="flex items-start gap-2 text-xs text-gray-400">
               <span className="text-violet-400 font-black shrink-0">{i + 1}.</span>
@@ -72,7 +72,7 @@ export default function Register() {
   )
 
   return (
-    <div className="min-h-screen bg-[#111128] flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-[#0d0d0d] flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-10">
@@ -84,31 +84,31 @@ export default function Register() {
           <p className="text-gray-500 text-sm">La plataforma de trading cards de LATAM</p>
         </div>
 
-        <div className="bg-[#1a1a36] border border-white/5 rounded-2xl p-8 space-y-5">
+        <div className="bg-[#1a1a1a] border border-white/5 rounded-2xl p-8 space-y-5">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-gray-400 text-sm font-medium mb-1.5">Nombre</label>
               <input type="text" value={name} onChange={(e) => setName(e.target.value)} required
                 placeholder="Tu nombre"
-                className="w-full bg-[#21213e] border border-white/10 text-white placeholder-gray-600 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-violet-500/50 transition-colors" />
+                className="w-full bg-[#1d1d1d] border border-white/10 text-white placeholder-gray-600 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-violet-500/50 transition-colors" />
             </div>
             <div>
               <label className="block text-gray-400 text-sm font-medium mb-1.5">Email</label>
               <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required
                 placeholder="tu@email.com"
-                className="w-full bg-[#21213e] border border-white/10 text-white placeholder-gray-600 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-violet-500/50 transition-colors" />
+                className="w-full bg-[#1d1d1d] border border-white/10 text-white placeholder-gray-600 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-violet-500/50 transition-colors" />
             </div>
             <div>
               <label className="block text-gray-400 text-sm font-medium mb-1.5">Contraseña</label>
               <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required
                 placeholder="Mínimo 6 caracteres"
-                className="w-full bg-[#21213e] border border-white/10 text-white placeholder-gray-600 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-violet-500/50 transition-colors" />
+                className="w-full bg-[#1d1d1d] border border-white/10 text-white placeholder-gray-600 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-violet-500/50 transition-colors" />
             </div>
             <div>
               <label className="block text-gray-400 text-sm font-medium mb-1.5">Confirmar contraseña</label>
               <input type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} required
                 placeholder="••••••••"
-                className="w-full bg-[#21213e] border border-white/10 text-white placeholder-gray-600 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-violet-500/50 transition-colors" />
+                className="w-full bg-[#1d1d1d] border border-white/10 text-white placeholder-gray-600 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-violet-500/50 transition-colors" />
             </div>
 
             {error && (

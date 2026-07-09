@@ -1,6 +1,7 @@
+import { supabase } from './supabase'
+
 // ─── Config central de imágenes ──────────────────────────────────────────────
-// Todas las imágenes de la app se definen aquí.
-// El panel /admin sobreescribe estos defaults en localStorage.
+// Imágenes de la app. Admin puede sobreescribir via Supabase settings table.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export type ImageKey =
@@ -92,4 +93,21 @@ export function getOverrides(): Partial<Record<ImageKey, string>> {
   } catch {
     return {}
   }
+}
+
+// ─── DB-backed image overrides (Supabase settings table) ─────────────────────
+const DB_KEY = 'image_overrides'
+
+export async function loadImageOverridesFromDB(): Promise<Partial<Record<ImageKey, string>>> {
+  const { data } = await supabase.from('settings').select('value').eq('key', DB_KEY).maybeSingle()
+  if (!data?.value) return {}
+  try { return JSON.parse(data.value) as Partial<Record<ImageKey, string>> } catch { return {} }
+}
+
+export async function saveImageOverridesToDB(overrides: Partial<Record<ImageKey, string>>): Promise<void> {
+  await supabase.from('settings').upsert({
+    key: DB_KEY,
+    value: JSON.stringify(overrides),
+    updated_at: new Date().toISOString(),
+  })
 }

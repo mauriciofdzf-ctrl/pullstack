@@ -47,7 +47,7 @@ export default function Shop() {
   const filtered = PRODUCTS.filter((p) => cat === 'Todos' || p.cat === cat)
 
   return (
-    <div className="min-h-screen bg-[#111128] pt-20 pb-16 px-6">
+    <div className="min-h-screen bg-[#0d0d0d] pt-20 pb-16 px-6">
       <div className="max-w-7xl mx-auto">
 
         {/* Header */}
@@ -58,7 +58,7 @@ export default function Shop() {
             <p className="text-gray-500 text-sm">Cajas selladas · Pokémon TCG · One Piece TCG · Accesorios · Envío seguro LATAM</p>
           </div>
           <div className="relative shrink-0">
-            <button className="bg-[#1a1a36] border border-white/10 text-white p-3 rounded-xl hover:border-violet-500/30 transition-colors">
+            <button className="bg-[#1a1a1a] border border-white/10 text-white p-3 rounded-xl hover:border-violet-500/30 transition-colors">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
               </svg>
@@ -84,7 +84,7 @@ export default function Shop() {
         <div className="flex gap-2 mb-8 flex-wrap">
           {CATS.map((c) => (
             <button key={c} onClick={() => setCat(c)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${cat === c ? 'bg-violet-600 text-white' : 'bg-[#1a1a36] border border-white/10 text-gray-400 hover:border-violet-500/30 hover:text-violet-400'}`}>
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${cat === c ? 'bg-violet-600 text-white' : 'bg-[#1a1a1a] border border-white/10 text-gray-400 hover:border-violet-500/30 hover:text-violet-400'}`}>
               {c}
             </button>
           ))}
@@ -96,7 +96,7 @@ export default function Shop() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {filtered.map((p, i) => (
             <div key={i}
-              className="group bg-[#1a1a36] border border-white/5 hover:border-violet-500/30 rounded-2xl overflow-hidden transition-all hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(139,92,246,0.15)]">
+              className="group bg-[#1a1a1a] border border-white/5 hover:border-violet-500/30 rounded-2xl overflow-hidden transition-all hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(139,92,246,0.15)]">
               <div className="relative h-52 overflow-hidden">
                 <img src={p.img} alt={`${p.cat} — ${p.name}`}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
@@ -139,7 +139,7 @@ export default function Shop() {
             { icon: '🛡️', title: 'Sellados 100% Auténticos', sub: 'Verificados antes de enviar' },
             { icon: '💳', title: 'Pago con Stripe', sub: 'Tarjeta, OXXO y transferencia' },
           ].map((b, i) => (
-            <div key={i} className="bg-[#1a1a36] border border-white/5 rounded-xl p-4 flex items-center gap-3">
+            <div key={i} className="bg-[#1a1a1a] border border-white/5 rounded-xl p-4 flex items-center gap-3">
               <span className="text-3xl">{b.icon}</span>
               <div>
                 <p className="text-white font-bold text-sm">{b.title}</p>

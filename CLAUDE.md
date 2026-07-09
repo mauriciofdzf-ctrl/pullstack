@@ -122,10 +122,10 @@ En local: archivo `.env.local` (no commitear).
 
 ## Decisiones de diseño importantes
 
-- **Dark theme único:** bg-[#0a0a0a] / bg-[#111] / bg-[#1a1a1a]. No hay modo claro.
-- **Colores accent:** amber-500 = acción primaria, red-500 = live/peligro, green-400 = éxito.
+- **Dark theme único:** bg-[#0d0d0d] / bg-[#141414] / bg-[#1a1a1a] / bg-[#1d1d1d] inputs. No hay modo claro.
+- **Colores de marca:** amber-500 = acción primaria (botones CTA, tabs activos), red-500 = subastas/live, emerald = ventas/éxito, blue = trades. Logo: gradiente amber→orange.
 - **Sin componentes UI externos:** todo es Tailwind vanilla. No shadcn, no Radix, no MUI.
-- **Imágenes:** Defaults en Unsplash, admin puede overridear con cualquier URL pública. Se guardan en localStorage bajo key `pullstack_images_v1`.
+- **Imágenes:** Defaults en Unsplash, admin puede overridear desde el panel Admin. Se guardan en Supabase `settings` table (key: `image_overrides`), NO localStorage.
 - **TypeScript strict: false** — no forzar tipos estrictos, priorizar velocidad de desarrollo.
 - **Supabase cloud only** — sin instancia local de Supabase.
 

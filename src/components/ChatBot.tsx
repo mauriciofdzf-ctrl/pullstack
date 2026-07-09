@@ -235,9 +235,9 @@ export default function ChatBot() {
 
       {/* Panel de chat */}
       {open && (
-        <div className="fixed bottom-24 right-6 z-50 w-[360px] max-h-[560px] flex flex-col bg-[#1a1a36] border border-white/10 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.6)] overflow-hidden">
+        <div className="fixed bottom-24 right-6 z-50 w-[360px] max-h-[560px] flex flex-col bg-[#1a1a1a] border border-white/10 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.6)] overflow-hidden">
           {/* Header */}
-          <div className="flex items-center gap-3 px-4 py-3 bg-[#16162e] border-b border-white/5">
+          <div className="flex items-center gap-3 px-4 py-3 bg-[#141414] border-b border-white/5">
             <div className="w-9 h-9 bg-violet-600 rounded-full flex items-center justify-center text-black shrink-0">
               <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 2a2 2 0 012 2v1h2a3 3 0 013 3v7a3 3 0 01-3 3H8l-4 3v-3H4a3 3 0 01-3-3V8a3 3 0 013-3h2V4a2 2 0 012-2h4zM9 9a1 1 0 100 2 1 1 0 000-2zm6 0a1 1 0 100 2 1 1 0 000-2zm-3 4a3 3 0 01-2.83-2h5.66A3 3 0 0112 13z" />
@@ -269,7 +269,7 @@ export default function ChatBot() {
                   </div>
                 )}
                 <div className={`flex flex-col gap-2 max-w-[85%] ${m.from === 'user' ? 'items-end' : 'items-start'}`}>
-                  <div className={`px-3 py-2.5 rounded-2xl text-sm leading-relaxed ${m.from === 'user' ? 'bg-violet-600 text-white font-medium rounded-br-sm' : 'bg-[#21213e] border border-white/5 text-gray-200 rounded-bl-sm'}`}>
+                  <div className={`px-3 py-2.5 rounded-2xl text-sm leading-relaxed ${m.from === 'user' ? 'bg-violet-600 text-white font-medium rounded-br-sm' : 'bg-[#1d1d1d] border border-white/5 text-gray-200 rounded-bl-sm'}`}>
                     {renderText(m.text)}
                   </div>
                   {m.chips && m.chips.length > 0 && (
@@ -278,7 +278,7 @@ export default function ChatBot() {
                         <button
                           key={c}
                           onClick={() => sendMessage(c)}
-                          className="bg-[#21213e] hover:bg-violet-500/10 border border-white/10 hover:border-violet-500/40 text-gray-400 hover:text-violet-400 text-[11px] px-2.5 py-1 rounded-full transition-all"
+                          className="bg-[#1d1d1d] hover:bg-violet-500/10 border border-white/10 hover:border-violet-500/40 text-gray-400 hover:text-violet-400 text-[11px] px-2.5 py-1 rounded-full transition-all"
                         >
                           {c}
                         </button>
@@ -297,7 +297,7 @@ export default function ChatBot() {
                     <path d="M12 2a2 2 0 012 2v1h2a3 3 0 013 3v7a3 3 0 01-3 3H8l-4 3v-3H4a3 3 0 01-3-3V8a3 3 0 013-3h2V4a2 2 0 012-2h4z" />
                   </svg>
                 </div>
-                <div className="bg-[#21213e] border border-white/5 rounded-2xl rounded-bl-sm px-4 py-3 flex gap-1 items-center">
+                <div className="bg-[#1d1d1d] border border-white/5 rounded-2xl rounded-bl-sm px-4 py-3 flex gap-1 items-center">
                   {[0, 1, 2].map((i) => (
                     <span key={i} className="w-1.5 h-1.5 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
                   ))}
@@ -308,7 +308,7 @@ export default function ChatBot() {
           </div>
 
           {/* Input */}
-          <div className="px-3 py-3 border-t border-white/5 bg-[#16162e]">
+          <div className="px-3 py-3 border-t border-white/5 bg-[#141414]">
             <div className="flex gap-2 items-center">
               <input
                 type="text"
@@ -316,7 +316,7 @@ export default function ChatBot() {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && sendMessage(input)}
                 placeholder="Pregunta sobre precios, gradeo, cómo comprar..."
-                className="flex-1 bg-[#1a1a36] border border-white/10 text-white placeholder-gray-700 px-3 py-2.5 rounded-xl text-xs focus:outline-none focus:border-violet-500/40"
+                className="flex-1 bg-[#1a1a1a] border border-white/10 text-white placeholder-gray-700 px-3 py-2.5 rounded-xl text-xs focus:outline-none focus:border-violet-500/40"
               />
               <button
                 onClick={() => sendMessage(input)}

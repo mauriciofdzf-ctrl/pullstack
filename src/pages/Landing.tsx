@@ -1,10 +1,16 @@
-import { useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getImages } from '../lib/imageConfig'
+import { IMAGE_DEFAULTS, loadImageOverridesFromDB } from '../lib/imageConfig'
 
 export default function Landing() {
   const navigate = useNavigate()
-  const IMGS = useMemo(() => getImages(), [])
+  const [IMGS, setIMGS] = useState(IMAGE_DEFAULTS)
+
+  useEffect(() => {
+    loadImageOverridesFromDB().then(overrides => {
+      if (Object.keys(overrides).length > 0) setIMGS({ ...IMAGE_DEFAULTS, ...overrides })
+    })
+  }, [])
 
   // Arrays inside component so they can reference IMGS
   const trending = [
@@ -30,7 +36,7 @@ export default function Landing() {
   ]
 
   return (
-    <main className="bg-[#111128] text-white pt-16">
+    <main className="bg-[#0d0d0d] text-white pt-16">
 
       {/* ─── HERO ─── */}
       <section className="relative min-h-screen flex items-center overflow-hidden">
@@ -77,14 +83,14 @@ export default function Landing() {
 
         <div className="relative max-w-7xl mx-auto px-6 py-28 w-full">
           <div className="max-w-xl">
-            <div className="inline-flex items-center gap-2 bg-violet-500/10 border border-violet-500/30 text-violet-400 text-xs font-bold px-3 py-1.5 rounded-full mb-8 uppercase tracking-widest">
-              <span className="w-1.5 h-1.5 bg-violet-500 rounded-full animate-pulse" />
+            <div className="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold px-3 py-1.5 rounded-full mb-8 uppercase tracking-widest">
+              <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
               NBA · NFL · Soccer · MLB · Pokémon · One Piece
             </div>
             <h1 className="text-6xl sm:text-7xl font-black leading-[0.88] mb-6 tracking-tighter">
               TU COLECCIÓN.<br />
               TU{' '}
-              <span className="bg-gradient-to-r from-violet-400 to-yellow-300 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-amber-400 to-yellow-300 bg-clip-text text-transparent">
                 INVERSIÓN.
               </span>
             </h1>
@@ -95,7 +101,7 @@ export default function Landing() {
             <div className="flex flex-wrap gap-3 mb-14">
               <button
                 onClick={() => navigate('/marketplace')}
-                className="bg-violet-600 hover:bg-violet-500 text-white font-black px-8 py-3.5 rounded-xl text-sm transition-all hover:scale-105 shadow-lg shadow-violet-500/25 uppercase tracking-wide"
+                className="bg-amber-500 hover:bg-amber-400 text-black font-black px-8 py-3.5 rounded-xl text-sm transition-all hover:scale-105 shadow-lg shadow-amber-500/25 uppercase tracking-wide"
               >
                 Explorar ahora
               </button>
@@ -124,10 +130,10 @@ export default function Landing() {
       </section>
 
       {/* ─── CATEGORÍAS ─── */}
-      <section className="py-20 px-6 bg-[#16162e]">
+      <section className="py-20 px-6 bg-[#141414]">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
-            <p className="text-violet-400 text-xs font-bold uppercase tracking-widest mb-2">Explorar</p>
+            <p className="text-amber-400 text-xs font-bold uppercase tracking-widest mb-2">Explorar</p>
             <h2 className="text-4xl font-black text-white">Todas las categorías</h2>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
@@ -156,7 +162,7 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto">
           <div className="flex items-end justify-between mb-10">
             <div>
-              <p className="text-violet-400 text-xs font-bold uppercase tracking-widest mb-2">Mercado 2026</p>
+              <p className="text-amber-400 text-xs font-bold uppercase tracking-widest mb-2">Mercado 2026</p>
               <h2 className="text-4xl font-black text-white">Las cartas más hot 🔥</h2>
               <p className="text-gray-500 text-sm mt-1">Precios reales verificados · eBay, Goldin, PSA</p>
             </div>
@@ -169,7 +175,7 @@ export default function Landing() {
               <div
                 key={card.player}
                 onClick={() => navigate('/marketplace')}
-                className="group bg-[#1a1a36] border border-white/5 hover:border-violet-500/40 rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_60px_rgba(245,158,11,0.12)]"
+                className="group bg-[#1a1a1a] border border-white/5 hover:border-violet-500/40 rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_60px_rgba(245,158,11,0.12)]"
               >
                 <div className="relative h-56 overflow-hidden">
                   <img src={card.img} alt={card.sport} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
@@ -196,7 +202,7 @@ export default function Landing() {
       </section>
 
       {/* ─── LIVE AUCTIONS ─── */}
-      <section className="py-20 px-6 bg-[#16162e]">
+      <section className="py-20 px-6 bg-[#141414]">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-end justify-between mb-10">
             <div>
@@ -213,7 +219,7 @@ export default function Landing() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
             {liveNow.map((a) => (
               <div key={a.title} onClick={() => navigate('/live')}
-                className="group bg-[#1a1a36] border border-white/5 hover:border-red-500/30 rounded-2xl overflow-hidden cursor-pointer transition-all hover:-translate-y-1">
+                className="group bg-[#1a1a1a] border border-white/5 hover:border-red-500/30 rounded-2xl overflow-hidden cursor-pointer transition-all hover:-translate-y-1">
                 <div className="relative h-44 overflow-hidden">
                   <img src={a.img} alt={a.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#111] to-transparent" />
@@ -249,7 +255,7 @@ export default function Landing() {
       <section className="py-20 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-14">
-            <p className="text-violet-400 text-xs font-bold uppercase tracking-widest mb-3">Plataforma completa</p>
+            <p className="text-amber-400 text-xs font-bold uppercase tracking-widest mb-3">Plataforma completa</p>
             <h2 className="text-4xl font-black text-white">Todo lo que necesita<br />un coleccionista serio</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -302,7 +308,7 @@ export default function Landing() {
       </section>
 
       {/* ─── POR QUÉ PULLSTACK ─── */}
-      <section className="py-20 px-6 bg-[#16162e]">
+      <section className="py-20 px-6 bg-[#141414]">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-14">
             <p className="text-emerald-400 text-xs font-bold uppercase tracking-widest mb-3">La diferencia LATAM</p>
@@ -331,7 +337,7 @@ export default function Landing() {
                 orange:'text-orange-400 bg-orange-500/10 border-orange-500/20',
               }
               return (
-                <div key={title} className="bg-[#1a1a36] border border-white/5 rounded-2xl p-5 hover:border-white/10 transition-all">
+                <div key={title} className="bg-[#1a1a1a] border border-white/5 rounded-2xl p-5 hover:border-white/10 transition-all">
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl mb-3 border ${c[color]}`}>{icon}</div>
                   <h3 className="text-white font-black text-sm mb-1.5">{title}</h3>
                   <p className="text-gray-500 text-xs leading-relaxed">{desc}</p>
@@ -340,7 +346,7 @@ export default function Landing() {
             })}
           </div>
 
-          <div className="bg-[#1a1a36] border border-white/5 rounded-2xl overflow-hidden">
+          <div className="bg-[#1a1a1a] border border-white/5 rounded-2xl overflow-hidden">
             <div className="grid grid-cols-3 text-center text-[10px] font-black uppercase tracking-widest border-b border-white/5">
               <div className="py-3 text-gray-600">Característica</div>
               <div className="py-3 text-gray-600 border-x border-white/5">Competencia (US)</div>
@@ -380,9 +386,9 @@ export default function Landing() {
       <section className="py-28 px-6 text-center relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-amber-950/10 to-black pointer-events-none" />
         <div className="relative max-w-2xl mx-auto">
-          <h2 className="text-5xl font-black text-white mb-4">¿Listo para tu<br /><span className="text-violet-400">primer pull?</span></h2>
+          <h2 className="text-5xl font-black text-white mb-4">¿Listo para tu<br /><span className="text-amber-400">primer pull?</span></h2>
           <p className="text-gray-400 mb-10 text-lg">Únete a +50,000 coleccionistas en la plataforma #1 de LATAM.</p>
-          <button onClick={() => navigate('/marketplace')} className="bg-violet-600 hover:bg-violet-500 text-white font-black px-12 py-4 rounded-xl text-lg transition-all hover:scale-105 shadow-2xl shadow-violet-500/20">
+          <button onClick={() => navigate('/marketplace')} className="bg-amber-500 hover:bg-amber-400 text-black font-black px-12 py-4 rounded-xl text-lg transition-all hover:scale-105 shadow-2xl shadow-amber-500/20">
             Empezar ahora →
           </button>
         </div>
@@ -392,7 +398,7 @@ export default function Landing() {
       <footer className="border-t border-white/5 py-10 px-6">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 bg-gradient-to-br from-violet-500 to-fuchsia-600 rounded-lg flex items-center justify-center">
+            <div className="w-7 h-7 bg-gradient-to-br from-amber-400 to-orange-500 rounded-lg flex items-center justify-center">
               <span className="text-black font-black text-xs">PS</span>
             </div>
             <span className="text-white font-black">PullStack</span>

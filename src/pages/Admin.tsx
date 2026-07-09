@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import {
-  IMAGE_SECTIONS, getOverrides, saveImage, resetImages,
-  IMAGE_DEFAULTS, IMAGE_LABELS, type ImageKey,
+  IMAGE_SECTIONS, IMAGE_DEFAULTS, IMAGE_LABELS, type ImageKey,
+  loadImageOverridesFromDB, saveImageOverridesToDB,
 } from '../lib/imageConfig'
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
@@ -18,7 +18,7 @@ type AdminDM      = { id: number; from_user_id: string; to_user_id: string; from
 // ─── Sub-componentes ──────────────────────────────────────────────────────────
 function StatCard({ label, value, icon, accent }: { label: string; value: number | string; icon: string; accent: string }) {
   return (
-    <div className={`bg-[#1a1a36] border ${accent} rounded-2xl p-5 flex flex-col gap-2`}>
+    <div className={`bg-[#1a1a1a] border ${accent} rounded-2xl p-5 flex flex-col gap-2`}>
       <div className="flex items-center justify-between">
         <span className="text-2xl">{icon}</span>
         <span className="text-3xl font-black text-white tabular-nums">{value}</span>
@@ -28,50 +28,56 @@ function StatCard({ label, value, icon, accent }: { label: string; value: number
   )
 }
 
-function ImageSlot({ imgKey }: { imgKey: ImageKey }) {
-  const overrides = getOverrides()
-  const isCustom   = imgKey in overrides
-  const base       = isCustom ? overrides[imgKey]! : IMAGE_DEFAULTS[imgKey]
-  const [input,   setInput]   = useState(base)
-  const [preview, setPreview] = useState(base)
+function ImageSlot({ imgKey, currentUrl, onSave, onReset }: {
+  imgKey: ImageKey
+  currentUrl: string
+  onSave: (key: ImageKey, url: string) => Promise<void>
+  onReset: (key: ImageKey) => Promise<void>
+}) {
+  const isCustom  = currentUrl !== IMAGE_DEFAULTS[imgKey]
+  const [input,   setInput]   = useState(currentUrl)
+  const [preview, setPreview] = useState(currentUrl)
   const [saved,   setSaved]   = useState(false)
   const [err,     setErr]     = useState(false)
-  const [custom,  setCustom]  = useState(isCustom)
+  const [saving,  setSaving]  = useState(false)
 
-  const save = () => {
+  const save = async () => {
     if (!input.trim()) return
-    saveImage(imgKey, input.trim()); setCustom(true); setSaved(true)
+    setSaving(true)
+    await onSave(imgKey, input.trim())
+    setSaving(false); setSaved(true)
     setTimeout(() => setSaved(false), 2000)
   }
-  const reset = () => {
-    const o = getOverrides(); delete o[imgKey]
-    localStorage.setItem('pullstack_images_v1', JSON.stringify(o))
-    setInput(IMAGE_DEFAULTS[imgKey]); setPreview(IMAGE_DEFAULTS[imgKey])
-    setCustom(false); setErr(false)
+  const reset = async () => {
+    setSaving(true)
+    await onReset(imgKey)
+    setSaving(false)
+    setInput(IMAGE_DEFAULTS[imgKey]); setPreview(IMAGE_DEFAULTS[imgKey]); setErr(false)
   }
 
   return (
-    <div className={`bg-[#16162e] rounded-2xl overflow-hidden border transition-all ${custom ? 'border-violet-500/40' : 'border-white/5'}`}>
-      <div className="relative h-40 bg-[#1a1a36]">
+    <div className={`bg-[#141414] rounded-2xl overflow-hidden border transition-all ${isCustom ? 'border-amber-500/40' : 'border-white/5'}`}>
+      <div className="relative h-40 bg-[#1a1a1a]">
         {err
           ? <div className="w-full h-full flex items-center justify-center text-gray-700"><svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg></div>
-          : <img key={preview} src={preview} alt={IMAGE_LABELS[imgKey]} className="w-full h-full object-cover" onError={() => setErr(true)} />
+          : <img key={preview} src={preview} alt={IMAGE_LABELS[imgKey]} className="w-full h-full object-cover" onError={() => setErr(true)} onLoad={() => setErr(false)} />
         }
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
-        {custom && <span className="absolute top-2 right-2 bg-violet-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full">✓ Custom</span>}
+        {isCustom && <span className="absolute top-2 right-2 bg-amber-500 text-black text-[10px] font-black px-2 py-0.5 rounded-full">✓ Custom</span>}
         <span className="absolute bottom-2 left-3 text-white text-xs font-bold drop-shadow">{IMAGE_LABELS[imgKey]}</span>
       </div>
       <div className="p-3 space-y-2">
         <input type="text" value={input}
           onChange={e => { setInput(e.target.value); setPreview(e.target.value); setErr(false) }}
           placeholder="https://... URL pública de imagen"
-          className="w-full bg-[#1a1a36] border border-white/10 text-white placeholder-gray-700 px-3 py-2 rounded-lg text-xs focus:outline-none focus:border-violet-500/50 font-mono"
+          className="w-full bg-[#1a1a1a] border border-white/10 text-white placeholder-gray-700 px-3 py-2 rounded-lg text-xs focus:outline-none focus:border-amber-500/50 font-mono"
         />
         <div className="flex gap-2">
-          <button onClick={save} className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${saved ? 'bg-green-500 text-white' : 'bg-violet-600 hover:bg-violet-500 text-white'}`}>
-            {saved ? '✓ Guardado' : 'Guardar'}
+          <button onClick={save} disabled={saving}
+            className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all disabled:opacity-50 ${saved ? 'bg-emerald-500 text-white' : 'bg-amber-500 hover:bg-amber-400 text-black'}`}>
+            {saving ? '...' : saved ? '✓ Guardado en nube' : 'Guardar'}
           </button>
-          {custom && <button onClick={reset} className="px-3 py-2 rounded-lg text-xs font-bold bg-white/5 hover:bg-white/10 text-gray-400 border border-white/5 transition-all">↩ Reset</button>}
+          {isCustom && <button onClick={reset} disabled={saving} className="px-3 py-2 rounded-lg text-xs font-bold bg-white/5 hover:bg-white/10 text-gray-400 border border-white/5 transition-all disabled:opacity-50">↩ Reset</button>}
         </div>
       </div>
     </div>
@@ -164,9 +170,10 @@ export default function Admin() {
   const [paySaved, setPaySaved] = useState(false)
 
   // Images
-  const [imgSection, setImgSection]   = useState(IMAGE_SECTIONS[0].label)
-  const [overridesCount, setOvCount]  = useState(Object.keys(getOverrides()).length)
-  const [resetDone, setResetDone]     = useState(false)
+  const [imgSection,    setImgSection]    = useState(IMAGE_SECTIONS[0].label)
+  const [dbOverrides,   setDbOverrides]   = useState<Partial<Record<ImageKey, string>>>({})
+  const [imagesLoading, setImagesLoading] = useState(false)
+  const [resetDone,     setResetDone]     = useState(false)
 
   useEffect(() => { loadStats() }, [])
 
@@ -177,6 +184,7 @@ export default function Admin() {
     if (tab === 'transactions') loadTxns()
     if (tab === 'pagos')        loadPayConfig()
     if (tab === 'mensajes')     loadMessages()
+    if (tab === 'images')       loadImages()
   }, [tab])
 
   const loadStats = async () => {
@@ -298,6 +306,34 @@ export default function Admin() {
     setTimeout(() => setPaySaved(false), 2500)
   }
 
+  const loadImages = async () => {
+    setImagesLoading(true)
+    const overrides = await loadImageOverridesFromDB()
+    setDbOverrides(overrides)
+    setImagesLoading(false)
+  }
+
+  const saveSlot = async (key: ImageKey, url: string) => {
+    const next = { ...dbOverrides, [key]: url }
+    setDbOverrides(next)
+    await saveImageOverridesToDB(next)
+  }
+
+  const resetSlot = async (key: ImageKey) => {
+    const next = { ...dbOverrides }
+    delete next[key]
+    setDbOverrides(next)
+    await saveImageOverridesToDB(next)
+  }
+
+  const resetAllImages = async () => {
+    if (!confirm('¿Resetear TODAS las imágenes al default?')) return
+    setDbOverrides({})
+    await saveImageOverridesToDB({})
+    setResetDone(true)
+    setTimeout(() => setResetDone(false), 2500)
+  }
+
   const filteredUsers = users.filter(u =>
     !userSearch || (u.display_name || '').toLowerCase().includes(userSearch.toLowerCase())
   )
@@ -316,7 +352,7 @@ export default function Admin() {
   ]
 
   return (
-    <div className="min-h-screen bg-[#111128] pt-20 pb-16 px-4 sm:px-6">
+    <div className="min-h-screen bg-[#0d0d0d] pt-20 pb-16 px-4 sm:px-6">
       <div className="max-w-7xl mx-auto">
 
         {/* Header */}
@@ -335,8 +371,8 @@ export default function Admin() {
             <button key={t.id} onClick={() => setTab(t.id)}
               className={`relative flex items-center gap-1.5 px-3 sm:px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all shrink-0 ${
                 tab === t.id
-                  ? 'bg-violet-600 text-white shadow-lg shadow-violet-500/20'
-                  : 'bg-[#1a1a36] border border-white/10 text-gray-400 hover:border-violet-500/30 hover:text-violet-400'
+                  ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20'
+                  : 'bg-[#1a1a1a] border border-white/10 text-gray-400 hover:border-amber-500/30 hover:text-amber-400'
               }`}>
               <span>{t.icon}</span>
               <span>{t.label}</span>
@@ -360,7 +396,7 @@ export default function Admin() {
             </div>
 
             <div className="grid sm:grid-cols-2 gap-4">
-              <div className="bg-[#1a1a36] border border-white/5 rounded-2xl p-5">
+              <div className="bg-[#1a1a1a] border border-white/5 rounded-2xl p-5">
                 <h3 className="text-white font-bold mb-4 text-sm">Accesos rápidos</h3>
                 <div className="space-y-2">
                   {TABS.filter(t => t.id !== 'overview').map(t => (
@@ -374,7 +410,7 @@ export default function Admin() {
                 </div>
               </div>
 
-              <div className="bg-[#1a1a36] border border-white/5 rounded-2xl p-5">
+              <div className="bg-[#1a1a1a] border border-white/5 rounded-2xl p-5">
                 <h3 className="text-white font-bold mb-4 text-sm">Tu sesión actual</h3>
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-600 flex items-center justify-center text-white font-black text-sm shrink-0">M</div>
@@ -403,7 +439,7 @@ export default function Admin() {
                 <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                 <input value={userSearch} onChange={e => setUserSearch(e.target.value)}
                   placeholder="Buscar usuario..."
-                  className="w-full bg-[#1a1a36] border border-white/10 text-white placeholder-gray-600 pl-9 pr-4 py-2.5 rounded-xl text-sm focus:outline-none focus:border-violet-500/50" />
+                  className="w-full bg-[#1a1a1a] border border-white/10 text-white placeholder-gray-600 pl-9 pr-4 py-2.5 rounded-xl text-sm focus:outline-none focus:border-violet-500/50" />
               </div>
               <span className="text-gray-600 text-sm shrink-0">{filteredUsers.length} usuarios</span>
             </div>
@@ -415,7 +451,7 @@ export default function Admin() {
               : (
                 <div className="space-y-2">
                   {filteredUsers.map(u => (
-                    <div key={u.id} className="flex items-center gap-3 bg-[#1a1a36] border border-white/5 rounded-xl px-4 py-3 hover:border-white/10 transition-all">
+                    <div key={u.id} className="flex items-center gap-3 bg-[#1a1a1a] border border-white/5 rounded-xl px-4 py-3 hover:border-white/10 transition-all">
                       <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-black text-xs shrink-0 ${u.role === 'admin' ? 'bg-gradient-to-br from-violet-500 to-fuchsia-600 text-white' : 'bg-white/5 text-gray-500'}`}>
                         {(u.display_name || 'U').slice(0, 2).toUpperCase()}
                       </div>
@@ -453,7 +489,7 @@ export default function Admin() {
               : (
                 <div className="space-y-2">
                   {listings.map(l => (
-                    <div key={l.id} className={`flex items-center gap-3 bg-[#1a1a36] border rounded-xl px-4 py-3 transition-all ${l.active ? 'border-white/5' : 'border-red-500/10 opacity-50'}`}>
+                    <div key={l.id} className={`flex items-center gap-3 bg-[#1a1a1a] border rounded-xl px-4 py-3 transition-all ${l.active ? 'border-white/5' : 'border-red-500/10 opacity-50'}`}>
                       <div className="flex-1 min-w-0">
                         <p className="text-white text-sm font-medium truncate">{l.title}</p>
                         <p className="text-gray-600 text-[10px]">
@@ -494,7 +530,7 @@ export default function Admin() {
               : (
                 <div className="space-y-2">
                   {orders.map(o => (
-                    <div key={o.id} className="bg-[#1a1a36] border border-white/5 rounded-xl px-4 py-3 hover:border-white/10 transition-all flex items-center gap-3">
+                    <div key={o.id} className="bg-[#1a1a1a] border border-white/5 rounded-xl px-4 py-3 hover:border-white/10 transition-all flex items-center gap-3">
                       <div className="flex-1 min-w-0">
                         <p className="text-white text-sm font-medium">{o.contact_name || 'Sin nombre'}</p>
                         <p className="text-gray-600 text-[10px]">Pedido #{o.id} · <span className="text-emerald-400 font-bold">{o.total}</span></p>
@@ -504,7 +540,7 @@ export default function Admin() {
                           {o.status}
                         </span>
                         <select value={o.status} onChange={e => updateOrderStatus(o.id, e.target.value)}
-                          className="bg-[#21213e] border border-white/10 text-gray-300 rounded-lg px-2 py-1 text-[10px] focus:outline-none cursor-pointer">
+                          className="bg-[#1d1d1d] border border-white/10 text-gray-300 rounded-lg px-2 py-1 text-[10px] focus:outline-none cursor-pointer">
                           {ORDER_STATUS.map(s => <option key={s} value={s}>{s}</option>)}
                         </select>
                         <button onClick={() => deleteOrder(o.id)}
@@ -538,7 +574,7 @@ export default function Admin() {
               : (
                 <div className="space-y-3">
                   {txns.map(t => (
-                    <div key={t.id} className={`bg-[#1a1a36] border rounded-2xl p-4 transition-all ${t.status === 'pending' ? 'border-yellow-500/20' : t.status === 'completed' ? 'border-emerald-500/15' : 'border-white/5'}`}>
+                    <div key={t.id} className={`bg-[#1a1a1a] border rounded-2xl p-4 transition-all ${t.status === 'pending' ? 'border-yellow-500/20' : t.status === 'completed' ? 'border-emerald-500/15' : 'border-white/5'}`}>
                       <div className="flex items-start justify-between gap-3 mb-3">
                         <div className="flex-1 min-w-0">
                           <p className="text-white font-bold text-sm truncate">{t.listing_title}</p>
@@ -551,7 +587,7 @@ export default function Admin() {
                         </span>
                       </div>
 
-                      <div className="grid grid-cols-3 gap-2 mb-3 bg-[#21213e] rounded-xl p-3 text-xs">
+                      <div className="grid grid-cols-3 gap-2 mb-3 bg-[#1d1d1d] rounded-xl p-3 text-xs">
                         <div>
                           <p className="text-gray-600 mb-0.5">Precio venta</p>
                           <p className="text-white font-bold">{t.sale_price}</p>
@@ -568,7 +604,7 @@ export default function Admin() {
 
                       <div className="flex items-center justify-between gap-3 flex-wrap">
                         <div className="flex items-center gap-2 text-[10px] text-gray-500">
-                          <span className="bg-[#21213e] px-2 py-1 rounded-lg">{METHOD_LABEL[t.payment_method] || t.payment_method}</span>
+                          <span className="bg-[#1d1d1d] px-2 py-1 rounded-lg">{METHOD_LABEL[t.payment_method] || t.payment_method}</span>
                           <span className="font-mono text-gray-600">Ref: PS-{t.payment_reference}</span>
                         </div>
                         <div className="flex items-center gap-2">
@@ -587,7 +623,7 @@ export default function Admin() {
                             {t.tracking_number ? '📦 Ver guía' : '📦 Agregar guía'}
                           </button>
                           <select value={t.status} onChange={e => updateTxnStatus(t.id, e.target.value)}
-                            className="bg-[#21213e] border border-white/10 text-gray-300 rounded-lg px-2 py-1 text-[10px] focus:outline-none cursor-pointer">
+                            className="bg-[#1d1d1d] border border-white/10 text-gray-300 rounded-lg px-2 py-1 text-[10px] focus:outline-none cursor-pointer">
                             {TXN_STATUS.map(s => <option key={s} value={s}>{TXN_STATUS_LABEL[s]}</option>)}
                           </select>
                         </div>
@@ -602,25 +638,25 @@ export default function Admin() {
                               <label className="text-gray-600 text-[9px] font-bold uppercase mb-1 block">Número de guía</label>
                               <input value={trackingForm.tracking_number} onChange={e => setTrackingForm(f => ({ ...f, tracking_number: e.target.value }))}
                                 placeholder="Ej: 1Z999AA10123456784"
-                                className="w-full bg-[#111128] border border-white/10 text-white px-3 py-2 rounded-lg text-xs focus:outline-none focus:border-cyan-500/50 font-mono placeholder-gray-700" />
+                                className="w-full bg-[#0d0d0d] border border-white/10 text-white px-3 py-2 rounded-lg text-xs focus:outline-none focus:border-cyan-500/50 font-mono placeholder-gray-700" />
                             </div>
                             <div>
                               <label className="text-gray-600 text-[9px] font-bold uppercase mb-1 block">Paquetería</label>
                               <input value={trackingForm.tracking_carrier} onChange={e => setTrackingForm(f => ({ ...f, tracking_carrier: e.target.value }))}
                                 placeholder="DHL, FedEx, Estafeta..."
-                                className="w-full bg-[#111128] border border-white/10 text-white px-3 py-2 rounded-lg text-xs focus:outline-none focus:border-cyan-500/50 placeholder-gray-700" />
+                                className="w-full bg-[#0d0d0d] border border-white/10 text-white px-3 py-2 rounded-lg text-xs focus:outline-none focus:border-cyan-500/50 placeholder-gray-700" />
                             </div>
                             <div>
                               <label className="text-gray-600 text-[9px] font-bold uppercase mb-1 block">URL de rastreo</label>
                               <input value={trackingForm.tracking_url} onChange={e => setTrackingForm(f => ({ ...f, tracking_url: e.target.value }))}
                                 placeholder="https://track.dhl.com/..."
-                                className="w-full bg-[#111128] border border-white/10 text-white px-3 py-2 rounded-lg text-xs focus:outline-none focus:border-cyan-500/50 font-mono placeholder-gray-700" />
+                                className="w-full bg-[#0d0d0d] border border-white/10 text-white px-3 py-2 rounded-lg text-xs focus:outline-none focus:border-cyan-500/50 font-mono placeholder-gray-700" />
                             </div>
                             <div>
                               <label className="text-gray-600 text-[9px] font-bold uppercase mb-1 block">Entrega estimada</label>
                               <input value={trackingForm.estimated_delivery} onChange={e => setTrackingForm(f => ({ ...f, estimated_delivery: e.target.value }))}
                                 placeholder="Ej: 2-4 días hábiles"
-                                className="w-full bg-[#111128] border border-white/10 text-white px-3 py-2 rounded-lg text-xs focus:outline-none focus:border-cyan-500/50 placeholder-gray-700" />
+                                className="w-full bg-[#0d0d0d] border border-white/10 text-white px-3 py-2 rounded-lg text-xs focus:outline-none focus:border-cyan-500/50 placeholder-gray-700" />
                             </div>
                           </div>
                           <button
@@ -650,11 +686,11 @@ export default function Admin() {
           <div>
             <div className="flex gap-2 mb-5">
               <button onClick={() => setMsgTab('support')}
-                className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${msgTab === 'support' ? 'bg-violet-600 text-white' : 'bg-[#1a1a36] border border-white/10 text-gray-400 hover:border-violet-500/30 hover:text-violet-400'}`}>
+                className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${msgTab === 'support' ? 'bg-amber-500 text-black' : 'bg-[#1a1a1a] border border-white/10 text-gray-400 hover:border-amber-500/30 hover:text-amber-400'}`}>
                 💬 Soporte ({msgs.length})
               </button>
               <button onClick={() => setMsgTab('dms')}
-                className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${msgTab === 'dms' ? 'bg-violet-600 text-white' : 'bg-[#1a1a36] border border-white/10 text-gray-400 hover:border-violet-500/30 hover:text-violet-400'}`}>
+                className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${msgTab === 'dms' ? 'bg-amber-500 text-black' : 'bg-[#1a1a1a] border border-white/10 text-gray-400 hover:border-amber-500/30 hover:text-amber-400'}`}>
                 📩 Mensajes directos ({dms.length})
               </button>
             </div>
@@ -667,7 +703,7 @@ export default function Admin() {
                   : (
                     <div className="space-y-2">
                       {msgs.map(m => (
-                        <div key={m.id} className={`bg-[#1a1a36] border rounded-xl px-4 py-3 ${m.from_admin ? 'border-violet-500/20' : 'border-white/5'}`}>
+                        <div key={m.id} className={`bg-[#1a1a1a] border rounded-xl px-4 py-3 ${m.from_admin ? 'border-violet-500/20' : 'border-white/5'}`}>
                           <div className="flex items-start gap-3">
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 mb-1.5 flex-wrap">
@@ -690,14 +726,14 @@ export default function Admin() {
                   : (
                     <div className="space-y-2">
                       {dms.map(d => (
-                        <div key={d.id} className={`bg-[#1a1a36] border rounded-xl px-4 py-3 ${!d.read ? 'border-blue-500/20' : 'border-white/5'}`}>
+                        <div key={d.id} className={`bg-[#1a1a1a] border rounded-xl px-4 py-3 ${!d.read ? 'border-blue-500/20' : 'border-white/5'}`}>
                           <div className="flex items-start gap-3">
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 mb-1 flex-wrap">
                                 <span className="text-gray-200 text-xs font-bold">{d.from_name}</span>
                                 <span className="text-gray-700 text-xs">→</span>
                                 <span className="text-gray-400 text-xs">{d.to_name}</span>
-                                {d.listing_title && <span className="bg-[#21213e] text-gray-500 text-[10px] px-2 py-0.5 rounded-full border border-white/5 truncate max-w-[140px]">{d.listing_title}</span>}
+                                {d.listing_title && <span className="bg-[#1d1d1d] text-gray-500 text-[10px] px-2 py-0.5 rounded-full border border-white/5 truncate max-w-[140px]">{d.listing_title}</span>}
                                 {!d.read && <span className="bg-blue-500/20 text-blue-400 text-[10px] font-black px-1.5 py-0.5 rounded-full border border-blue-500/30">Nuevo</span>}
                               </div>
                               <p className="text-gray-300 text-sm leading-relaxed">{d.content}</p>
@@ -720,7 +756,7 @@ export default function Admin() {
               ? <div className="flex justify-center py-20"><div className="w-8 h-8 border-2 border-violet-500 border-t-transparent rounded-full animate-spin"/></div>
               : <>
                 {/* Catálogo estático */}
-                <div className="bg-[#1a1a36] border border-white/5 rounded-2xl p-5">
+                <div className="bg-[#1a1a1a] border border-white/5 rounded-2xl p-5">
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="text-white font-black">Catálogo de ejemplo</h3>
@@ -737,7 +773,7 @@ export default function Admin() {
                 </div>
 
                 {/* SPEI */}
-                <div className="bg-[#1a1a36] border border-white/5 rounded-2xl p-5 space-y-4">
+                <div className="bg-[#1a1a1a] border border-white/5 rounded-2xl p-5 space-y-4">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-2xl">🏦</span>
                     <h3 className="text-white font-black">SPEI / Transferencia</h3>
@@ -752,13 +788,13 @@ export default function Admin() {
                       <input value={payConfig[f.key as keyof typeof payConfig]}
                         onChange={e => setPayConfig(p => ({ ...p, [f.key]: e.target.value }))}
                         placeholder={f.placeholder}
-                        className="w-full bg-[#21213e] border border-white/10 text-white placeholder-gray-700 px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:border-violet-500/50 font-mono" />
+                        className="w-full bg-[#1d1d1d] border border-white/10 text-white placeholder-gray-700 px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:border-violet-500/50 font-mono" />
                     </div>
                   ))}
                 </div>
 
                 {/* MercadoPago */}
-                <div className="bg-[#1a1a36] border border-white/5 rounded-2xl p-5 space-y-4">
+                <div className="bg-[#1a1a1a] border border-white/5 rounded-2xl p-5 space-y-4">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-2xl">💳</span>
                     <h3 className="text-white font-black">MercadoPago</h3>
@@ -772,13 +808,13 @@ export default function Admin() {
                       <input value={payConfig[f.key as keyof typeof payConfig]}
                         onChange={e => setPayConfig(p => ({ ...p, [f.key]: e.target.value }))}
                         placeholder={f.placeholder}
-                        className="w-full bg-[#21213e] border border-white/10 text-white placeholder-gray-700 px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:border-violet-500/50 font-mono" />
+                        className="w-full bg-[#1d1d1d] border border-white/10 text-white placeholder-gray-700 px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:border-violet-500/50 font-mono" />
                     </div>
                   ))}
                 </div>
 
                 {/* OXXO */}
-                <div className="bg-[#1a1a36] border border-white/5 rounded-2xl p-5 space-y-4">
+                <div className="bg-[#1a1a1a] border border-white/5 rounded-2xl p-5 space-y-4">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-2xl">🏪</span>
                     <h3 className="text-white font-black">OXXO Pay</h3>
@@ -788,12 +824,12 @@ export default function Admin() {
                     <input value={payConfig.oxxo_link}
                       onChange={e => setPayConfig(p => ({ ...p, oxxo_link: e.target.value }))}
                       placeholder="https://mpago.la/... (lo genera MercadoPago)"
-                      className="w-full bg-[#21213e] border border-white/10 text-white placeholder-gray-700 px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:border-violet-500/50 font-mono" />
+                      className="w-full bg-[#1d1d1d] border border-white/10 text-white placeholder-gray-700 px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:border-violet-500/50 font-mono" />
                   </div>
                 </div>
 
                 {/* Tarjeta */}
-                <div className="bg-[#1a1a36] border border-white/5 rounded-2xl p-5 space-y-4">
+                <div className="bg-[#1a1a1a] border border-white/5 rounded-2xl p-5 space-y-4">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-2xl">💰</span>
                     <h3 className="text-white font-black">Tarjeta (Stripe / MP)</h3>
@@ -803,12 +839,12 @@ export default function Admin() {
                     <input value={payConfig.tarjeta_link}
                       onChange={e => setPayConfig(p => ({ ...p, tarjeta_link: e.target.value }))}
                       placeholder="https://buy.stripe.com/... o https://mpago.la/..."
-                      className="w-full bg-[#21213e] border border-white/10 text-white placeholder-gray-700 px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:border-violet-500/50 font-mono" />
+                      className="w-full bg-[#1d1d1d] border border-white/10 text-white placeholder-gray-700 px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:border-violet-500/50 font-mono" />
                   </div>
                 </div>
 
                 <button onClick={savePayConfig}
-                  className={`w-full py-3 rounded-xl font-black text-sm transition-all ${paySaved ? 'bg-emerald-600 text-white' : 'bg-violet-600 hover:bg-violet-500 text-white'}`}>
+                  className={`w-full py-3 rounded-xl font-black text-sm transition-all ${paySaved ? 'bg-emerald-600 text-white' : 'bg-amber-500 hover:bg-amber-400 text-black'}`}>
                   {paySaved ? '✅ Guardado — compradores ya ven tus datos' : 'Guardar configuración de pagos'}
                 </button>
               </>
@@ -819,27 +855,44 @@ export default function Admin() {
         {/* ── IMÁGENES ── */}
         {tab === 'images' && (
           <div>
+            <div className="bg-amber-500/5 border border-amber-500/15 rounded-xl p-4 mb-6">
+              <p className="text-amber-400 text-sm font-bold mb-1">☁️ Imágenes guardadas en la nube</p>
+              <p className="text-gray-500 text-xs">Los cambios aplican para <span className="text-white font-bold">todos los usuarios</span> en tiempo real. Pega cualquier URL pública de imagen.</p>
+            </div>
             <div className="flex items-center justify-between mb-5">
-              <p className="text-gray-600 text-sm">{overridesCount} imágenes personalizadas</p>
-              <button onClick={() => { if (!confirm('¿Resetear TODAS las imágenes?')) return; resetImages(); setResetDone(true); setOvCount(0); setTimeout(() => setResetDone(false), 2500) }}
-                className={`text-xs font-bold px-4 py-2 rounded-lg border transition-all ${resetDone ? 'bg-green-500/10 border-green-500/30 text-green-400' : 'border-white/10 text-gray-500 hover:border-red-500/30 hover:text-red-400'}`}>
+              <p className="text-gray-600 text-sm">{Object.keys(dbOverrides).length} imágenes personalizadas</p>
+              <button onClick={resetAllImages}
+                className={`text-xs font-bold px-4 py-2 rounded-lg border transition-all ${resetDone ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'border-white/10 text-gray-500 hover:border-red-500/30 hover:text-red-400'}`}>
                 {resetDone ? '✓ Reseteado' : '↩ Reset todo'}
               </button>
             </div>
             <div className="flex gap-2 flex-wrap mb-6">
               {IMAGE_SECTIONS.map(s => {
-                const cnt = s.keys.filter(k => k in getOverrides()).length
+                const cnt = s.keys.filter(k => k in dbOverrides).length
                 return (
                   <button key={s.label} onClick={() => setImgSection(s.label)}
-                    className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${imgSection === s.label ? 'bg-violet-600 text-white' : 'bg-[#1a1a36] border border-white/10 text-gray-400 hover:border-violet-500/30 hover:text-violet-400'}`}>
+                    className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${imgSection === s.label ? 'bg-amber-500 text-black' : 'bg-[#1a1a1a] border border-white/10 text-gray-400 hover:border-amber-500/30 hover:text-amber-400'}`}>
                     {s.label}{cnt > 0 && <span className="ml-1.5 text-[10px] opacity-70">{cnt}✓</span>}
                   </button>
                 )
               })}
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {IMAGE_SECTIONS.find(s => s.label === imgSection)!.keys.map(k => <ImageSlot key={k} imgKey={k} />)}
-            </div>
+            {imagesLoading
+              ? <div className="flex justify-center py-20"><div className="w-8 h-8 border-2 border-amber-500 border-t-transparent rounded-full animate-spin"/></div>
+              : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {IMAGE_SECTIONS.find(s => s.label === imgSection)!.keys.map(k => (
+                    <ImageSlot
+                      key={k}
+                      imgKey={k}
+                      currentUrl={dbOverrides[k] ?? IMAGE_DEFAULTS[k]}
+                      onSave={saveSlot}
+                      onReset={resetSlot}
+                    />
+                  ))}
+                </div>
+              )
+            }
           </div>
         )}
 

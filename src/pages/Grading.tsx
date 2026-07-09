@@ -89,7 +89,7 @@ export default function Grading() {
   const selectedServices = SERVICES[form.grader] || []
 
   if (success) return (
-    <div className="min-h-screen bg-[#111128] pt-24 pb-16 px-4 flex items-center justify-center">
+    <div className="min-h-screen bg-[#0d0d0d] pt-24 pb-16 px-4 flex items-center justify-center">
       <div className="max-w-md w-full text-center">
         <div className="w-20 h-20 rounded-full bg-green-500/20 border border-green-500/30 flex items-center justify-center mx-auto mb-6">
           <svg className="w-10 h-10 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -109,7 +109,7 @@ export default function Grading() {
         <p className="text-gray-500 text-xs mb-8">Costo de envío internacional aprox. <span className="text-violet-400 font-bold">$45 USD</span> round-trip desde México.</p>
         <div className="flex gap-3 justify-center">
           <button onClick={() => { setSuccess(false); setForm({ player_name: '', card_year: '', brand: '', card_number: '', variation: '', raw_value: '', condition: 'Near Mint (NM)', grader: 'PSA', service_tier: 'Bulk', notes: '' }) }}
-            className="bg-[#21213e] border border-white/10 text-gray-300 font-bold px-5 py-2.5 rounded-xl text-sm transition-all hover:border-white/20">
+            className="bg-[#1d1d1d] border border-white/10 text-gray-300 font-bold px-5 py-2.5 rounded-xl text-sm transition-all hover:border-white/20">
             Nueva solicitud
           </button>
           <button onClick={() => navigate('/profile')}
@@ -122,7 +122,7 @@ export default function Grading() {
   )
 
   return (
-    <div className="min-h-screen bg-[#111128] pt-24 pb-16 px-4">
+    <div className="min-h-screen bg-[#0d0d0d] pt-24 pb-16 px-4">
       <div className="max-w-2xl mx-auto">
 
         {/* Header */}
@@ -138,7 +138,7 @@ export default function Grading() {
         {/* Steps */}
         <div className="grid grid-cols-4 gap-2 mb-8">
           {STEPS.map(s => (
-            <div key={s.n} className="bg-[#1a1a36] border border-white/5 rounded-xl p-3 text-center">
+            <div key={s.n} className="bg-[#1a1a1a] border border-white/5 rounded-xl p-3 text-center">
               <div className="text-2xl mb-1.5">{s.icon}</div>
               <div className="w-5 h-5 rounded-full bg-violet-500/20 border border-violet-500/30 text-violet-400 font-black text-[10px] flex items-center justify-center mx-auto mb-1">{s.n}</div>
               <div className="text-gray-500 text-[10px] leading-tight">{s.label}</div>
@@ -158,51 +158,51 @@ export default function Grading() {
 
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Card info */}
-          <div className="bg-[#1a1a36] border border-white/5 rounded-2xl p-6">
+          <div className="bg-[#1a1a1a] border border-white/5 rounded-2xl p-6">
             <h3 className="text-white font-bold mb-4">Información de la carta</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="sm:col-span-2">
                 <label className="text-gray-400 text-xs mb-1.5 block">Jugador / Personaje *</label>
                 <input value={form.player_name} onChange={e => set('player_name', e.target.value)}
                   placeholder="Ej. LeBron James, Pikachu, Lionel Messi"
-                  className="w-full bg-[#21213e] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-violet-500/50 transition-colors" />
+                  className="w-full bg-[#1d1d1d] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-violet-500/50 transition-colors" />
               </div>
               <div>
                 <label className="text-gray-400 text-xs mb-1.5 block">Año</label>
                 <input value={form.card_year} onChange={e => set('card_year', e.target.value)}
                   placeholder="2003"
-                  className="w-full bg-[#21213e] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-violet-500/50 transition-colors" />
+                  className="w-full bg-[#1d1d1d] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-violet-500/50 transition-colors" />
               </div>
               <div>
                 <label className="text-gray-400 text-xs mb-1.5 block">Marca / Set</label>
                 <input value={form.brand} onChange={e => set('brand', e.target.value)}
                   placeholder="Topps Chrome, Prizm, Base Set..."
-                  className="w-full bg-[#21213e] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-violet-500/50 transition-colors" />
+                  className="w-full bg-[#1d1d1d] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-violet-500/50 transition-colors" />
               </div>
               <div>
                 <label className="text-gray-400 text-xs mb-1.5 block">Número de carta</label>
                 <input value={form.card_number} onChange={e => set('card_number', e.target.value)}
                   placeholder="#23"
-                  className="w-full bg-[#21213e] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-violet-500/50 transition-colors" />
+                  className="w-full bg-[#1d1d1d] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-violet-500/50 transition-colors" />
               </div>
               <div>
                 <label className="text-gray-400 text-xs mb-1.5 block">Variante / Parallel</label>
                 <input value={form.variation} onChange={e => set('variation', e.target.value)}
                   placeholder="Refractor, Silver /99, RC Auto..."
-                  className="w-full bg-[#21213e] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-violet-500/50 transition-colors" />
+                  className="w-full bg-[#1d1d1d] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-violet-500/50 transition-colors" />
               </div>
               <div>
                 <label className="text-gray-400 text-xs mb-1.5 block">Valor estimado raw (USD)</label>
                 <input value={form.raw_value} onChange={e => set('raw_value', e.target.value)}
                   placeholder="150" type="number" min="0"
-                  className="w-full bg-[#21213e] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-violet-500/50 transition-colors" />
+                  className="w-full bg-[#1d1d1d] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-violet-500/50 transition-colors" />
               </div>
               <div className="sm:col-span-2">
                 <label className="text-gray-400 text-xs mb-2 block">Condición percibida</label>
                 <div className="flex flex-wrap gap-2">
                   {CONDITIONS.map(c => (
                     <button key={c} type="button" onClick={() => set('condition', c)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${form.condition === c ? 'bg-violet-500/20 border-violet-500/40 text-violet-400' : 'bg-[#21213e] border-white/10 text-gray-400 hover:border-white/20'}`}>
+                      className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${form.condition === c ? 'bg-violet-500/20 border-violet-500/40 text-violet-400' : 'bg-[#1d1d1d] border-white/10 text-gray-400 hover:border-white/20'}`}>
                       {c}
                     </button>
                   ))}
@@ -212,13 +212,13 @@ export default function Grading() {
           </div>
 
           {/* Grader */}
-          <div className="bg-[#1a1a36] border border-white/5 rounded-2xl p-6">
+          <div className="bg-[#1a1a1a] border border-white/5 rounded-2xl p-6">
             <h3 className="text-white font-bold mb-4">Gradería</h3>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
               {GRADERS.map(g => (
                 <button key={g.id} type="button"
                   onClick={() => { set('grader', g.id); set('service_tier', SERVICES[g.id][0].name) }}
-                  className={`relative p-3 rounded-xl border text-left transition-all ${form.grader === g.id ? 'bg-violet-500/10 border-violet-500/40' : 'bg-[#21213e] border-white/10 hover:border-white/20'}`}>
+                  className={`relative p-3 rounded-xl border text-left transition-all ${form.grader === g.id ? 'bg-violet-500/10 border-violet-500/40' : 'bg-[#1d1d1d] border-white/10 hover:border-white/20'}`}>
                   {g.popular && (
                     <div className="absolute -top-2 -right-2 bg-violet-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full">Popular</div>
                   )}
@@ -232,7 +232,7 @@ export default function Grading() {
               <div className="space-y-2">
                 {selectedServices.map(s => (
                   <button key={s.name} type="button" onClick={() => set('service_tier', s.name)}
-                    className={`w-full flex items-center justify-between p-3 rounded-xl border text-left transition-all ${form.service_tier === s.name ? 'bg-violet-500/10 border-violet-500/40' : 'bg-[#21213e] border-white/10 hover:border-white/20'}`}>
+                    className={`w-full flex items-center justify-between p-3 rounded-xl border text-left transition-all ${form.service_tier === s.name ? 'bg-violet-500/10 border-violet-500/40' : 'bg-[#1d1d1d] border-white/10 hover:border-white/20'}`}>
                     <div className="flex items-center gap-3">
                       <div className={`w-3 h-3 rounded-full border-2 shrink-0 ${form.service_tier === s.name ? 'bg-violet-600 border-violet-500' : 'border-gray-600'}`} />
                       <span className={`text-sm font-bold ${form.service_tier === s.name ? 'text-violet-400' : 'text-white'}`}>{s.name}</span>
@@ -248,12 +248,12 @@ export default function Grading() {
           </div>
 
           {/* Notes */}
-          <div className="bg-[#1a1a36] border border-white/5 rounded-2xl p-6">
+          <div className="bg-[#1a1a1a] border border-white/5 rounded-2xl p-6">
             <label className="text-white font-bold text-sm mb-3 block">Notas adicionales</label>
             <textarea value={form.notes} onChange={e => set('notes', e.target.value)}
               placeholder="¿Algo que debamos saber? Estado específico de la carta, urgencia, instrucciones especiales..."
               rows={3}
-              className="w-full bg-[#21213e] border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-violet-500/50 resize-none transition-colors" />
+              className="w-full bg-[#1d1d1d] border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-violet-500/50 resize-none transition-colors" />
           </div>
 
           <div className="bg-blue-500/5 border border-blue-500/20 rounded-xl p-4 text-sm text-blue-300">

@@ -167,7 +167,7 @@ export default function CheckoutModal({ listing, user, profile, onClose }: {
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
       onClick={e => e.target === e.currentTarget && onClose()}>
-      <div className="w-full max-w-md bg-[#1a1a36] border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
+      <div className="w-full max-w-md bg-[#1a1a1a] border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
 
         {/* Header */}
         {step !== 'done' && (
@@ -188,7 +188,7 @@ export default function CheckoutModal({ listing, user, profile, onClose }: {
         {step === 'method' && (
           <div className="p-5 space-y-4">
             {/* Price breakdown */}
-            <div className="bg-[#21213e] border border-white/5 rounded-xl p-4 space-y-2 text-sm">
+            <div className="bg-[#1d1d1d] border border-white/5 rounded-xl p-4 space-y-2 text-sm">
               <div className="flex justify-between text-gray-400">
                 <span>Precio del artículo</span>
                 <span className="text-white font-bold">{rawPrice || '—'}</span>
@@ -213,7 +213,7 @@ export default function CheckoutModal({ listing, user, profile, onClose }: {
                     className={`w-full flex items-center gap-3 p-3.5 rounded-xl border transition-all text-left ${
                       method === m.id
                         ? 'border-violet-500/60 bg-violet-500/10'
-                        : 'border-white/5 bg-[#21213e] hover:border-white/15'
+                        : 'border-white/5 bg-[#1d1d1d] hover:border-white/15'
                     }`}>
                     <span className="text-2xl">{m.icon}</span>
                     <div className="flex-1">
@@ -248,7 +248,7 @@ export default function CheckoutModal({ listing, user, profile, onClose }: {
               ← Cambiar método
             </button>
 
-            <div className="flex items-center gap-3 bg-[#21213e] border border-white/5 rounded-xl p-3">
+            <div className="flex items-center gap-3 bg-[#1d1d1d] border border-white/5 rounded-xl p-3">
               <span className="text-2xl">{selectedMethod.icon}</span>
               <div>
                 <p className="text-white font-black text-sm">{selectedMethod.label}</p>
@@ -257,7 +257,7 @@ export default function CheckoutModal({ listing, user, profile, onClose }: {
             </div>
 
             {method && isMethodReady(method) ? (
-              <div className="bg-[#21213e] border border-white/5 rounded-xl p-4 space-y-2.5">
+              <div className="bg-[#1d1d1d] border border-white/5 rounded-xl p-4 space-y-2.5">
                 <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-3">Datos de pago</p>
                 {getInstructions(method, formatMXN(total), ref).map((line, i) => (
                   <div key={i} className="flex items-start gap-2">
