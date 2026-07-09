@@ -98,6 +98,14 @@ create policy "users_update_own_listings" on listings
 create policy "admins_delete_listings" on listings
   for delete using (get_my_role() = 'admin');
 
+drop policy if exists "users_delete_own_listings" on listings;
+create policy "users_delete_own_listings" on listings
+  for delete using (auth.uid() = user_id);
+
+drop policy if exists "users_delete_own_orders" on orders;
+create policy "users_delete_own_orders" on orders
+  for delete using (auth.uid() = user_id);
+
 -- ============================================================
 -- BIDS
 -- ============================================================

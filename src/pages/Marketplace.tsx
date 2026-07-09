@@ -606,8 +606,8 @@ function BidModal({ item, onClose, user, navigate }: {
             <div className="w-14 h-14 bg-green-500/20 border border-green-500/30 rounded-full flex items-center justify-center mx-auto mb-3">
               <svg className="w-7 h-7 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
             </div>
-            <p className="text-white font-black text-lg">¡Puja enviada!</p>
-            <p className="text-gray-500 text-sm mt-1">Te notificaremos si eres el ganador.</p>
+            <p className="text-white font-black text-lg">¡Interés registrado!</p>
+            <p className="text-gray-500 text-sm mt-1">El equipo de PullStack te contactará por mensajes pronto.</p>
           </div>
         ) : (
           <>
@@ -636,8 +636,8 @@ function BidModal({ item, onClose, user, navigate }: {
               {error && <p className="text-red-400 text-xs mt-1.5">{error}</p>}
             </div>
             <button onClick={submit} disabled={loading || !amount}
-              className="w-full bg-violet-600 hover:bg-violet-500 disabled:opacity-40 text-black font-black py-3 rounded-xl transition-all">
-              {loading ? 'Enviando puja...' : 'Confirmar puja'}
+              className="w-full bg-red-600 hover:bg-red-500 disabled:opacity-40 text-white font-black py-3 rounded-xl transition-all">
+              {loading ? 'Enviando puja...' : '🔨 Confirmar puja'}
             </button>
             <p className="text-gray-600 text-[10px] text-center mt-3">El vendedor decide si acepta. Si ganas, te contactamos por email.</p>
           </>
@@ -766,8 +766,9 @@ export default function Marketplace() {
   }, [])
 
   const deleteMyListing = async (id: number) => {
+    if (!confirm('¿Retirar este anuncio del mercado?')) return
     setDeletingId(id)
-    await supabase.from('listings').update({ active: false }).eq('id', id)
+    await supabase.from('listings').delete().eq('id', id)
     setListings(prev => prev.filter(l => l.id !== id))
     setDeletingId(null)
   }
@@ -875,6 +876,28 @@ export default function Marketplace() {
           )}
         </div>
 
+        {/* ── Secciones destacadas ── */}
+        <div className="grid grid-cols-3 gap-3 mb-7">
+          {[
+            { k: 'card',      icon: '🃏', label: 'Cartas',         color: 'violet', sub: 'Individuales · Gradeadas' },
+            { k: 'box',       icon: '📦', label: 'Cajas Selladas',  color: 'amber',  sub: 'NBA · NFL · Soccer · TCG' },
+            { k: 'accessory', icon: '🛡️', label: 'Accesorios',      color: 'emerald', sub: 'Sleeves · Toploaders · Binders' },
+          ].map(s => (
+            <button key={s.k} onClick={() => setKind(kind === s.k ? 'all' : s.k)}
+              className={`rounded-2xl p-4 border transition-all text-left group ${
+                kind === s.k
+                  ? s.color === 'violet'  ? 'bg-violet-600/20 border-violet-500/50'
+                  : s.color === 'amber'   ? 'bg-amber-500/20 border-amber-500/50'
+                                          : 'bg-emerald-500/20 border-emerald-500/50'
+                  : 'bg-[#1a1a36] border-white/5 hover:border-white/15'
+              }`}>
+              <p className="text-2xl mb-1.5">{s.icon}</p>
+              <p className={`font-black text-sm ${kind === s.k ? 'text-white' : 'text-gray-300 group-hover:text-white'}`}>{s.label}</p>
+              <p className={`text-[10px] mt-0.5 ${kind === s.k ? 'text-gray-300' : 'text-gray-600'}`}>{s.sub}</p>
+            </button>
+          ))}
+        </div>
+
         {/* Filtros */}
         <div className="space-y-3 mb-8">
           {/* Tipo de producto */}
@@ -973,7 +996,7 @@ export default function Marketplace() {
                         {isOwner && (
                           <button onClick={e => { e.stopPropagation(); deleteMyListing(listing.id) }} disabled={deletingId === listing.id}
                             title="Retirar anuncio"
-                            className="text-gray-600 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100 p-1.5 rounded-lg hover:bg-red-500/10">
+                            className="text-gray-500 hover:text-red-400 transition-colors p-1.5 rounded-lg hover:bg-red-500/10 border border-transparent hover:border-red-500/20">
                             {deletingId === listing.id
                               ? <div className="w-3.5 h-3.5 border border-red-400/50 border-t-transparent rounded-full animate-spin" />
                               : <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
@@ -1137,8 +1160,12 @@ export default function Marketplace() {
                     </div>
                   ) : (
                     <button onClick={() => { addToCart(item); setCartOpen(true) }}
-                      className="w-full bg-violet-500/10 hover:bg-violet-600 border border-violet-500/30 hover:border-violet-500 text-violet-400 hover:text-black font-bold py-2 px-3 rounded-lg text-xs transition-all">
-                      + Agregar al carrito
+                      className={`w-full font-bold py-2 px-3 rounded-lg text-xs transition-all ${
+                        item.kind === 'box'
+                          ? 'bg-amber-500/10 hover:bg-amber-500 border border-amber-500/30 hover:border-amber-500 text-amber-400 hover:text-black'
+                          : 'bg-emerald-500/10 hover:bg-emerald-500 border border-emerald-500/30 hover:border-emerald-500 text-emerald-400 hover:text-black'
+                      }`}>
+                      {item.kind === 'box' ? '📦 Agregar al carrito' : '🛡️ Agregar al carrito'}
                     </button>
                   )}
                 </div>

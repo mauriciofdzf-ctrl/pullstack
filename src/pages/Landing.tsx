@@ -301,6 +301,69 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* ─── POR QUÉ PULLSTACK ─── */}
+      <section className="py-20 px-6 bg-[#16162e]">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-14">
+            <p className="text-emerald-400 text-xs font-bold uppercase tracking-widest mb-3">La diferencia LATAM</p>
+            <h2 className="text-4xl font-black text-white">Lo que no encuentras<br />en eBay, Whatnot o Goldin</h2>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+            {([
+              ['🏦', 'emerald', 'Pagos 100% LATAM', 'SPEI, OXXO, MercadoPago. Sin tarjeta USD ni PayPal.'],
+              ['🇲🇽', 'red',     'Precios en MXN',   'Ve exactamente cuánto pagas en pesos, tipo de cambio incluido.'],
+              ['📬', 'blue',    'Grading Concierge', 'Enviamos tus cartas a PSA/BGS desde México con seguro y tracking.'],
+              ['🤝', 'violet',  'Trading P2P Seguro','Escrow integrado. Sin riesgo de estafas en grupos de Facebook.'],
+              ['📦', 'amber',   'Sin Aduanas Sorpresa','Costo real: precio + envío + impuestos + aranceles MX calculados.'],
+              ['🎓', 'cyan',    'Educación en Español','RC, parallels, PSA pop, comps. Todo en español, todo gratis.'],
+              ['📊', 'fuchsia', 'Precios Reales LATAM','Comps de eBay, Goldin, Fanatics. Sin inflación de WhatsApp.'],
+              ['🎙️', 'orange',  'Comunidad Española', 'Subastas live con hosts mexicanos. No más streams en inglés.'],
+            ] as [string, string, string, string][]).map(([icon, color, title, desc]) => {
+              const c: Record<string, string> = {
+                emerald:'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
+                red:'text-red-400 bg-red-500/10 border-red-500/20',
+                blue:'text-blue-400 bg-blue-500/10 border-blue-500/20',
+                violet:'text-violet-400 bg-violet-500/10 border-violet-500/20',
+                amber:'text-amber-400 bg-amber-500/10 border-amber-500/20',
+                cyan:'text-cyan-400 bg-cyan-500/10 border-cyan-500/20',
+                fuchsia:'text-fuchsia-400 bg-fuchsia-500/10 border-fuchsia-500/20',
+                orange:'text-orange-400 bg-orange-500/10 border-orange-500/20',
+              }
+              return (
+                <div key={title} className="bg-[#1a1a36] border border-white/5 rounded-2xl p-5 hover:border-white/10 transition-all">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl mb-3 border ${c[color]}`}>{icon}</div>
+                  <h3 className="text-white font-black text-sm mb-1.5">{title}</h3>
+                  <p className="text-gray-500 text-xs leading-relaxed">{desc}</p>
+                </div>
+              )
+            })}
+          </div>
+
+          <div className="bg-[#1a1a36] border border-white/5 rounded-2xl overflow-hidden">
+            <div className="grid grid-cols-3 text-center text-[10px] font-black uppercase tracking-widest border-b border-white/5">
+              <div className="py-3 text-gray-600">Característica</div>
+              <div className="py-3 text-gray-600 border-x border-white/5">Competencia (US)</div>
+              <div className="py-3 text-emerald-400 bg-emerald-500/5">PullStack ✓</div>
+            </div>
+            {[
+              ['Pagos LATAM (SPEI/OXXO)',     '❌ Solo USD/tarjeta',         '✅ SPEI · OXXO · MercadoPago'],
+              ['Precios en MXN',              '❌ Solo USD',                  '✅ USD + MXN en tiempo real'],
+              ['Grading desde México',        '❌ Auto-envío costoso a EUA',  '✅ Concierge local con seguro'],
+              ['Soporte en español',          '❌ Solo inglés',               '✅ Español 100%'],
+              ['Costo real de importación',   '❌ No calculado',              '✅ Incluido en precio'],
+              ['Comunidad LATAM verificada',  '❌ Grupos de FB sin escrow',    '✅ Plataforma con escrow P2P'],
+            ].map(([feat, them, us]) => (
+              <div key={feat} className="grid grid-cols-3 border-b border-white/5 last:border-0">
+                <div className="px-4 py-2.5 text-gray-400 text-xs">{feat}</div>
+                <div className="px-4 py-2.5 text-gray-600 text-xs border-x border-white/5">{them}</div>
+                <div className="px-4 py-2.5 text-emerald-400 text-xs font-bold">{us}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ─── MARCAS ─── */}
       <section className="py-14 px-6 border-y border-white/5">
         <div className="max-w-6xl mx-auto">

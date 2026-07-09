@@ -12,6 +12,8 @@ type AdminUser    = { id: string; display_name: string | null; role: string; cre
 type AdminListing = { id: number; user_id: string; display_name: string; title: string; sport: string; txn_type: string; price: string | null; active: boolean; created_at: string }
 type AdminOrder   = { id: number; contact_name: string; total: string; status: string; created_at: string }
 type AdminTxn     = { id: number; buyer_name: string; seller_name: string; listing_title: string; sale_price: string; commission_pct: number; commission_amt: number; total_paid: number; payment_method: string; payment_reference: string; status: string; created_at: string; tracking_number: string | null; tracking_carrier: string | null; tracking_url: string | null; estimated_delivery: string | null }
+type AdminMessage = { id: number; user_id: string; content: string; from_admin: boolean; created_at: string }
+type AdminDM      = { id: number; from_user_id: string; to_user_id: string; from_name: string; to_name: string; content: string; listing_title: string | null; action_type: string; created_at: string; read: boolean }
 
 // ─── Sub-componentes ──────────────────────────────────────────────────────────
 function StatCard({ label, value, icon, accent }: { label: string; value: number | string; icon: string; accent: string }) {
@@ -127,7 +129,7 @@ const TXN_CSS: Record<string, string> = {
   trade:   'text-blue-400',
 }
 
-type Tab = 'overview' | 'users' | 'listings' | 'orders' | 'transactions' | 'pagos' | 'images'
+type Tab = 'overview' | 'users' | 'listings' | 'orders' | 'transactions' | 'pagos' | 'images' | 'mensajes'
 
 // ─── Panel principal ──────────────────────────────────────────────────────────
 export default function Admin() {
@@ -163,6 +165,12 @@ export default function Admin() {
   const [showCatalog, setShowCatalog] = useState(true)
   const [catalogSaving, setCatalogSaving] = useState(false)
 
+  // Messages
+  const [msgs,       setMsgs]      = useState<AdminMessage[]>([])
+  const [dms,        setDms]       = useState<AdminDM[]>([])
+  const [msgsLoading, setML]       = useState(false)
+  const [msgTab,     setMsgTab]    = useState<'support' | 'dms'>('support')
+
   // Pagos config
   const [payConfig, setPayConfig] = useState({
     spei_banco: '', spei_clabe: '', spei_beneficiario: 'PullStack',
@@ -186,6 +194,7 @@ export default function Admin() {
     if (tab === 'orders')       loadOrders()
     if (tab === 'transactions') loadTxns()
     if (tab === 'pagos')        loadPayConfig()
+    if (tab === 'mensajes')     loadMessages()
   }, [tab])
 
   const loadStats = async () => {
@@ -239,6 +248,23 @@ export default function Admin() {
   const updateOrderStatus = async (id: number, status: string) => {
     await supabase.from('orders').update({ status }).eq('id', id)
     setOrders(prev => prev.map(o => o.id === id ? { ...o, status } : o))
+  }
+
+  const deleteOrder = async (id: number) => {
+    if (!confirm('¿Eliminar este pedido? Esta acción no se puede deshacer.')) return
+    await supabase.from('orders').delete().eq('id', id)
+    setOrders(prev => prev.filter(o => o.id !== id))
+  }
+
+  const loadMessages = async () => {
+    setML(true)
+    const [m, d] = await Promise.all([
+      supabase.from('messages').select('id, user_id, content, from_admin, created_at').order('created_at', { ascending: false }).limit(300),
+      supabase.from('direct_messages').select('id, from_user_id, to_user_id, from_name, to_name, content, listing_title, action_type, created_at, read').order('created_at', { ascending: false }).limit(300),
+    ])
+    setMsgs((m.data || []) as AdminMessage[])
+    setDms((d.data || []) as AdminDM[])
+    setML(false)
   }
 
   const loadTxns = async () => {
@@ -307,6 +333,7 @@ export default function Admin() {
     { id: 'listings',      label: 'Anuncios',       icon: '🏷️' },
     { id: 'orders',        label: 'Pedidos',        icon: '📦' },
     { id: 'transactions',  label: 'Transacciones',  icon: '💸', badge: pendingTxns },
+    { id: 'mensajes',      label: 'Mensajes',        icon: '💬' },
     { id: 'pagos',         label: 'Métodos de Pago', icon: '⚙️' },
     { id: 'images',        label: 'Imágenes',       icon: '🖼️' },
   ]
@@ -519,6 +546,10 @@ export default function Admin() {
                           className="bg-[#21213e] border border-white/10 text-gray-300 rounded-lg px-2 py-1 text-[10px] focus:outline-none cursor-pointer">
                           {ORDER_STATUS.map(s => <option key={s} value={s}>{s}</option>)}
                         </select>
+                        <button onClick={() => deleteOrder(o.id)}
+                          className="text-[10px] font-bold px-2.5 py-1 rounded-lg border border-red-500/20 text-red-400 hover:bg-red-500/10 transition-all">
+                          ✕
+                        </button>
                       </div>
                     </div>
                   ))}
@@ -648,6 +679,74 @@ export default function Admin() {
                     </div>
                   ))}
                 </div>
+              )
+            }
+          </div>
+        )}
+
+        {/* ── MENSAJES ── */}
+        {tab === 'mensajes' && (
+          <div>
+            <div className="flex gap-2 mb-5">
+              <button onClick={() => setMsgTab('support')}
+                className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${msgTab === 'support' ? 'bg-violet-600 text-white' : 'bg-[#1a1a36] border border-white/10 text-gray-400 hover:border-violet-500/30 hover:text-violet-400'}`}>
+                💬 Soporte ({msgs.length})
+              </button>
+              <button onClick={() => setMsgTab('dms')}
+                className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${msgTab === 'dms' ? 'bg-violet-600 text-white' : 'bg-[#1a1a36] border border-white/10 text-gray-400 hover:border-violet-500/30 hover:text-violet-400'}`}>
+                📩 Mensajes directos ({dms.length})
+              </button>
+            </div>
+            {msgsLoading
+              ? <div className="flex justify-center py-20"><div className="w-8 h-8 border-2 border-violet-500 border-t-transparent rounded-full animate-spin"/></div>
+              : msgTab === 'support'
+              ? (
+                msgs.length === 0
+                  ? <div className="text-center py-16"><p className="text-5xl mb-3">💬</p><p className="text-gray-500 text-sm">Sin mensajes de soporte aún</p></div>
+                  : (
+                    <div className="space-y-2">
+                      {msgs.map(m => (
+                        <div key={m.id} className={`bg-[#1a1a36] border rounded-xl px-4 py-3 ${m.from_admin ? 'border-violet-500/20' : 'border-white/5'}`}>
+                          <div className="flex items-start gap-3">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                                <span className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${m.from_admin ? 'bg-violet-500/20 text-violet-400 border-violet-500/30' : 'bg-white/5 text-gray-500 border-white/10'}`}>
+                                  {m.from_admin ? '🛡️ Admin' : '👤 Usuario'}
+                                </span>
+                                <span className="text-gray-700 text-[10px]">{new Date(m.created_at).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
+                              </div>
+                              <p className="text-gray-300 text-sm leading-relaxed">{m.content}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )
+              )
+              : (
+                dms.length === 0
+                  ? <div className="text-center py-16"><p className="text-5xl mb-3">📩</p><p className="text-gray-500 text-sm">Sin mensajes directos aún</p></div>
+                  : (
+                    <div className="space-y-2">
+                      {dms.map(d => (
+                        <div key={d.id} className={`bg-[#1a1a36] border rounded-xl px-4 py-3 ${!d.read ? 'border-blue-500/20' : 'border-white/5'}`}>
+                          <div className="flex items-start gap-3">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                <span className="text-gray-200 text-xs font-bold">{d.from_name}</span>
+                                <span className="text-gray-700 text-xs">→</span>
+                                <span className="text-gray-400 text-xs">{d.to_name}</span>
+                                {d.listing_title && <span className="bg-[#21213e] text-gray-500 text-[10px] px-2 py-0.5 rounded-full border border-white/5 truncate max-w-[140px]">{d.listing_title}</span>}
+                                {!d.read && <span className="bg-blue-500/20 text-blue-400 text-[10px] font-black px-1.5 py-0.5 rounded-full border border-blue-500/30">Nuevo</span>}
+                              </div>
+                              <p className="text-gray-300 text-sm leading-relaxed">{d.content}</p>
+                              <p className="text-gray-700 text-[10px] mt-1">{new Date(d.created_at).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )
               )
             }
           </div>
