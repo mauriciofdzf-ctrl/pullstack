@@ -316,6 +316,26 @@ do $$ begin
 end $$;
 
 -- ============================================================
+-- STORAGE — bucket para imágenes de anuncios
+-- ============================================================
+insert into storage.buckets (id, name, public)
+  values ('listing-images', 'listing-images', true)
+  on conflict (id) do nothing;
+
+drop policy if exists "listing_images_public_read"   on storage.objects;
+drop policy if exists "listing_images_auth_upload"   on storage.objects;
+drop policy if exists "listing_images_owner_delete"  on storage.objects;
+
+create policy "listing_images_public_read" on storage.objects
+  for select using (bucket_id = 'listing-images');
+
+create policy "listing_images_auth_upload" on storage.objects
+  for insert with check (bucket_id = 'listing-images' and auth.role() = 'authenticated');
+
+create policy "listing_images_owner_delete" on storage.objects
+  for delete using (bucket_id = 'listing-images' and (storage.foldername(name))[1] = auth.uid()::text);
+
+-- ============================================================
 -- TU CUENTA COMO ADMIN
 -- ============================================================
 update public.profiles
