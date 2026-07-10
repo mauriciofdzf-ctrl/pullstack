@@ -2,10 +2,6 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
-import {
-  IMAGE_SECTIONS, IMAGE_DEFAULTS, IMAGE_LABELS, type ImageKey,
-  loadImageOverridesFromDB, saveImageOverridesToDB,
-} from '../lib/imageConfig'
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 type AdminUser    = { id: string; display_name: string | null; role: string; created_at: string }
@@ -28,61 +24,6 @@ function StatCard({ label, value, icon, accent }: { label: string; value: number
   )
 }
 
-function ImageSlot({ imgKey, currentUrl, onSave, onReset }: {
-  imgKey: ImageKey
-  currentUrl: string
-  onSave: (key: ImageKey, url: string) => Promise<void>
-  onReset: (key: ImageKey) => Promise<void>
-}) {
-  const isCustom  = currentUrl !== IMAGE_DEFAULTS[imgKey]
-  const [input,   setInput]   = useState(currentUrl)
-  const [preview, setPreview] = useState(currentUrl)
-  const [saved,   setSaved]   = useState(false)
-  const [err,     setErr]     = useState(false)
-  const [saving,  setSaving]  = useState(false)
-
-  const save = async () => {
-    if (!input.trim()) return
-    setSaving(true)
-    await onSave(imgKey, input.trim())
-    setSaving(false); setSaved(true)
-    setTimeout(() => setSaved(false), 2000)
-  }
-  const reset = async () => {
-    setSaving(true)
-    await onReset(imgKey)
-    setSaving(false)
-    setInput(IMAGE_DEFAULTS[imgKey]); setPreview(IMAGE_DEFAULTS[imgKey]); setErr(false)
-  }
-
-  return (
-    <div className={`bg-[#13102a] rounded-2xl overflow-hidden border transition-all ${isCustom ? 'border-amber-500/40' : 'border-white/5'}`}>
-      <div className="relative h-40 bg-[#1c1835]">
-        {err
-          ? <div className="w-full h-full flex items-center justify-center text-gray-700"><svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg></div>
-          : <img key={preview} src={preview} alt={IMAGE_LABELS[imgKey]} className="w-full h-full object-cover" onError={() => setErr(true)} onLoad={() => setErr(false)} />
-        }
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
-        {isCustom && <span className="absolute top-2 right-2 bg-amber-500 text-black text-[10px] font-black px-2 py-0.5 rounded-full">✓ Custom</span>}
-        <span className="absolute bottom-2 left-3 text-white text-xs font-bold drop-shadow">{IMAGE_LABELS[imgKey]}</span>
-      </div>
-      <div className="p-3 space-y-2">
-        <input type="text" value={input}
-          onChange={e => { setInput(e.target.value); setPreview(e.target.value); setErr(false) }}
-          placeholder="https://... URL pública de imagen"
-          className="w-full bg-[#1c1835] border border-white/10 text-white placeholder-gray-700 px-3 py-2 rounded-lg text-xs focus:outline-none focus:border-amber-500/50 font-mono"
-        />
-        <div className="flex gap-2">
-          <button onClick={save} disabled={saving}
-            className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all disabled:opacity-50 ${saved ? 'bg-emerald-500 text-white' : 'bg-amber-500 hover:bg-amber-400 text-black'}`}>
-            {saving ? '...' : saved ? '✓ Guardado en nube' : 'Guardar'}
-          </button>
-          {isCustom && <button onClick={reset} disabled={saving} className="px-3 py-2 rounded-lg text-xs font-bold bg-white/5 hover:bg-white/10 text-gray-400 border border-white/5 transition-all disabled:opacity-50">↩ Reset</button>}
-        </div>
-      </div>
-    </div>
-  )
-}
 
 const ORDER_STATUS  = ['pending','confirmed','paid','shipped','delivered','cancelled']
 const TXN_STATUS    = ['pending','verified','completed','cancelled']
@@ -118,7 +59,7 @@ const TXN_CSS: Record<string, string> = {
   trade:   'text-blue-400',
 }
 
-type Tab = 'overview' | 'users' | 'listings' | 'orders' | 'transactions' | 'pagos' | 'images' | 'mensajes'
+type Tab = 'overview' | 'users' | 'listings' | 'orders' | 'transactions' | 'pagos' | 'mensajes'
 
 // ─── Panel principal ──────────────────────────────────────────────────────────
 export default function Admin() {
@@ -169,12 +110,6 @@ export default function Admin() {
   const [payLoading, setPL]   = useState(false)
   const [paySaved, setPaySaved] = useState(false)
 
-  // Images
-  const [imgSection,    setImgSection]    = useState(IMAGE_SECTIONS[0].label)
-  const [dbOverrides,   setDbOverrides]   = useState<Partial<Record<ImageKey, string>>>({})
-  const [imagesLoading, setImagesLoading] = useState(false)
-  const [resetDone,     setResetDone]     = useState(false)
-
   useEffect(() => { loadStats() }, [])
 
   useEffect(() => {
@@ -184,7 +119,6 @@ export default function Admin() {
     if (tab === 'transactions') loadTxns()
     if (tab === 'pagos')        loadPayConfig()
     if (tab === 'mensajes')     loadMessages()
-    if (tab === 'images')       loadImages()
   }, [tab])
 
   const loadStats = async () => {
@@ -302,34 +236,6 @@ export default function Admin() {
     setTimeout(() => setPaySaved(false), 2500)
   }
 
-  const loadImages = async () => {
-    setImagesLoading(true)
-    const overrides = await loadImageOverridesFromDB()
-    setDbOverrides(overrides)
-    setImagesLoading(false)
-  }
-
-  const saveSlot = async (key: ImageKey, url: string) => {
-    const next = { ...dbOverrides, [key]: url }
-    setDbOverrides(next)
-    await saveImageOverridesToDB(next)
-  }
-
-  const resetSlot = async (key: ImageKey) => {
-    const next = { ...dbOverrides }
-    delete next[key]
-    setDbOverrides(next)
-    await saveImageOverridesToDB(next)
-  }
-
-  const resetAllImages = async () => {
-    if (!confirm('¿Resetear TODAS las imágenes al default?')) return
-    setDbOverrides({})
-    await saveImageOverridesToDB({})
-    setResetDone(true)
-    setTimeout(() => setResetDone(false), 2500)
-  }
-
   const filteredUsers = users.filter(u =>
     !userSearch || (u.display_name || '').toLowerCase().includes(userSearch.toLowerCase())
   )
@@ -344,7 +250,6 @@ export default function Admin() {
     { id: 'transactions',  label: 'Transacciones',  icon: '💸', badge: pendingTxns },
     { id: 'mensajes',      label: 'Mensajes',        icon: '💬' },
     { id: 'pagos',         label: 'Métodos de Pago', icon: '⚙️' },
-    { id: 'images',        label: 'Imágenes',       icon: '🖼️' },
   ]
 
   return (
@@ -840,50 +745,6 @@ export default function Admin() {
                   {paySaved ? '✅ Guardado — compradores ya ven tus datos' : 'Guardar configuración de pagos'}
                 </button>
               </>
-            }
-          </div>
-        )}
-
-        {/* ── IMÁGENES ── */}
-        {tab === 'images' && (
-          <div>
-            <div className="bg-amber-500/5 border border-amber-500/15 rounded-xl p-4 mb-6">
-              <p className="text-amber-400 text-sm font-bold mb-1">☁️ Imágenes guardadas en la nube</p>
-              <p className="text-gray-500 text-xs">Los cambios aplican para <span className="text-white font-bold">todos los usuarios</span> en tiempo real. Pega cualquier URL pública de imagen.</p>
-            </div>
-            <div className="flex items-center justify-between mb-5">
-              <p className="text-gray-600 text-sm">{Object.keys(dbOverrides).length} imágenes personalizadas</p>
-              <button onClick={resetAllImages}
-                className={`text-xs font-bold px-4 py-2 rounded-lg border transition-all ${resetDone ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'border-white/10 text-gray-500 hover:border-red-500/30 hover:text-red-400'}`}>
-                {resetDone ? '✓ Reseteado' : '↩ Reset todo'}
-              </button>
-            </div>
-            <div className="flex gap-2 flex-wrap mb-6">
-              {IMAGE_SECTIONS.map(s => {
-                const cnt = s.keys.filter(k => k in dbOverrides).length
-                return (
-                  <button key={s.label} onClick={() => setImgSection(s.label)}
-                    className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${imgSection === s.label ? 'bg-amber-500 text-black' : 'bg-[#1c1835] border border-white/10 text-gray-400 hover:border-amber-500/30 hover:text-amber-400'}`}>
-                    {s.label}{cnt > 0 && <span className="ml-1.5 text-[10px] opacity-70">{cnt}✓</span>}
-                  </button>
-                )
-              })}
-            </div>
-            {imagesLoading
-              ? <div className="flex justify-center py-20"><div className="w-8 h-8 border-2 border-amber-500 border-t-transparent rounded-full animate-spin"/></div>
-              : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {IMAGE_SECTIONS.find(s => s.label === imgSection)!.keys.map(k => (
-                    <ImageSlot
-                      key={k}
-                      imgKey={k}
-                      currentUrl={dbOverrides[k] ?? IMAGE_DEFAULTS[k]}
-                      onSave={saveSlot}
-                      onReset={resetSlot}
-                    />
-                  ))}
-                </div>
-              )
             }
           </div>
         )}
