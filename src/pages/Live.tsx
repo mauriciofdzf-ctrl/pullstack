@@ -37,7 +37,7 @@ export default function Live() {
     setNotifiedIds(prev => { const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s })
 
   return (
-    <div className="min-h-screen bg-[#090c14] pt-24 pb-16 px-4">
+    <div className="min-h-screen bg-[#0c0a1e] pt-24 pb-16 px-4">
       <div className="max-w-5xl mx-auto">
 
         {/* Header */}
@@ -51,9 +51,9 @@ export default function Live() {
         </div>
 
         {/* Live stream player */}
-        <div className="bg-[#12161f] border border-white/5 rounded-2xl overflow-hidden mb-8">
-          <div className="aspect-video bg-[#0d1018] flex items-center justify-center relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-[#070910] to-[#12161f] flex items-center justify-center">
+        <div className="bg-[#1c1835] border border-white/5 rounded-2xl overflow-hidden mb-8">
+          <div className="aspect-video bg-[#13102a] flex items-center justify-center relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-[#08061a] to-[#1c1835] flex items-center justify-center">
               <div className="text-center">
                 <div className="w-20 h-20 rounded-full bg-red-500/20 border border-red-500/30 flex items-center justify-center mx-auto mb-4">
                   <svg className="w-10 h-10 text-red-400" fill="currentColor" viewBox="0 0 24 24">
@@ -90,7 +90,7 @@ export default function Live() {
             <h2 className="text-white font-bold text-lg mb-4">Próximos breaks</h2>
             <div className="space-y-3">
               {SCHEDULE.map(ev => (
-                <div key={ev.id} className="bg-[#12161f] border border-white/5 hover:border-white/10 rounded-2xl p-4 transition-all">
+                <div key={ev.id} className="bg-[#1c1835] border border-white/5 hover:border-white/10 rounded-2xl p-4 transition-all">
                   <div className="flex items-center gap-3">
                     {ev.status === 'live' ? (
                       <div className="flex items-center gap-1.5 bg-red-500/20 border border-red-500/30 text-red-400 px-2.5 py-1 rounded-lg text-xs font-bold shrink-0">
@@ -111,7 +111,7 @@ export default function Live() {
                       </button>
                     ) : (
                       <button onClick={() => toggle(ev.id)}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-bold shrink-0 border transition-all ${notifiedIds.has(ev.id) ? 'bg-violet-500/20 border-violet-500/40 text-violet-400' : 'bg-[#191d28] border-white/10 text-gray-400 hover:border-white/20'}`}>
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold shrink-0 border transition-all ${notifiedIds.has(ev.id) ? 'bg-violet-500/20 border-violet-500/40 text-violet-400' : 'bg-[#26213d] border-white/10 text-gray-400 hover:border-white/20'}`}>
                         {notifiedIds.has(ev.id) ? '✓ Anotado' : 'Notificarme'}
                       </button>
                     )}
@@ -120,7 +120,7 @@ export default function Live() {
               ))}
             </div>
 
-            <div className="mt-4 bg-[#12161f] border border-white/5 rounded-2xl p-4 text-center">
+            <div className="mt-4 bg-[#1c1835] border border-white/5 rounded-2xl p-4 text-center">
               <p className="text-gray-500 text-sm mb-3">¿Quieres entrar a un break grupal?</p>
               <a href="/messages"
                 className="inline-block bg-violet-600 hover:bg-violet-500 text-white font-black px-5 py-2.5 rounded-xl text-sm transition-all">
@@ -134,7 +134,7 @@ export default function Live() {
             <h2 className="text-white font-bold text-lg mb-4">Breaks anteriores</h2>
             <div className="space-y-3">
               {PAST.map(p => (
-                <div key={p.id} className="bg-[#12161f] border border-white/5 rounded-2xl p-4">
+                <div key={p.id} className="bg-[#1c1835] border border-white/5 rounded-2xl p-4">
                   <div className="flex items-center justify-between mb-1">
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${SPORT_BADGE[p.sport] || ''}`}>{p.sport}</span>
                     <span className="text-gray-600 text-[10px]">{p.date}</span>
@@ -151,7 +151,7 @@ export default function Live() {
         </div>
 
         {/* How it works */}
-        <div className="bg-[#12161f] border border-white/5 rounded-2xl p-6">
+        <div className="bg-[#1c1835] border border-white/5 rounded-2xl p-6">
           <h2 className="text-white font-bold text-lg mb-5 text-center">¿Cómo funcionan los breaks?</h2>
           <div className="grid sm:grid-cols-4 gap-4">
             {HOW_IT_WORKS.map(h => (

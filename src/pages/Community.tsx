@@ -99,7 +99,7 @@ export default function Community() {
   }
 
   return (
-    <div className="min-h-screen bg-[#090c14] pt-24 pb-16 px-4">
+    <div className="min-h-screen bg-[#0c0a1e] pt-24 pb-16 px-4">
       <div className="max-w-3xl mx-auto">
 
         {/* Header */}
@@ -115,7 +115,7 @@ export default function Community() {
             </button>
           ) : (
             <button onClick={() => navigate('/login')}
-              className="bg-[#12161f] border border-white/10 hover:border-violet-500/30 text-gray-300 font-bold px-4 py-2.5 rounded-xl text-sm transition-all">
+              className="bg-[#1c1835] border border-white/10 hover:border-violet-500/30 text-gray-300 font-bold px-4 py-2.5 rounded-xl text-sm transition-all">
               Iniciar sesión
             </button>
           )}
@@ -123,18 +123,18 @@ export default function Community() {
 
         {/* New post form */}
         {showForm && user && (
-          <div className="bg-[#12161f] border border-violet-500/20 rounded-2xl p-5 mb-6 animate-in fade-in duration-200">
+          <div className="bg-[#1c1835] border border-violet-500/20 rounded-2xl p-5 mb-6 animate-in fade-in duration-200">
             <h3 className="text-white font-bold mb-4">Nueva publicación</h3>
             <input value={title} onChange={e => setTitle(e.target.value)}
               placeholder="Título *"
-              className="w-full bg-[#191d28] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm mb-3 focus:outline-none focus:border-violet-500/50 transition-colors" />
+              className="w-full bg-[#26213d] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm mb-3 focus:outline-none focus:border-violet-500/50 transition-colors" />
             <textarea value={body} onChange={e => setBody(e.target.value)}
               placeholder="Descripción, preguntas, pulls del día... (opcional)"
               rows={3}
-              className="w-full bg-[#191d28] border border-white/10 text-white rounded-xl px-4 py-3 text-sm mb-3 focus:outline-none focus:border-violet-500/50 resize-none transition-colors" />
+              className="w-full bg-[#26213d] border border-white/10 text-white rounded-xl px-4 py-3 text-sm mb-3 focus:outline-none focus:border-violet-500/50 resize-none transition-colors" />
             <div className="flex items-center gap-3 flex-wrap">
               <select value={sport} onChange={e => setSport(e.target.value)}
-                className="bg-[#191d28] border border-white/10 text-white rounded-xl px-3 py-2 text-sm focus:outline-none">
+                className="bg-[#26213d] border border-white/10 text-white rounded-xl px-3 py-2 text-sm focus:outline-none">
                 {SPORTS.filter(s => s !== 'Todos').map(s => <option key={s}>{s}</option>)}
               </select>
               <div className="flex-1" />
@@ -149,7 +149,7 @@ export default function Community() {
         )}
 
         {!user && (
-          <div className="bg-[#12161f] border border-white/5 rounded-2xl p-5 mb-6 flex items-center justify-between gap-4">
+          <div className="bg-[#1c1835] border border-white/5 rounded-2xl p-5 mb-6 flex items-center justify-between gap-4">
             <p className="text-gray-400 text-sm">Inicia sesión para publicar y darle like a posts</p>
             <button onClick={() => navigate('/login')}
               className="bg-violet-600 hover:bg-violet-500 text-white font-black px-4 py-2 rounded-xl text-sm whitespace-nowrap transition-all">
@@ -165,7 +165,7 @@ export default function Community() {
               className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap border transition-all ${
                 filter === s
                   ? 'bg-violet-500/20 text-violet-400 border-violet-500/40'
-                  : 'bg-[#12161f] border-white/5 text-gray-400 hover:text-white hover:border-white/10'
+                  : 'bg-[#1c1835] border-white/5 text-gray-400 hover:text-white hover:border-white/10'
               }`}>
               {s}
             </button>
@@ -176,7 +176,7 @@ export default function Community() {
         {loading ? (
           <div className="flex items-center justify-center py-20 text-gray-600 text-sm">Cargando...</div>
         ) : posts.length === 0 ? (
-          <div className="bg-[#12161f] border border-white/5 rounded-2xl p-12 text-center">
+          <div className="bg-[#1c1835] border border-white/5 rounded-2xl p-12 text-center">
             <div className="text-4xl mb-3">💬</div>
             <h3 className="text-white font-bold mb-1">Sin publicaciones aún</h3>
             <p className="text-gray-500 text-sm">Sé el primero en publicar en esta categoría.</p>
@@ -184,7 +184,7 @@ export default function Community() {
         ) : (
           <div className="space-y-4">
             {posts.map(p => (
-              <div key={p.id} className="bg-[#12161f] border border-white/5 hover:border-white/10 rounded-2xl p-5 transition-all">
+              <div key={p.id} className="bg-[#1c1835] border border-white/5 hover:border-white/10 rounded-2xl p-5 transition-all">
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div className="flex items-center gap-2.5">
                     <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${getColor(p.user_id)} flex items-center justify-center text-white font-black text-xs shrink-0`}>

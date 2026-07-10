@@ -32,7 +32,7 @@ export default function ResetPassword() {
   }
 
   if (success) return (
-    <div className="min-h-screen bg-[#090c14] flex items-center justify-center px-4">
+    <div className="min-h-screen bg-[#0c0a1e] flex items-center justify-center px-4">
       <div className="text-center max-w-sm">
         <div className="w-20 h-20 bg-green-500/10 border border-green-500/20 rounded-full flex items-center justify-center text-4xl mx-auto mb-6">✓</div>
         <h2 className="text-2xl font-black text-white mb-3">¡Contraseña actualizada!</h2>
@@ -43,7 +43,7 @@ export default function ResetPassword() {
   )
 
   if (!tokenReady) return (
-    <div className="min-h-screen bg-[#090c14] flex items-center justify-center px-4">
+    <div className="min-h-screen bg-[#0c0a1e] flex items-center justify-center px-4">
       <div className="text-center max-w-sm">
         <div className="w-16 h-16 border-2 border-violet-500 border-t-transparent rounded-full animate-spin mx-auto mb-6" />
         <p className="text-gray-400 text-sm">Verificando link de recuperación...</p>
@@ -57,7 +57,7 @@ export default function ResetPassword() {
   )
 
   return (
-    <div className="min-h-screen bg-[#090c14] flex items-center justify-center px-4">
+    <div className="min-h-screen bg-[#0c0a1e] flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-10">
           <Link to="/" className="inline-flex items-center gap-2.5 mb-6">
@@ -70,19 +70,19 @@ export default function ResetPassword() {
           <p className="text-gray-500 text-sm">Elige una contraseña segura para tu cuenta</p>
         </div>
 
-        <div className="bg-[#12161f] border border-white/5 rounded-2xl p-8 space-y-5">
+        <div className="bg-[#1c1835] border border-white/5 rounded-2xl p-8 space-y-5">
           <form onSubmit={handleReset} className="space-y-4">
             <div>
               <label className="block text-gray-400 text-sm font-medium mb-1.5">Nueva contraseña</label>
               <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required
                 placeholder="Mínimo 6 caracteres"
-                className="w-full bg-[#191d28] border border-white/10 text-white placeholder-gray-600 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-violet-500/50 transition-colors" />
+                className="w-full bg-[#26213d] border border-white/10 text-white placeholder-gray-600 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-violet-500/50 transition-colors" />
             </div>
             <div>
               <label className="block text-gray-400 text-sm font-medium mb-1.5">Confirmar contraseña</label>
               <input type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} required
                 placeholder="••••••••"
-                className="w-full bg-[#191d28] border border-white/10 text-white placeholder-gray-600 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-violet-500/50 transition-colors" />
+                className="w-full bg-[#26213d] border border-white/10 text-white placeholder-gray-600 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-violet-500/50 transition-colors" />
             </div>
 
             {error && (

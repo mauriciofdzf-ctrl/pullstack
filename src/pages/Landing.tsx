@@ -36,13 +36,16 @@ export default function Landing() {
   ]
 
   return (
-    <main className="bg-[#090c14] text-white pt-16">
+    <main className="bg-[#0c0a1e] text-white pt-16">
 
       {/* ─── HERO ─── */}
       <section className="relative min-h-screen flex items-center overflow-hidden">
         <div className="absolute inset-0 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: `url('${IMGS.cards}')` }} />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#070910] via-[#070910]/90 to-[#070910]/50" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#070910] via-transparent to-[#070910]/30" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#08061a] via-[#0c0a1e]/92 to-[#08061a]/40" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#08061a] via-transparent to-[#08061a]/20" />
+        {/* Glow ambiental */}
+        <div className="absolute left-1/4 top-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full bg-amber-500/6 blur-[120px] pointer-events-none" />
+        <div className="absolute right-1/3 top-1/4 w-[500px] h-[500px] rounded-full bg-violet-600/8 blur-[100px] pointer-events-none" />
 
         {/* Floating cards */}
         <div className="absolute right-0 top-0 bottom-0 w-1/2 hidden lg:flex items-center justify-end pr-12">
@@ -130,7 +133,8 @@ export default function Landing() {
       </section>
 
       {/* ─── CATEGORÍAS ─── */}
-      <section className="py-20 px-6 bg-[#0d1018]">
+      <section className="py-20 px-6 bg-gradient-to-b from-[#13102a] to-[#0c0a1e] relative overflow-hidden">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-violet-500/30 to-transparent" />
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
             <p className="text-amber-400 text-xs font-bold uppercase tracking-widest mb-2">Explorar</p>
@@ -145,11 +149,11 @@ export default function Landing() {
               >
                 <img src={cat.img} alt={cat.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
-                <div className="absolute inset-0 border border-violet-500/0 group-hover:border-violet-500/50 rounded-2xl transition-colors" />
+                <div className="absolute inset-0 border border-amber-500/0 group-hover:border-amber-500/40 rounded-2xl transition-colors group-hover:shadow-[inset_0_0_20px_rgba(245,158,11,0.08)]" />
                 <div className="absolute inset-0 p-3 flex flex-col justify-end">
                   <p className="text-white font-black text-sm leading-tight">{cat.name}</p>
                   <p className="text-gray-400 text-[10px] mt-0.5 leading-snug hidden sm:block">{cat.sub}</p>
-                  <p className="text-violet-400 text-[10px] font-bold mt-1">{cat.count}</p>
+                  <p className="text-amber-400 text-[10px] font-bold mt-1">{cat.count}</p>
                 </div>
               </button>
             ))}
@@ -166,7 +170,7 @@ export default function Landing() {
               <h2 className="text-4xl font-black text-white">Las cartas más hot 🔥</h2>
               <p className="text-gray-500 text-sm mt-1">Precios reales verificados · eBay, Goldin, PSA</p>
             </div>
-            <button onClick={() => navigate('/marketplace')} className="text-sm text-violet-400 hover:text-violet-300 font-semibold border border-violet-500/20 hover:border-violet-500/40 px-4 py-2 rounded-lg transition-all">
+            <button onClick={() => navigate('/marketplace')} className="text-sm text-amber-400 hover:text-amber-300 font-semibold border border-amber-500/20 hover:border-amber-500/40 px-4 py-2 rounded-lg transition-all">
               Ver todo →
             </button>
           </div>
@@ -175,16 +179,16 @@ export default function Landing() {
               <div
                 key={card.player}
                 onClick={() => navigate('/marketplace')}
-                className="group bg-[#12161f] border border-white/5 hover:border-violet-500/40 rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_60px_rgba(245,158,11,0.12)]"
+                className="group bg-[#1c1835] border border-white/5 hover:border-amber-500/30 rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_60px_rgba(245,158,11,0.15)]"
               >
                 <div className="relative h-56 overflow-hidden">
                   <img src={card.img} alt={card.sport} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#111] via-black/20 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0c0a1e] via-black/20 to-transparent" />
                   <div className="absolute top-3 left-3 bg-red-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full">🔥 {card.sport}</div>
-                  <div className="absolute top-3 right-3 bg-black/70 backdrop-blur text-violet-400 text-[10px] font-bold px-2 py-0.5 rounded-lg border border-violet-500/30">{card.grade}</div>
+                  <div className="absolute top-3 right-3 bg-black/70 backdrop-blur text-amber-400 text-[10px] font-bold px-2 py-0.5 rounded-lg border border-amber-500/30">{card.grade}</div>
                 </div>
                 <div className="p-4">
-                  <p className="text-[10px] text-violet-400 font-bold uppercase tracking-widest mb-1">{card.detail}</p>
+                  <p className="text-[10px] text-amber-500 font-bold uppercase tracking-widest mb-1">{card.detail}</p>
                   <h3 className="text-white font-black text-base leading-tight mb-0.5">{card.player}</h3>
                   <p className="text-gray-600 text-[10px] mb-3">{card.team}</p>
                   <div className="flex items-center justify-between">
@@ -192,7 +196,7 @@ export default function Landing() {
                       <div className="text-white font-black text-lg">{card.price}</div>
                       <div className="text-green-400 text-[10px] font-bold">{card.change}</div>
                     </div>
-                    <span className="bg-violet-500/10 border border-violet-500/30 text-violet-400 font-bold py-2 px-4 rounded-lg text-xs">Ver →</span>
+                    <span className="bg-amber-500/10 border border-amber-500/25 text-amber-400 font-bold py-2 px-4 rounded-lg text-xs group-hover:bg-amber-500/20 transition-colors">Ver →</span>
                   </div>
                 </div>
               </div>
@@ -202,7 +206,9 @@ export default function Landing() {
       </section>
 
       {/* ─── LIVE AUCTIONS ─── */}
-      <section className="py-20 px-6 bg-[#0d1018]">
+      <section className="py-20 px-6 bg-gradient-to-b from-[#0c0a1e] to-[#13102a] relative overflow-hidden">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-red-500/20 to-transparent" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-red-500/4 blur-[100px] pointer-events-none" />
         <div className="max-w-7xl mx-auto">
           <div className="flex items-end justify-between mb-10">
             <div>
@@ -219,7 +225,7 @@ export default function Landing() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
             {liveNow.map((a) => (
               <div key={a.title} onClick={() => navigate('/live')}
-                className="group bg-[#12161f] border border-white/5 hover:border-red-500/30 rounded-2xl overflow-hidden cursor-pointer transition-all hover:-translate-y-1">
+                className="group bg-[#1c1835] border border-white/5 hover:border-red-500/30 rounded-2xl overflow-hidden cursor-pointer transition-all hover:-translate-y-1">
                 <div className="relative h-44 overflow-hidden">
                   <img src={a.img} alt={a.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#111] to-transparent" />
@@ -234,7 +240,7 @@ export default function Landing() {
                   <div className="flex items-center justify-between mb-3">
                     <div>
                       <p className="text-gray-500 text-[10px] uppercase">Oferta actual</p>
-                      <p className="text-violet-400 font-black text-xl">{a.bid}</p>
+                      <p className="text-amber-400 font-black text-xl">{a.bid}</p>
                     </div>
                     <div className="text-right">
                       <p className="text-gray-500 text-[10px] uppercase">Tiempo</p>
@@ -266,7 +272,7 @@ export default function Landing() {
                 <p className="text-3xl mb-2">🃏</p>
                 <h3 className="text-white font-black text-2xl mb-1">Explorador · Marketplace</h3>
                 <p className="text-gray-400 text-sm max-w-sm">Cartas individuales, cajas selladas y accesorios en un solo lugar. Filtra por deporte, tipo y precio.</p>
-                <button className="mt-4 self-start text-violet-400 text-sm font-bold border border-violet-500/30 hover:border-violet-500/60 px-4 py-2 rounded-lg transition-all">Explorar →</button>
+                <button className="mt-4 self-start text-amber-400 text-sm font-bold border border-amber-500/30 hover:border-amber-500/60 hover:bg-amber-500/5 px-4 py-2 rounded-lg transition-all">Explorar →</button>
               </div>
             </div>
             <div className="relative rounded-2xl overflow-hidden h-64 group cursor-pointer" onClick={() => navigate('/marketplace')}>
@@ -296,7 +302,7 @@ export default function Landing() {
               <div className="absolute inset-0 p-8 flex flex-col justify-end">
                 <div className="flex gap-2 mb-3 flex-wrap">
                   {['Rifas semanales', 'Group Breaks', 'Spot por equipo', 'Sorteo en vivo'].map((t) => (
-                    <span key={t} className="bg-violet-500/20 border border-violet-500/40 text-violet-400 text-[10px] font-bold px-2 py-0.5 rounded-full">{t}</span>
+                    <span key={t} className="bg-amber-500/15 border border-amber-500/30 text-amber-400 text-[10px] font-bold px-2 py-0.5 rounded-full">{t}</span>
                   ))}
                 </div>
                 <h3 className="text-white font-black text-2xl mb-1">Rifas & Group Breaks</h3>
@@ -308,7 +314,7 @@ export default function Landing() {
       </section>
 
       {/* ─── POR QUÉ PULLSTACK ─── */}
-      <section className="py-20 px-6 bg-[#0d1018]">
+      <section className="py-20 px-6 bg-[#13102a]">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-14">
             <p className="text-emerald-400 text-xs font-bold uppercase tracking-widest mb-3">La diferencia LATAM</p>
@@ -337,7 +343,7 @@ export default function Landing() {
                 orange:'text-orange-400 bg-orange-500/10 border-orange-500/20',
               }
               return (
-                <div key={title} className="bg-[#12161f] border border-white/5 rounded-2xl p-5 hover:border-white/10 transition-all">
+                <div key={title} className="bg-[#1c1835] border border-white/5 rounded-2xl p-5 hover:border-white/10 transition-all">
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl mb-3 border ${c[color]}`}>{icon}</div>
                   <h3 className="text-white font-black text-sm mb-1.5">{title}</h3>
                   <p className="text-gray-500 text-xs leading-relaxed">{desc}</p>
@@ -346,7 +352,7 @@ export default function Landing() {
             })}
           </div>
 
-          <div className="bg-[#12161f] border border-white/5 rounded-2xl overflow-hidden">
+          <div className="bg-[#1c1835] border border-white/5 rounded-2xl overflow-hidden">
             <div className="grid grid-cols-3 text-center text-[10px] font-black uppercase tracking-widest border-b border-white/5">
               <div className="py-3 text-gray-600">Característica</div>
               <div className="py-3 text-gray-600 border-x border-white/5">Competencia (US)</div>
@@ -376,7 +382,7 @@ export default function Landing() {
           <p className="text-center text-gray-700 text-[10px] uppercase tracking-[0.3em] mb-8">Marcas y juegos disponibles</p>
           <div className="flex flex-wrap justify-center items-center gap-x-10 gap-y-5">
             {['TOPPS', 'PANINI', 'UPPER DECK', 'BOWMAN', 'DONRUSS', 'POKÉMON TCG', 'ONE PIECE TCG', 'DRAGON BALL SUPER', 'YU-GI-OH!', 'MAGIC: THE GATHERING'].map((b) => (
-              <span key={b} className="text-gray-700 hover:text-violet-400 font-black text-sm tracking-tight transition-colors cursor-pointer">{b}</span>
+              <span key={b} className="text-gray-700 hover:text-amber-400 font-black text-sm tracking-tight transition-colors cursor-pointer">{b}</span>
             ))}
           </div>
         </div>
