@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
+import { CATALOG } from '../lib/catalog'
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 type AdminUser    = { id: string; display_name: string | null; role: string; created_at: string }
@@ -59,7 +60,7 @@ const TXN_CSS: Record<string, string> = {
   trade:   'text-blue-400',
 }
 
-type Tab = 'overview' | 'users' | 'listings' | 'orders' | 'transactions' | 'pagos' | 'mensajes'
+type Tab = 'overview' | 'users' | 'listings' | 'orders' | 'transactions' | 'pagos' | 'mensajes' | 'catalog'
 
 // ─── Panel principal ──────────────────────────────────────────────────────────
 export default function Admin() {
@@ -94,6 +95,11 @@ export default function Admin() {
   const [showCatalog, setShowCatalog] = useState(true)
   const [catalogSaving, setCatalogSaving] = useState(false)
 
+  // Catalog hidden items
+  const [hiddenIds,     setHiddenIds]     = useState<Set<number>>(new Set())
+  const [catalogLoading, setCatalogLoading] = useState(false)
+  const [catalogFilter,  setCatalogFilter]  = useState('Todos')
+
   // Messages
   const [msgs,       setMsgs]      = useState<AdminMessage[]>([])
   const [dms,        setDms]       = useState<AdminDM[]>([])
@@ -119,6 +125,7 @@ export default function Admin() {
     if (tab === 'transactions') loadTxns()
     if (tab === 'pagos')        loadPayConfig()
     if (tab === 'mensajes')     loadMessages()
+    if (tab === 'catalog')      loadCatalogHidden()
   }, [tab])
 
   const loadStats = async () => {
@@ -236,6 +243,30 @@ export default function Admin() {
     setTimeout(() => setPaySaved(false), 2500)
   }
 
+  const loadCatalogHidden = async () => {
+    setCatalogLoading(true)
+    const { data } = await supabase.from('settings').select('value').eq('key', 'catalog_hidden').maybeSingle()
+    if (data?.value) {
+      try { setHiddenIds(new Set(JSON.parse(data.value) as number[])) } catch { /* noop */ }
+    } else {
+      setHiddenIds(new Set())
+    }
+    setCatalogLoading(false)
+  }
+
+  const toggleCatalogItem = async (id: number) => {
+    const next = new Set(hiddenIds)
+    if (next.has(id)) next.delete(id); else next.add(id)
+    setHiddenIds(next)
+    await supabase.from('settings').upsert({ key: 'catalog_hidden', value: JSON.stringify([...next]), updated_at: new Date().toISOString() })
+  }
+
+  const restoreAllCatalog = async () => {
+    if (!confirm('¿Restaurar todos los items del catálogo?')) return
+    setHiddenIds(new Set())
+    await supabase.from('settings').upsert({ key: 'catalog_hidden', value: '[]', updated_at: new Date().toISOString() })
+  }
+
   const filteredUsers = users.filter(u =>
     !userSearch || (u.display_name || '').toLowerCase().includes(userSearch.toLowerCase())
   )
@@ -250,6 +281,7 @@ export default function Admin() {
     { id: 'transactions',  label: 'Transacciones',  icon: '💸', badge: pendingTxns },
     { id: 'mensajes',      label: 'Mensajes',        icon: '💬' },
     { id: 'pagos',         label: 'Métodos de Pago', icon: '⚙️' },
+    { id: 'catalog',       label: 'Catálogo',        icon: '🗂️', badge: hiddenIds.size || undefined },
   ]
 
   return (
@@ -745,6 +777,70 @@ export default function Admin() {
                   {paySaved ? '✅ Guardado — compradores ya ven tus datos' : 'Guardar configuración de pagos'}
                 </button>
               </>
+            }
+          </div>
+        )}
+
+        {/* ── CATÁLOGO ── */}
+        {tab === 'catalog' && (
+          <div>
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3 className="text-white font-black text-lg">Catálogo PullStack</h3>
+                <p className="text-gray-500 text-xs mt-0.5">{CATALOG.length - hiddenIds.size} visibles · {hiddenIds.size} ocultos</p>
+              </div>
+              <div className="flex items-center gap-3">
+                {hiddenIds.size > 0 && (
+                  <button onClick={restoreAllCatalog}
+                    className="text-xs font-bold px-4 py-2 rounded-lg border border-white/10 text-gray-500 hover:border-emerald-500/30 hover:text-emerald-400 transition-all">
+                    ↩ Restaurar todo
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Filtro por sport */}
+            <div className="flex gap-2 flex-wrap mb-5">
+              {['Todos', 'NBA', 'NFL', 'Soccer', 'MLB', 'Pokémon', 'One Piece', 'General'].map(s => (
+                <button key={s} onClick={() => setCatalogFilter(s)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${catalogFilter === s ? 'bg-amber-500 text-black' : 'bg-[#1c1835] border border-white/10 text-gray-400 hover:border-amber-500/30'}`}>
+                  {s}
+                </button>
+              ))}
+            </div>
+
+            {catalogLoading
+              ? <div className="flex justify-center py-20"><div className="w-8 h-8 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" /></div>
+              : (
+                <div className="space-y-2">
+                  {CATALOG
+                    .filter(item => catalogFilter === 'Todos' || item.sport === catalogFilter)
+                    .map(item => {
+                      const hidden = hiddenIds.has(item.id)
+                      return (
+                        <div key={item.id}
+                          className={`flex items-center justify-between gap-4 px-4 py-3 rounded-xl border transition-all ${hidden ? 'bg-[#13102a] border-white/5 opacity-50' : 'bg-[#1c1835] border-white/5'}`}>
+                          <div className="flex items-center gap-3 min-w-0">
+                            <span className="text-gray-600 text-xs font-mono w-5 shrink-0">{item.id}</span>
+                            <div className="min-w-0">
+                              <p className={`font-bold text-sm truncate ${hidden ? 'text-gray-600 line-through' : 'text-white'}`}>{item.name}</p>
+                              <p className="text-gray-600 text-[11px] truncate">{item.sport} · {item.kind} · {item.price}</p>
+                            </div>
+                          </div>
+                          <button onClick={() => toggleCatalogItem(item.id)}
+                            className={`shrink-0 text-xs font-bold px-3 py-1.5 rounded-lg border transition-all ${
+                              hidden
+                                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20'
+                                : 'bg-red-500/10 border-red-500/30 text-red-400 hover:bg-red-500/20'
+                            }`}>
+                            {hidden ? '↩ Restaurar' : '🗑️ Eliminar'}
+                          </button>
+                        </div>
+                      )
+                    })
+                  }
+                </div>
+              )
             }
           </div>
         )}
