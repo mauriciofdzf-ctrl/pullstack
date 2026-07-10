@@ -1,4 +1,4 @@
-export const COMMISSION_PCT = 8
+export const COMMISSION_PCT = 5
 
 export type PaymentMethod = 'spei' | 'mercadopago' | 'oxxo' | 'tarjeta'
 

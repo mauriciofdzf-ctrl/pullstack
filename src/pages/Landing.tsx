@@ -119,8 +119,8 @@ export default function Landing() {
             <div className="flex gap-10 pt-8 border-t border-white/5">
               {[
                 { value: 'SPEI', label: 'OXXO · MercadoPago · Tarjeta', color: 'text-emerald-400' },
-                { value: '8%',   label: 'Comisión transparente',          color: 'text-amber-400' },
                 { value: 'MXN',  label: 'Precios en pesos disponibles',   color: 'text-violet-400' },
+                { value: 'LATAM', label: 'Plataforma #1 de cartas',        color: 'text-amber-400' },
               ].map((s) => (
                 <div key={s.label}>
                   <div className={`text-3xl font-black ${s.color}`}>{s.value}</div>
