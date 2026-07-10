@@ -151,6 +151,13 @@ export default function Admin() {
     setUsers(prev => prev.map(u => u.id === id ? { ...u, role } : u))
   }
 
+  const deleteUser = async (id: string, name: string) => {
+    if (!confirm(`¿Eliminar la cuenta de "${name}"? Esta acción no se puede deshacer.`)) return
+    const { error } = await supabase.rpc('delete_user', { target_id: id })
+    if (error) { alert('Error: ' + error.message); return }
+    setUsers(prev => prev.filter(u => u.id !== id))
+  }
+
   const loadListings = async () => {
     setLL(true)
     const { data } = await supabase.from('listings').select('id, user_id, display_name, title, sport, txn_type, price, active, created_at').order('created_at', { ascending: false }).limit(300)
@@ -385,24 +392,36 @@ export default function Admin() {
                 <div className="space-y-2">
                   {filteredUsers.map(u => (
                     <div key={u.id} className="flex items-center gap-3 bg-[#1c1835] border border-white/5 rounded-xl px-4 py-3 hover:border-white/10 transition-all">
-                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-black text-xs shrink-0 ${u.role === 'admin' ? 'bg-gradient-to-br from-violet-500 to-fuchsia-600 text-white' : 'bg-white/5 text-gray-500'}`}>
+                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-black text-xs shrink-0 ${u.role === 'admin' ? 'bg-gradient-to-br from-amber-500 to-orange-500 text-black' : 'bg-white/5 text-gray-500'}`}>
                         {(u.display_name || 'U').slice(0, 2).toUpperCase()}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-white text-sm font-medium truncate">{u.display_name || 'Sin nombre'}</p>
-                        <p className="text-gray-700 text-[10px] font-mono">{u.id.slice(0, 14)}...</p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-white text-sm font-bold truncate">{u.display_name || 'Sin nombre'}</p>
+                          {u.role === 'admin' && <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 shrink-0">👑 Admin</span>}
+                          {u.id === user?.id && <span className="text-[10px] text-gray-600">(tú)</span>}
+                        </div>
+                        <p className="text-gray-700 text-[10px] font-mono">{u.id.slice(0, 18)}...</p>
                       </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <span className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${u.role === 'admin' ? 'bg-red-500/15 border-red-500/30 text-red-400' : 'bg-white/5 border-white/10 text-gray-500'}`}>
-                          {u.role === 'admin' ? '👑 Admin' : 'Usuario'}
-                        </span>
-                        {u.id !== user?.id && (
-                          <button onClick={() => setUserRole(u.id, u.role === 'admin' ? 'user' : 'admin')}
-                            className="text-[10px] font-bold px-2.5 py-1 rounded-lg border border-white/10 text-gray-500 hover:border-violet-500/30 hover:text-violet-400 transition-all">
-                            {u.role === 'admin' ? '↓ Quitar' : '↑ Admin'}
+                      {u.id !== user?.id && (
+                        <div className="flex items-center gap-2 shrink-0">
+                          {u.role === 'admin' ? (
+                            <button onClick={() => setUserRole(u.id, 'user')}
+                              className="text-[11px] font-bold px-3 py-1.5 rounded-lg border border-amber-500/30 text-amber-400 hover:bg-amber-500/10 transition-all">
+                              ↓ Quitar admin
+                            </button>
+                          ) : (
+                            <button onClick={() => setUserRole(u.id, 'admin')}
+                              className="text-[11px] font-bold px-3 py-1.5 rounded-lg border border-white/10 text-gray-400 hover:border-amber-500/30 hover:text-amber-400 transition-all">
+                              👑 Hacer admin
+                            </button>
+                          )}
+                          <button onClick={() => deleteUser(u.id, u.display_name || 'Sin nombre')}
+                            className="text-[11px] font-bold px-3 py-1.5 rounded-lg border border-red-500/20 text-red-500/60 hover:bg-red-500/10 hover:border-red-500/40 hover:text-red-400 transition-all">
+                            🗑️
                           </button>
-                        )}
-                      </div>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
