@@ -147,8 +147,8 @@ export default function Admin() {
   }
 
   const setUserRole = async (id: string, role: 'user' | 'admin') => {
-    const { error } = await supabase.from('profiles').update({ role }).eq('id', id)
-    if (error) { alert('Error al cambiar rol: ' + error.message); return }
+    const { error } = await supabase.rpc('set_user_role', { target_id: id, new_role: role })
+    if (error) { alert('Error: ' + error.message); return }
     setUsers(prev => prev.map(u => u.id === id ? { ...u, role } : u))
   }
 
