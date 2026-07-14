@@ -664,6 +664,7 @@ export default function Marketplace() {
   const [checkoutModal, setCheckoutModal] = useState<UserListing | null>(null)
   const [showCatalog,   setShowCatalog]   = useState(true)
   const [hiddenIds,     setHiddenIds]     = useState<Set<number>>(new Set())
+  const [extraItems,    setExtraItems]    = useState<Item[]>([])
   const [minPrice,      setMinPrice]      = useState('')
   const [maxPrice,      setMaxPrice]      = useState('')
 
@@ -674,6 +675,12 @@ export default function Marketplace() {
       .then(({ data }) => {
         if (data?.value) {
           try { setHiddenIds(new Set(JSON.parse(data.value) as number[])) } catch { /* noop */ }
+        }
+      })
+    supabase.from('settings').select('value').eq('key', 'catalog_extra').maybeSingle()
+      .then(({ data }) => {
+        if (data?.value) {
+          try { setExtraItems(JSON.parse(data.value) as Item[]) } catch { /* noop */ }
         }
       })
   }, [])
@@ -744,7 +751,9 @@ export default function Marketplace() {
     return ms && mk && mt && mq && mpMin && mpMax
   })
 
-  let results = CATALOG.filter(item => !hiddenIds.has(item.id)).filter((item) => {
+  const allCatalog = [...CATALOG.filter(item => !hiddenIds.has(item.id)), ...extraItems]
+
+  let results = allCatalog.filter((item) => {
     const ms = sport === 'Todos' || item.sport === sport || item.sport === 'General'
     const mk = kind  === 'all'   || item.kind  === kind
     const mt = txn   === 'Todos' || txnMap[item.txn] === txn
@@ -1042,7 +1051,7 @@ export default function Marketplace() {
                 {/* Imagen */}
                 {(() => { const { isRC, isAuto, is1of1, numbered, gradeCo, gradeNum } = cardAttrs(item); return (
                 <div className="relative h-48 overflow-hidden">
-                  <img src={IMG[item.imgKey]} alt={item.name}
+                  <img src={item.imageUrl || IMG[item.imgKey]} alt={item.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#0c0a1e]/90 via-black/10 to-transparent" />
                   {/* Badges top-left */}

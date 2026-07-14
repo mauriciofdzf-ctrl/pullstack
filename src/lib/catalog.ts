@@ -1,20 +1,21 @@
 import type { ImageKey } from './imageConfig'
 
 export type CatalogItem = {
-  id:      number
-  name:    string
-  detail:  string
-  sport:   'NBA' | 'NFL' | 'Soccer' | 'MLB' | 'Pokémon' | 'One Piece' | 'General'
-  kind:    'card' | 'box' | 'accessory'
-  txn:     'sale' | 'auction' | 'trade' | 'buy'
-  price:   string
-  sub:     string
-  brand:   string
-  grade?:  string
-  change?: string
-  badge?:  string
-  hot?:    boolean
-  imgKey:  ImageKey
+  id:        number
+  name:      string
+  detail:    string
+  sport:     'NBA' | 'NFL' | 'Soccer' | 'MLB' | 'Pokémon' | 'One Piece' | 'General'
+  kind:      'card' | 'box' | 'accessory'
+  txn:       'sale' | 'auction' | 'trade' | 'buy'
+  price:     string
+  sub:       string
+  brand:     string
+  grade?:    string
+  change?:   string
+  badge?:    string
+  hot?:      boolean
+  imgKey:    ImageKey
+  imageUrl?: string  // URL directa para items agregados por admin
 }
 
 export const CATALOG: CatalogItem[] = [

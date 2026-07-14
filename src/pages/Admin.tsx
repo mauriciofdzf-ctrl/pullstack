@@ -96,9 +96,17 @@ export default function Admin() {
   const [catalogSaving, setCatalogSaving] = useState(false)
 
   // Catalog hidden items
-  const [hiddenIds,     setHiddenIds]     = useState<Set<number>>(new Set())
+  const [hiddenIds,      setHiddenIds]      = useState<Set<number>>(new Set())
   const [catalogLoading, setCatalogLoading] = useState(false)
   const [catalogFilter,  setCatalogFilter]  = useState('Todos')
+
+  // Catalog extra items (admin-added)
+  type ExtraItem = { id: number; name: string; detail: string; sport: string; kind: string; txn: string; price: string; sub: string; brand: string; grade: string; badge: string; imageUrl: string; imgKey: string }
+  const BLANK_EXTRA: Omit<ExtraItem, 'id'> = { name: '', detail: '', sport: 'NBA', kind: 'card', txn: 'sale', price: '', sub: '', brand: '', grade: '', badge: '', imageUrl: '', imgKey: 'nba1' }
+  const [extraItems,   setExtraItems]   = useState<ExtraItem[]>([])
+  const [showAddForm,  setShowAddForm]  = useState(false)
+  const [addForm,      setAddForm]      = useState(BLANK_EXTRA)
+  const [addSaving,    setAddSaving]    = useState(false)
 
   // Messages
   const [msgs,       setMsgs]      = useState<AdminMessage[]>([])
@@ -253,13 +261,40 @@ export default function Admin() {
 
   const loadCatalogHidden = async () => {
     setCatalogLoading(true)
-    const { data } = await supabase.from('settings').select('value').eq('key', 'catalog_hidden').maybeSingle()
-    if (data?.value) {
-      try { setHiddenIds(new Set(JSON.parse(data.value) as number[])) } catch { /* noop */ }
-    } else {
-      setHiddenIds(new Set())
-    }
+    const [hidden, extra] = await Promise.all([
+      supabase.from('settings').select('value').eq('key', 'catalog_hidden').maybeSingle(),
+      supabase.from('settings').select('value').eq('key', 'catalog_extra').maybeSingle(),
+    ])
+    if (hidden.data?.value) {
+      try { setHiddenIds(new Set(JSON.parse(hidden.data.value) as number[])) } catch { /* noop */ }
+    } else { setHiddenIds(new Set()) }
+    if (extra.data?.value) {
+      try { setExtraItems(JSON.parse(extra.data.value)) } catch { /* noop */ }
+    } else { setExtraItems([]) }
     setCatalogLoading(false)
+  }
+
+  const saveExtraItems = async (items: ExtraItem[]) => {
+    await supabase.from('settings').upsert({ key: 'catalog_extra', value: JSON.stringify(items), updated_at: new Date().toISOString() })
+  }
+
+  const addCatalogItem = async () => {
+    if (!addForm.name.trim() || !addForm.price.trim()) return
+    setAddSaving(true)
+    const newId = Date.now()
+    const newItem: ExtraItem = { ...addForm, id: newId }
+    const next = [...extraItems, newItem]
+    setExtraItems(next)
+    await saveExtraItems(next)
+    setAddForm(BLANK_EXTRA)
+    setShowAddForm(false)
+    setAddSaving(false)
+  }
+
+  const deleteExtraItem = async (id: number) => {
+    const next = extraItems.filter(i => i.id !== id)
+    setExtraItems(next)
+    await saveExtraItems(next)
   }
 
   const toggleCatalogItem = async (id: number) => {
@@ -804,23 +839,151 @@ export default function Admin() {
         {/* ── CATÁLOGO ── */}
         {tab === 'catalog' && (
           <div>
+            {/* Header */}
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h3 className="text-white font-black text-lg">Catálogo PullStack</h3>
-                <p className="text-gray-500 text-xs mt-0.5">{CATALOG.length - hiddenIds.size} visibles · {hiddenIds.size} ocultos</p>
+                <p className="text-gray-500 text-xs mt-0.5">
+                  {CATALOG.length - hiddenIds.size + extraItems.length} visibles · {hiddenIds.size} ocultos · {extraItems.length} agregados
+                </p>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 {hiddenIds.size > 0 && (
                   <button onClick={restoreAllCatalog}
-                    className="text-xs font-bold px-4 py-2 rounded-lg border border-white/10 text-gray-500 hover:border-emerald-500/30 hover:text-emerald-400 transition-all">
+                    className="text-xs font-bold px-3 py-1.5 rounded-lg border border-white/10 text-gray-500 hover:border-emerald-500/30 hover:text-emerald-400 transition-all">
                     ↩ Restaurar todo
                   </button>
                 )}
+                <button onClick={() => setShowAddForm(v => !v)}
+                  className={`text-xs font-bold px-4 py-2 rounded-lg border transition-all ${showAddForm ? 'bg-amber-500 text-black border-amber-500' : 'bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20'}`}>
+                  {showAddForm ? '✕ Cancelar' : '+ Agregar item'}
+                </button>
               </div>
             </div>
 
+            {/* Formulario agregar */}
+            {showAddForm && (
+              <div className="bg-[#13102a] border border-amber-500/20 rounded-2xl p-5 mb-6 space-y-3">
+                <p className="text-amber-400 text-sm font-black mb-1">Nuevo item del catálogo</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-gray-500 text-[11px] uppercase tracking-wide block mb-1">Nombre *</label>
+                    <input value={addForm.name} onChange={e => setAddForm(f => ({...f, name: e.target.value}))}
+                      placeholder="Ej: Luka Dončić RC Auto"
+                      className="w-full bg-[#1c1835] border border-white/10 text-white px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-amber-500/50 placeholder-gray-700" />
+                  </div>
+                  <div>
+                    <label className="text-gray-500 text-[11px] uppercase tracking-wide block mb-1">Precio *</label>
+                    <input value={addForm.price} onChange={e => setAddForm(f => ({...f, price: e.target.value}))}
+                      placeholder="$1,200"
+                      className="w-full bg-[#1c1835] border border-white/10 text-white px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-amber-500/50 placeholder-gray-700" />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="text-gray-500 text-[11px] uppercase tracking-wide block mb-1">Detalle</label>
+                    <input value={addForm.detail} onChange={e => setAddForm(f => ({...f, detail: e.target.value}))}
+                      placeholder="Ej: 2018-19 Panini Prizm RC Silver"
+                      className="w-full bg-[#1c1835] border border-white/10 text-white px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-amber-500/50 placeholder-gray-700" />
+                  </div>
+                  <div>
+                    <label className="text-gray-500 text-[11px] uppercase tracking-wide block mb-1">Sport</label>
+                    <select value={addForm.sport} onChange={e => setAddForm(f => ({...f, sport: e.target.value}))}
+                      className="w-full bg-[#1c1835] border border-white/10 text-white px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-amber-500/50">
+                      {['NBA','NFL','Soccer','MLB','Pokémon','One Piece','General'].map(s => <option key={s}>{s}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-gray-500 text-[11px] uppercase tracking-wide block mb-1">Tipo</label>
+                    <select value={addForm.kind} onChange={e => setAddForm(f => ({...f, kind: e.target.value}))}
+                      className="w-full bg-[#1c1835] border border-white/10 text-white px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-amber-500/50">
+                      <option value="card">Carta</option>
+                      <option value="box">Caja</option>
+                      <option value="accessory">Accesorio</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-gray-500 text-[11px] uppercase tracking-wide block mb-1">Transacción</label>
+                    <select value={addForm.txn} onChange={e => setAddForm(f => ({...f, txn: e.target.value}))}
+                      className="w-full bg-[#1c1835] border border-white/10 text-white px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-amber-500/50">
+                      <option value="sale">Venta</option>
+                      <option value="auction">Subasta</option>
+                      <option value="trade">Trading</option>
+                      <option value="buy">Tienda</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-gray-500 text-[11px] uppercase tracking-wide block mb-1">Marca / Set</label>
+                    <input value={addForm.brand} onChange={e => setAddForm(f => ({...f, brand: e.target.value}))}
+                      placeholder="Panini Prizm 2018"
+                      className="w-full bg-[#1c1835] border border-white/10 text-white px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-amber-500/50 placeholder-gray-700" />
+                  </div>
+                  <div>
+                    <label className="text-gray-500 text-[11px] uppercase tracking-wide block mb-1">Grado (opcional)</label>
+                    <input value={addForm.grade} onChange={e => setAddForm(f => ({...f, grade: e.target.value}))}
+                      placeholder="PSA 10"
+                      className="w-full bg-[#1c1835] border border-white/10 text-white px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-amber-500/50 placeholder-gray-700" />
+                  </div>
+                  <div>
+                    <label className="text-gray-500 text-[11px] uppercase tracking-wide block mb-1">Badge (opcional)</label>
+                    <input value={addForm.badge} onChange={e => setAddForm(f => ({...f, badge: e.target.value}))}
+                      placeholder="🔥 Hot"
+                      className="w-full bg-[#1c1835] border border-white/10 text-white px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-amber-500/50 placeholder-gray-700" />
+                  </div>
+                  <div>
+                    <label className="text-gray-500 text-[11px] uppercase tracking-wide block mb-1">Sub-texto</label>
+                    <input value={addForm.sub} onChange={e => setAddForm(f => ({...f, sub: e.target.value}))}
+                      placeholder="Raw ~$300 · 2 en stock"
+                      className="w-full bg-[#1c1835] border border-white/10 text-white px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-amber-500/50 placeholder-gray-700" />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="text-gray-500 text-[11px] uppercase tracking-wide block mb-1">URL de imagen</label>
+                    <input value={addForm.imageUrl} onChange={e => setAddForm(f => ({...f, imageUrl: e.target.value}))}
+                      placeholder="https://images.unsplash.com/... (deja vacío para imagen genérica)"
+                      className="w-full bg-[#1c1835] border border-white/10 text-white px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-amber-500/50 placeholder-gray-700 font-mono" />
+                  </div>
+                </div>
+                <button onClick={addCatalogItem} disabled={addSaving || !addForm.name.trim() || !addForm.price.trim()}
+                  className="w-full bg-amber-500 hover:bg-amber-400 disabled:opacity-40 text-black font-black py-2.5 rounded-xl text-sm transition-all mt-1">
+                  {addSaving ? 'Guardando...' : '+ Agregar al catálogo'}
+                </button>
+              </div>
+            )}
+
+            {/* Items agregados por admin */}
+            {extraItems.length > 0 && (
+              <div className="mb-6">
+                <p className="text-amber-400 text-[11px] font-black uppercase tracking-widest mb-2">Agregados por admin ({extraItems.length})</p>
+                <div className="space-y-2">
+                  {extraItems
+                    .filter(item => catalogFilter === 'Todos' || item.sport === catalogFilter)
+                    .map(item => (
+                      <div key={item.id} className="flex items-center justify-between gap-4 px-4 py-3 rounded-xl border bg-amber-500/5 border-amber-500/15">
+                        <div className="flex items-center gap-3 min-w-0">
+                          {item.imageUrl && <img src={item.imageUrl} className="w-10 h-10 rounded-lg object-cover shrink-0" onError={e => { (e.target as HTMLImageElement).style.display='none' }} />}
+                          <div className="min-w-0">
+                            <p className="text-white font-bold text-sm truncate">{item.name}</p>
+                            <p className="text-gray-500 text-[11px] truncate">{item.sport} · {item.kind} · {item.price}</p>
+                          </div>
+                        </div>
+                        <button onClick={() => deleteExtraItem(item.id)}
+                          className="shrink-0 text-xs font-bold px-3 py-1.5 rounded-lg border bg-red-500/10 border-red-500/30 text-red-400 hover:bg-red-500/20 transition-all">
+                          🗑️ Eliminar
+                        </button>
+                      </div>
+                    ))
+                  }
+                </div>
+              </div>
+            )}
+
+            {/* Separador */}
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex-1 h-px bg-white/5" />
+              <span className="text-[11px] text-gray-600 uppercase tracking-widest font-bold">Catálogo base</span>
+              <div className="flex-1 h-px bg-white/5" />
+            </div>
+
             {/* Filtro por sport */}
-            <div className="flex gap-2 flex-wrap mb-5">
+            <div className="flex gap-2 flex-wrap mb-4">
               {['Todos', 'NBA', 'NFL', 'Soccer', 'MLB', 'Pokémon', 'One Piece', 'General'].map(s => (
                 <button key={s} onClick={() => setCatalogFilter(s)}
                   className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${catalogFilter === s ? 'bg-amber-500 text-black' : 'bg-[#1c1835] border border-white/10 text-gray-400 hover:border-amber-500/30'}`}>
@@ -839,7 +1002,7 @@ export default function Admin() {
                       const hidden = hiddenIds.has(item.id)
                       return (
                         <div key={item.id}
-                          className={`flex items-center justify-between gap-4 px-4 py-3 rounded-xl border transition-all ${hidden ? 'bg-[#13102a] border-white/5 opacity-50' : 'bg-[#1c1835] border-white/5'}`}>
+                          className={`flex items-center justify-between gap-4 px-4 py-3 rounded-xl border transition-all ${hidden ? 'bg-[#13102a] border-white/5 opacity-40' : 'bg-[#1c1835] border-white/5'}`}>
                           <div className="flex items-center gap-3 min-w-0">
                             <span className="text-gray-600 text-xs font-mono w-5 shrink-0">{item.id}</span>
                             <div className="min-w-0">
