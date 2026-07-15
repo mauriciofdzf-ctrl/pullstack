@@ -786,6 +786,14 @@ export default function Marketplace() {
 
   const cartCount = cart.length
 
+  const deleteExtraItem = async (id: number) => {
+    const next = extraItems.filter(i => i.id !== id)
+    setExtraItems(next)
+    await supabase.from('settings').upsert({ key: 'catalog_extra', value: JSON.stringify(next), updated_at: new Date().toISOString() })
+  }
+
+  const isExtraItem = (id: number) => extraItems.some(i => i.id === id)
+
   const addToCart = (item: typeof CATALOG[0]) => {
     setCart((c) => [...c, { id: item.id, name: item.name, price: item.price, kind: item.kind, txn: item.txn }])
   }
@@ -1181,6 +1189,13 @@ export default function Marketplace() {
                   <div className={`absolute top-3 right-3 text-[10px] font-black px-2 py-0.5 rounded-full border uppercase ${txnCss[item.txn]}`}>
                     {txnMap[item.txn]}
                   </div>
+                  {/* Botón eliminar (solo admin, solo items extra) */}
+                  {isAdmin && isExtraItem(item.id) && (
+                    <button onClick={e => { e.stopPropagation(); deleteExtraItem(item.id) }}
+                      className="absolute top-8 right-3 bg-red-600/90 hover:bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full transition-all opacity-0 group-hover:opacity-100">
+                      🗑️
+                    </button>
+                  )}
                   {/* Footer de la imagen */}
                   <div className="absolute bottom-2 left-3 right-3 flex items-center justify-between gap-1">
                     {gradeCo && gradeNum && (
