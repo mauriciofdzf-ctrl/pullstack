@@ -643,7 +643,7 @@ function TradeModal({ item, onClose, user, navigate }: {
 }
 
 export default function Marketplace() {
-  const { user, profile } = useAuth()
+  const { user, profile, isAdmin } = useAuth()
   const navigate = useNavigate()
   const [sport,  setSport]  = useState('Todos')
   const [kind,   setKind]   = useState('all')
@@ -667,6 +667,9 @@ export default function Marketplace() {
   const [extraItems,    setExtraItems]    = useState<Item[]>([])
   const [minPrice,      setMinPrice]      = useState('')
   const [maxPrice,      setMaxPrice]      = useState('')
+  const [showCatalogForm, setShowCatalogForm] = useState(false)
+  const [catalogForm, setCatalogForm] = useState({ name:'', detail:'', sport:'NBA', kind:'card', txn:'sale', price:'', sub:'', brand:'', grade:'', badge:'', imageUrl:'' })
+  const [catalogFormSaving, setCatalogFormSaving] = useState(false)
 
   useEffect(() => {
     supabase.from('settings').select('value').eq('key', 'show_catalog').single()
@@ -768,6 +771,18 @@ export default function Marketplace() {
   if (sort === 'Precio: Menor') results = [...results].sort((a, b) => parsePrice(a.price) - parsePrice(b.price))
   if (sort === 'A–Z')           results = [...results].sort((a, b) => a.name.localeCompare(b.name))
   if (sort === 'Trending 🔥')   results = [...results].sort((a, b) => (b.hot ? 1 : 0) - (a.hot ? 1 : 0))
+
+  const addCatalogItem = async () => {
+    if (!catalogForm.name.trim() || !catalogForm.price.trim()) return
+    setCatalogFormSaving(true)
+    const newItem = { ...catalogForm, id: Date.now(), imgKey: 'nba1' } as Item
+    const next = [...extraItems, newItem]
+    setExtraItems(next)
+    await supabase.from('settings').upsert({ key: 'catalog_extra', value: JSON.stringify(next), updated_at: new Date().toISOString() })
+    setCatalogForm({ name:'', detail:'', sport:'NBA', kind:'card', txn:'sale', price:'', sub:'', brand:'', grade:'', badge:'', imageUrl:'' })
+    setShowCatalogForm(false)
+    setCatalogFormSaving(false)
+  }
 
   const cartCount = cart.length
 
@@ -1019,11 +1034,107 @@ export default function Marketplace() {
             <p className="font-bold">Solo se muestran anuncios de usuarios</p>
           </div>
         )}
-        {showCatalog && <div className="flex items-center gap-3 mb-5">
-          <div className="flex-1 h-px bg-white/5" />
-          <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">Catálogo PullStack</span>
-          <div className="flex-1 h-px bg-white/5" />
-        </div>}
+        {showCatalog && (
+          <div className="mb-5">
+            <div className="flex items-center gap-3">
+              <div className="flex-1 h-px bg-white/5" />
+              <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">Catálogo PullStack</span>
+              <div className="flex-1 h-px bg-white/5" />
+              {isAdmin && (
+                <button onClick={() => setShowCatalogForm(v => !v)}
+                  className={`text-xs font-bold px-3 py-1.5 rounded-lg border transition-all shrink-0 ${showCatalogForm ? 'bg-amber-500 text-black border-amber-500' : 'bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20'}`}>
+                  {showCatalogForm ? '✕' : '+ Agregar'}
+                </button>
+              )}
+            </div>
+
+            {showCatalogForm && isAdmin && (
+              <div className="mt-4 bg-[#13102a] border border-amber-500/20 rounded-2xl p-5 space-y-3">
+                <p className="text-amber-400 text-sm font-black">Agregar item al catálogo</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-gray-500 text-[11px] uppercase tracking-wide block mb-1">Nombre *</label>
+                    <input value={catalogForm.name} onChange={e => setCatalogForm(f => ({...f, name: e.target.value}))}
+                      placeholder="Ej: Luka Dončić RC Auto"
+                      className="w-full bg-[#1c1835] border border-white/10 text-white px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-amber-500/50 placeholder-gray-700" />
+                  </div>
+                  <div>
+                    <label className="text-gray-500 text-[11px] uppercase tracking-wide block mb-1">Precio *</label>
+                    <input value={catalogForm.price} onChange={e => setCatalogForm(f => ({...f, price: e.target.value}))}
+                      placeholder="$1,200"
+                      className="w-full bg-[#1c1835] border border-white/10 text-white px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-amber-500/50 placeholder-gray-700" />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="text-gray-500 text-[11px] uppercase tracking-wide block mb-1">Detalle</label>
+                    <input value={catalogForm.detail} onChange={e => setCatalogForm(f => ({...f, detail: e.target.value}))}
+                      placeholder="Ej: 2018-19 Panini Prizm RC Silver"
+                      className="w-full bg-[#1c1835] border border-white/10 text-white px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-amber-500/50 placeholder-gray-700" />
+                  </div>
+                  <div>
+                    <label className="text-gray-500 text-[11px] uppercase tracking-wide block mb-1">Sport</label>
+                    <select value={catalogForm.sport} onChange={e => setCatalogForm(f => ({...f, sport: e.target.value}))}
+                      className="w-full bg-[#1c1835] border border-white/10 text-white px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-amber-500/50">
+                      {['NBA','NFL','Soccer','MLB','Pokémon','One Piece','General'].map(s => <option key={s}>{s}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-gray-500 text-[11px] uppercase tracking-wide block mb-1">Tipo</label>
+                    <select value={catalogForm.kind} onChange={e => setCatalogForm(f => ({...f, kind: e.target.value}))}
+                      className="w-full bg-[#1c1835] border border-white/10 text-white px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-amber-500/50">
+                      <option value="card">Carta</option>
+                      <option value="box">Caja</option>
+                      <option value="accessory">Accesorio</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-gray-500 text-[11px] uppercase tracking-wide block mb-1">Transacción</label>
+                    <select value={catalogForm.txn} onChange={e => setCatalogForm(f => ({...f, txn: e.target.value}))}
+                      className="w-full bg-[#1c1835] border border-white/10 text-white px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-amber-500/50">
+                      <option value="sale">Venta</option>
+                      <option value="auction">Subasta</option>
+                      <option value="trade">Trading</option>
+                      <option value="buy">Tienda</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-gray-500 text-[11px] uppercase tracking-wide block mb-1">Marca / Set</label>
+                    <input value={catalogForm.brand} onChange={e => setCatalogForm(f => ({...f, brand: e.target.value}))}
+                      placeholder="Panini Prizm 2018"
+                      className="w-full bg-[#1c1835] border border-white/10 text-white px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-amber-500/50 placeholder-gray-700" />
+                  </div>
+                  <div>
+                    <label className="text-gray-500 text-[11px] uppercase tracking-wide block mb-1">Grado</label>
+                    <input value={catalogForm.grade} onChange={e => setCatalogForm(f => ({...f, grade: e.target.value}))}
+                      placeholder="PSA 10"
+                      className="w-full bg-[#1c1835] border border-white/10 text-white px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-amber-500/50 placeholder-gray-700" />
+                  </div>
+                  <div>
+                    <label className="text-gray-500 text-[11px] uppercase tracking-wide block mb-1">Badge</label>
+                    <input value={catalogForm.badge} onChange={e => setCatalogForm(f => ({...f, badge: e.target.value}))}
+                      placeholder="🔥 Hot"
+                      className="w-full bg-[#1c1835] border border-white/10 text-white px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-amber-500/50 placeholder-gray-700" />
+                  </div>
+                  <div>
+                    <label className="text-gray-500 text-[11px] uppercase tracking-wide block mb-1">Sub-texto</label>
+                    <input value={catalogForm.sub} onChange={e => setCatalogForm(f => ({...f, sub: e.target.value}))}
+                      placeholder="Raw ~$300"
+                      className="w-full bg-[#1c1835] border border-white/10 text-white px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-amber-500/50 placeholder-gray-700" />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="text-gray-500 text-[11px] uppercase tracking-wide block mb-1">URL de imagen</label>
+                    <input value={catalogForm.imageUrl} onChange={e => setCatalogForm(f => ({...f, imageUrl: e.target.value}))}
+                      placeholder="https://... (opcional)"
+                      className="w-full bg-[#1c1835] border border-white/10 text-white px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-amber-500/50 placeholder-gray-700 font-mono" />
+                  </div>
+                </div>
+                <button onClick={addCatalogItem} disabled={catalogFormSaving || !catalogForm.name.trim() || !catalogForm.price.trim()}
+                  className="w-full bg-amber-500 hover:bg-amber-400 disabled:opacity-40 text-black font-black py-2.5 rounded-xl text-sm transition-all">
+                  {catalogFormSaving ? 'Guardando...' : '+ Agregar al catálogo'}
+                </button>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Resultados */}
         {showCatalog && (
