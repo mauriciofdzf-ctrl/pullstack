@@ -159,6 +159,9 @@ export default function Landing() {
               <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
               Deportes · TCG · Coleccionables
             </div>
+            <h1 className="text-7xl sm:text-8xl font-black leading-none mb-6 tracking-tighter bg-gradient-to-r from-white via-white to-amber-400 bg-clip-text text-transparent">
+              PULLSTACK<span className="text-amber-400">MX</span>
+            </h1>
             <p className="text-gray-400 text-lg leading-relaxed mb-10 max-w-md">
               La plataforma de LATAM para comprar, vender e intercambiar cartas.
               Todos los deportes, todos los gustos — en un solo lugar.
