@@ -812,9 +812,7 @@ export default function Marketplace() {
         {/* Header */}
         <div className="flex items-start justify-between gap-4 mb-8">
           <div>
-            <p className="text-violet-400 text-xs font-bold uppercase tracking-widest mb-1">PullStackMX</p>
-            <h1 className="text-4xl font-black text-white mb-1">Mercado</h1>
-            <p className="text-gray-500 text-sm">Compra · Subasta · Tradea · NBA · NFL · Soccer · MLB · Pokémon · One Piece</p>
+            <h1 className="text-4xl font-black bg-gradient-to-r from-violet-400 via-fuchsia-400 to-amber-400 bg-clip-text text-transparent">Mercado</h1>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <button onClick={() => user ? setShowPublish(true) : navigate('/login')}

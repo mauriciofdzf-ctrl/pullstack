@@ -419,33 +419,10 @@ export default function Landing() {
                 Ya tengo cuenta
               </button>
             </div>
-            <div className="mt-10 flex flex-wrap justify-center gap-6 text-sm text-gray-600">
-              {['Sin tarjeta requerida', 'SPEI · OXXO · MercadoPago', 'Soporte en español'].map(f => (
-                <span key={f} className="flex items-center gap-1.5">
-                  <span className="text-emerald-500 font-bold">✓</span> {f}
-                </span>
-              ))}
-            </div>
           </div>
         </section>
       )}
 
-      {/* ─── MARCAS ─── */}
-      <section className="py-16 px-6 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0c0a1e] to-[#13102a]" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[200px] rounded-full bg-violet-600/8 blur-[80px] pointer-events-none" />
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/8 to-transparent" />
-        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/8 to-transparent" />
-        <div className="relative max-w-6xl mx-auto">
-          <p className="text-center text-gray-600 text-[10px] uppercase tracking-[0.3em] mb-10">Marcas y juegos disponibles</p>
-          <div className="flex flex-wrap justify-center items-center gap-x-10 gap-y-5">
-            {['TOPPS', 'PANINI', 'UPPER DECK', 'BOWMAN', 'DONRUSS', 'POKÉMON TCG', 'ONE PIECE TCG', 'DRAGON BALL SUPER', 'YU-GI-OH!', 'MAGIC: THE GATHERING'].map((b) => (
-              <span key={b} className="text-gray-600 hover:text-amber-400 font-black text-sm tracking-tight transition-all cursor-pointer hover:scale-105">{b}</span>
-            ))}
-            <span className="text-amber-500/60 font-black text-sm tracking-tight">+ 50 marcas más</span>
-          </div>
-        </div>
-      </section>
 
 
       {/* ─── FOOTER ─── */}
