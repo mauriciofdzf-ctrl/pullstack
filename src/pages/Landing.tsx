@@ -352,27 +352,6 @@ export default function Landing() {
             })}
           </div>
 
-          <div className="bg-[#1c1835] border border-white/5 rounded-2xl overflow-hidden">
-            <div className="grid grid-cols-3 text-center text-[10px] font-black uppercase tracking-widest border-b border-white/5">
-              <div className="py-3 text-gray-600">Característica</div>
-              <div className="py-3 text-gray-600 border-x border-white/5">Competencia (US)</div>
-              <div className="py-3 text-emerald-400 bg-emerald-500/5">PullStack ✓</div>
-            </div>
-            {[
-              ['Pagos LATAM (SPEI/OXXO)',     '❌ Solo USD/tarjeta',         '✅ SPEI · OXXO · MercadoPago'],
-              ['Precios en MXN',              '❌ Solo USD',                  '✅ USD + MXN en tiempo real'],
-              ['Grading desde México',        '❌ Auto-envío costoso a EUA',  '✅ Concierge local con seguro'],
-              ['Soporte en español',          '❌ Solo inglés',               '✅ Español 100%'],
-              ['Costo real de importación',   '❌ No calculado',              '✅ Incluido en precio'],
-              ['Comunidad LATAM verificada',  '❌ Grupos de FB sin escrow',    '✅ Plataforma con escrow P2P'],
-            ].map(([feat, them, us]) => (
-              <div key={feat} className="grid grid-cols-3 border-b border-white/5 last:border-0">
-                <div className="px-4 py-2.5 text-gray-400 text-xs">{feat}</div>
-                <div className="px-4 py-2.5 text-gray-600 text-xs border-x border-white/5">{them}</div>
-                <div className="px-4 py-2.5 text-emerald-400 text-xs font-bold">{us}</div>
-              </div>
-            ))}
-          </div>
         </div>
       </section>
 
