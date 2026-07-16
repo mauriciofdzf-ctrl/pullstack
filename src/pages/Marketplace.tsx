@@ -492,7 +492,7 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
                   : <>📢 Publicar anuncio</>
                 }
               </button>
-              <p className="text-gray-600 text-[10px] text-center mt-2">Al publicar aceptas que PullStack puede moderar anuncios que incumplan las reglas.</p>
+              <p className="text-gray-600 text-[10px] text-center mt-2">Al publicar aceptas que PullStackMX puede moderar anuncios que incumplan las reglas.</p>
             </div>
           </>
         )}
@@ -537,7 +537,7 @@ function BidModal({ item, onClose, user, navigate }: {
               <svg className="w-7 h-7 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
             </div>
             <p className="text-white font-black text-lg">¡Interés registrado!</p>
-            <p className="text-gray-500 text-sm mt-1">El equipo de PullStack te contactará por mensajes pronto.</p>
+            <p className="text-gray-500 text-sm mt-1">El equipo de PullStackMX te contactará por mensajes pronto.</p>
           </div>
         ) : (
           <>
@@ -812,7 +812,7 @@ export default function Marketplace() {
         {/* Header */}
         <div className="flex items-start justify-between gap-4 mb-8">
           <div>
-            <p className="text-violet-400 text-xs font-bold uppercase tracking-widest mb-1">PullStack</p>
+            <p className="text-violet-400 text-xs font-bold uppercase tracking-widest mb-1">PullStackMX</p>
             <h1 className="text-4xl font-black text-white mb-1">Mercado</h1>
             <p className="text-gray-500 text-sm">Compra · Subasta · Tradea · NBA · NFL · Soccer · MLB · Pokémon · One Piece</p>
           </div>
@@ -1035,7 +1035,7 @@ export default function Marketplace() {
           </div>
         )}
 
-        {/* ── Catálogo PullStack ──────────────────────────────── */}
+        {/* ── Catálogo PullStackMX ──────────────────────────────── */}
         {!showCatalog && (
           <div className="text-center py-16 text-gray-600">
             <p className="text-4xl mb-3">🃏</p>
@@ -1046,7 +1046,7 @@ export default function Marketplace() {
           <div className="mb-5">
             <div className="flex items-center gap-3">
               <div className="flex-1 h-px bg-white/5" />
-              <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">Catálogo PullStack</span>
+              <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">Catálogo PullStackMX</span>
               <div className="flex-1 h-px bg-white/5" />
               {isAdmin && (
                 <button onClick={() => setShowCatalogForm(v => !v)}

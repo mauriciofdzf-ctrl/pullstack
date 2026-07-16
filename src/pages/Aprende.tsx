@@ -219,9 +219,9 @@ const LATAM_TIPS = [
   { title: 'Cómo enviar a PSA desde México', icon: '🏅',
     body: 'Busca un consolidador de PSA en México (hay varios en grupos de FB y Discord) o manda directo vía FedEx/DHL. Siempre con seguro, siempre con tracking. Empaca con penny sleeves + top loader + bubble wrap + caja rígida.' },
   { title: 'Dónde comprar con más confianza', icon: '🛡️',
-    body: 'eBay con vendedor +500 feedback y política de devoluciones. Tiendas certificadas con reputación. PullStack para cartas verificadas. Grupos de FB solo con escrow o meetup en persona. Nunca transferencia directa a desconocidos.' },
+    body: 'eBay con vendedor +500 feedback y política de devoluciones. Tiendas certificadas con reputación. PullStackMX para cartas verificadas. Grupos de FB solo con escrow o meetup en persona. Nunca transferencia directa a desconocidos.' },
   { title: 'Cómo vender desde México', icon: '💰',
-    body: 'eBay tiene envío internacional desde México. Grupos de WhatsApp/FB con buenos precios pero menos protección. PullStack para ventas con escrow. Para cartas PSA de alto valor, Goldin o Heritage Auctions aceptan consignaciones internacionales.' },
+    body: 'eBay tiene envío internacional desde México. Grupos de WhatsApp/FB con buenos precios pero menos protección. PullStackMX para ventas con escrow. Para cartas PSA de alto valor, Goldin o Heritage Auctions aceptan consignaciones internacionales.' },
   { title: 'El mercado de soccer en LATAM', icon: '⚽',
     body: 'Es la mayor oportunidad cultural. Mucha gente conoce las estampas Panini, pero no el grading, parallels o numbered cards. La educación es el diferencial. Cartas de Yamal, Vinicius, Messi y jugadores mexicanos tienen mercado local.' },
 ]
@@ -253,7 +253,7 @@ export default function Aprende() {
 
         {/* Header */}
         <div className="mb-10">
-          <p className="text-violet-400 text-xs font-bold uppercase tracking-widest mb-1">PullStack</p>
+          <p className="text-violet-400 text-xs font-bold uppercase tracking-widest mb-1">PullStackMX</p>
           <h1 className="text-4xl font-black text-white mb-2">Aprende el Hobby</h1>
           <p className="text-gray-500 text-sm max-w-xl">
             Todo lo que necesitas saber para entender el mercado de trading cards, tomar mejores decisiones y construir una colección con estrategia.
@@ -465,7 +465,7 @@ export default function Aprende() {
             <div className="bg-violet-600/5 border border-violet-500/20 rounded-2xl p-6">
               <h2 className="text-white font-black text-xl mb-2">🌎 Por qué LATAM es diferente</h2>
               <p className="text-gray-400 text-sm leading-relaxed max-w-2xl">
-                El mercado de cartas está dominado por plataformas en inglés y precios en dólares. Para el coleccionista en México o LATAM hay barreras reales: importación, tipo de cambio, desconfianza, falta de comps locales y educación en español. PullStack existe para cambiar eso.
+                El mercado de cartas está dominado por plataformas en inglés y precios en dólares. Para el coleccionista en México o LATAM hay barreras reales: importación, tipo de cambio, desconfianza, falta de comps locales y educación en español. PullStackMX existe para cambiar eso.
               </p>
             </div>
 

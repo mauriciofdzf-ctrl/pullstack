@@ -41,12 +41,12 @@ const QUICK = [
   '¿Cuánto cuesta el grading desde México?',
   '¿Tienen seguro para cartas en tránsito?',
   '¿Cuánto tarda el proceso completo?',
-  '¿Cómo vendo una carta en PullStack?',
+  '¿Cómo vendo una carta en PullStackMX?',
   '¿Aceptan todas las cartas?',
 ]
 
 const WELCOME = (name: string) =>
-  `¡Hola ${name}! 👋 Bienvenido a PullStack. Puedes preguntarme sobre grading concierge, compra/venta de cartas, envíos desde México, o cualquier duda sobre tu colección. ¿En qué te puedo ayudar?`
+  `¡Hola ${name}! 👋 Bienvenido a PullStackMX. Puedes preguntarme sobre grading concierge, compra/venta de cartas, envíos desde México, o cualquier duda sobre tu colección. ¿En qué te puedo ayudar?`
 
 const ACTION_LABEL: Record<string, string> = {
   buy: '🛒 Compra', auction: '🔨 Puja', trade: '🔄 Trade', general: '💬'
@@ -205,7 +205,7 @@ export default function Messages() {
           </button>
           <button onClick={() => setTab('support')}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${tab === 'support' ? 'bg-violet-600 text-white' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
-            🎧 Soporte PullStack
+            🎧 Soporte PullStackMX
           </button>
         </div>
 
@@ -343,7 +343,7 @@ export default function Messages() {
             <div className="flex items-center gap-3 py-4 border-b border-white/5 shrink-0">
               <LogoIcon size={40} />
               <div className="flex-1">
-                <div className="text-white font-bold text-sm">PullStack Support</div>
+                <div className="text-white font-bold text-sm">PullStackMX Support</div>
                 <div className="flex items-center gap-1.5">
                   <span className="w-2 h-2 bg-green-400 rounded-full" />
                   <span className="text-green-400 text-xs">En línea · responde en &lt;24h</span>

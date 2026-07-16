@@ -566,7 +566,7 @@ export default function ListingDetail() {
                   </div>
                 ) : myTxn.status === 'verified' || myTxn.status === 'completed' ? (
                   <div className="bg-[#26213d] border border-white/5 rounded-xl p-3 text-center">
-                    <p className="text-gray-400 text-xs">El equipo de PullStack está coordinando el envío.</p>
+                    <p className="text-gray-400 text-xs">El equipo de PullStackMX está coordinando el envío.</p>
                     <p className="text-gray-600 text-xs mt-0.5">Recibirás la guía de rastreo pronto.</p>
                   </div>
                 ) : (

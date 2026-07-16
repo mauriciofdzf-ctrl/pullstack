@@ -65,7 +65,7 @@ export default function CheckoutModal({ listing, user, profile, onClose }: {
         data.forEach(r => { m[r.key] = r.value || '' })
         setPayCfg({
           spei_banco: m.spei_banco || '', spei_clabe: m.spei_clabe || '',
-          spei_beneficiario: m.spei_beneficiario || 'PullStack',
+          spei_beneficiario: m.spei_beneficiario || 'PullStackMX',
           mp_usuario: m.mp_usuario || '', mp_link: m.mp_link || '',
           oxxo_link: m.oxxo_link || '',
           tarjeta_link: m.tarjeta_link || '',
@@ -79,7 +79,7 @@ export default function CheckoutModal({ listing, user, profile, onClose }: {
     if (m === 'spei') return [
       `Banco: ${payCfg.spei_banco || '—'}`,
       `CLABE: ${payCfg.spei_clabe || '—'}`,
-      `Beneficiario: ${payCfg.spei_beneficiario || 'PullStack'}`,
+      `Beneficiario: ${payCfg.spei_beneficiario || 'PullStackMX'}`,
       `Monto exacto: ${total}`,
       `Concepto / Referencia: PS-${r}`,
     ]
@@ -194,7 +194,7 @@ export default function CheckoutModal({ listing, user, profile, onClose }: {
                 <span className="text-white font-bold">{rawPrice || '—'}</span>
               </div>
               <div className="flex justify-between text-gray-400">
-                <span>Comisión PullStack ({COMMISSION_PCT}%)</span>
+                <span>Comisión PullStackMX ({COMMISSION_PCT}%)</span>
                 <span className="text-violet-400 font-bold">{formatMXN(commission)}</span>
               </div>
               <div className="border-t border-white/10 pt-2 flex justify-between">
@@ -277,7 +277,7 @@ export default function CheckoutModal({ listing, user, profile, onClose }: {
               <>
                 <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-3 text-xs text-blue-300 flex gap-2">
                   <span className="shrink-0">ℹ️</span>
-                  <span>Al confirmar, notificamos al vendedor y al equipo PullStack. Tu pago será verificado en máx. 24 hrs.</span>
+                  <span>Al confirmar, notificamos al vendedor y al equipo PullStackMX. Tu pago será verificado en máx. 24 hrs.</span>
                 </div>
 
                 {error && <p className="text-red-400 text-xs text-center">{error}</p>}
@@ -310,7 +310,7 @@ export default function CheckoutModal({ listing, user, profile, onClose }: {
             <p className="text-white font-black text-xl mb-2">¡Pago registrado!</p>
             <p className="text-gray-400 text-sm mb-1">Referencia: <span className="text-violet-400 font-black">PS-{ref}</span></p>
             {txnId && <p className="text-gray-600 text-xs mb-4">Orden #{txnId}</p>}
-            <p className="text-gray-400 text-sm mb-6">El equipo de PullStack verificará tu pago en máx. 24 hrs y notificará al vendedor para coordinar el envío.</p>
+            <p className="text-gray-400 text-sm mb-6">El equipo de PullStackMX verificará tu pago en máx. 24 hrs y notificará al vendedor para coordinar el envío.</p>
             <div className="flex gap-3">
               <button onClick={onClose} className="flex-1 bg-white/5 border border-white/10 text-gray-300 font-bold py-2.5 rounded-xl text-sm hover:bg-white/10 transition-all">
                 Cerrar

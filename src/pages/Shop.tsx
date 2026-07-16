@@ -53,7 +53,7 @@ export default function Shop() {
         {/* Header */}
         <div className="flex items-start justify-between mb-10">
           <div>
-            <p className="text-violet-400 text-xs font-bold uppercase tracking-widest mb-2">PullStack</p>
+            <p className="text-violet-400 text-xs font-bold uppercase tracking-widest mb-2">PullStackMX</p>
             <h1 className="text-4xl font-black text-white mb-1">Tienda Oficial</h1>
             <p className="text-gray-500 text-sm">Cajas selladas · Pokémon TCG · One Piece TCG · Accesorios · Envío seguro LATAM</p>
           </div>

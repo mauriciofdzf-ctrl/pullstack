@@ -19,7 +19,7 @@ export const PAYMENT_METHODS: {
     instructions: (total, ref) => [
       `Banco: TU BANCO AQUÍ`,
       `CLABE: TU CLABE AQUÍ (18 dígitos)`,
-      `Beneficiario: PullStack`,
+      `Beneficiario: PullStackMX`,
       `Monto exacto: ${total}`,
       `Concepto / Referencia: PS-${ref}`,
     ],

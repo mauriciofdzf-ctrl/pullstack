@@ -78,9 +78,9 @@ export default function Register() {
         <div className="text-center mb-10">
           <Link to="/" className="inline-flex items-center gap-2.5 mb-6">
             <LogoIcon size={40} />
-            <span className="text-white font-black text-2xl">PullStack</span>
+            <span className="text-white font-black text-2xl">PullStackMX</span>
           </Link>
-          <h1 className="text-3xl font-black text-white mb-2">Únete a PullStack</h1>
+          <h1 className="text-3xl font-black text-white mb-2">Únete a PullStackMX</h1>
           <p className="text-gray-500 text-sm">La plataforma de trading cards de LATAM</p>
         </div>
 

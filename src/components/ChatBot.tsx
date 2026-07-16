@@ -43,25 +43,25 @@ const BOT_RULES: BotRule[] = [
   // Comprar
   {
     keywords: ['comprar', 'adquirir', 'conseguir', 'cómo compro', 'como compro', 'quiero comprar'],
-    response: '🛒 **¿Cómo comprar en PullStack?**\n\n1. **Busca** la carta o caja que quieres en el Explorador\n2. **Filtra** por deporte, tipo (carta/caja/accesorio) y modalidad\n3. **Elige** tu modalidad:\n   - 💚 **Venta directa** — Precio fijo, compra al instante\n   - 🔴 **Subasta** — Puja y gana el mejor postor\n   - 🔵 **Trading** — Intercambia carta por carta\n4. **Paga** con tarjeta, OXXO o transferencia (próximamente con Stripe)\n5. **Recibe** tu carta certificada y asegurada 📦\n\n¿Quieres saber más sobre alguna modalidad?',
+    response: '🛒 **¿Cómo comprar en PullStackMX?**\n\n1. **Busca** la carta o caja que quieres en el Explorador\n2. **Filtra** por deporte, tipo (carta/caja/accesorio) y modalidad\n3. **Elige** tu modalidad:\n   - 💚 **Venta directa** — Precio fijo, compra al instante\n   - 🔴 **Subasta** — Puja y gana el mejor postor\n   - 🔵 **Trading** — Intercambia carta por carta\n4. **Paga** con tarjeta, OXXO o transferencia (próximamente con Stripe)\n5. **Recibe** tu carta certificada y asegurada 📦\n\n¿Quieres saber más sobre alguna modalidad?',
     chips: ['¿Cómo funciona la subasta?', '¿Cómo funciona el trading?', 'Ver Explorador'],
   },
   // Subasta
   {
     keywords: ['subasta', 'pujar', 'bid', 'remate'],
-    response: '🔴 **Subastas en PullStack:**\n\nLas subastas duran 24-72 horas. El proceso:\n\n1. Ve la carta en subasta y haz clic en **"Pujar"**\n2. Ingresa tu oferta (debe superar la puja actual)\n3. Si alguien supera tu oferta, te llegará una notificación\n4. Al finalizar el tiempo, el mayor postor gana\n5. Tienes 24h para completar el pago\n\n💡 Consejo: espera los últimos minutos para pujar (técnica del "sniping")',
+    response: '🔴 **Subastas en PullStackMX:**\n\nLas subastas duran 24-72 horas. El proceso:\n\n1. Ve la carta en subasta y haz clic en **"Pujar"**\n2. Ingresa tu oferta (debe superar la puja actual)\n3. Si alguien supera tu oferta, te llegará una notificación\n4. Al finalizar el tiempo, el mayor postor gana\n5. Tienes 24h para completar el pago\n\n💡 Consejo: espera los últimos minutos para pujar (técnica del "sniping")',
     chips: ['¿Cómo funciona el trading?', '¿Cómo compro?', 'Ver subastas'],
   },
   // Trading / P2P
   {
     keywords: ['trading', 'tradear', 'intercambio', 'intercambiar', 'p2p', 'trueque', 'cambio'],
-    response: '🔵 **Trading P2P en PullStack:**\n\nEl sistema de intercambio más avanzado de LATAM:\n\n1. **Propón un trade** — Ofreces tus cartas por las del otro usuario\n2. **Si hay diferencia de valor** — El sistema calcula quién paga la diferencia en efectivo\n3. **Ambos confirman** — El trade se activa solo si los dos aceptan\n4. **Envío seguro** — PullStack actúa de intermediario hasta que ambos reciben\n\n📊 Ejemplo: Tu Wemby PSA 10 ($8,400) por su Mahomes RC ($12,000) → Tú pagas $3,600 adicionales.',
+    response: '🔵 **Trading P2P en PullStackMX:**\n\nEl sistema de intercambio más avanzado de LATAM:\n\n1. **Propón un trade** — Ofreces tus cartas por las del otro usuario\n2. **Si hay diferencia de valor** — El sistema calcula quién paga la diferencia en efectivo\n3. **Ambos confirman** — El trade se activa solo si los dos aceptan\n4. **Envío seguro** — PullStackMX actúa de intermediario hasta que ambos reciben\n\n📊 Ejemplo: Tu Wemby PSA 10 ($8,400) por su Mahomes RC ($12,000) → Tú pagas $3,600 adicionales.',
     chips: ['¿Cómo compro?', '¿Cómo vendo?', 'Ver Explorador'],
   },
   // Vender
   {
     keywords: ['vender', 'venta', 'poner en venta', 'publicar', 'cómo vendo', 'como vendo'],
-    response: '💰 **¿Cómo vender en PullStack?**\n\n1. **Crea tu cuenta** y verifica tu identidad\n2. **Fotografía tu carta** (4 ángulos + esquinas)\n3. **Publica** — elige precio fijo, subasta o trading\n4. **Cuando alguien compra** — PullStack te notifica\n5. **Envía la carta** en 48h con seguro\n6. **Cobras** cuando el comprador confirma recepción\n\n💳 Comisión: 5% del precio de venta (entre los más bajos de LATAM)\n\n📦 Tip: una carta graduada (PSA/BGS) se vende hasta 10x más rápido que raw.',
+    response: '💰 **¿Cómo vender en PullStackMX?**\n\n1. **Crea tu cuenta** y verifica tu identidad\n2. **Fotografía tu carta** (4 ángulos + esquinas)\n3. **Publica** — elige precio fijo, subasta o trading\n4. **Cuando alguien compra** — PullStackMX te notifica\n5. **Envía la carta** en 48h con seguro\n6. **Cobras** cuando el comprador confirma recepción\n\n💳 Comisión: 5% del precio de venta (entre los más bajos de LATAM)\n\n📦 Tip: una carta graduada (PSA/BGS) se vende hasta 10x más rápido que raw.',
     chips: ['¿Cómo gradear?', '¿Cómo fotografiar mi carta?', '¿Cuánto vale mi carta?'],
   },
   // Cuánto vale mi carta
@@ -109,25 +109,25 @@ const BOT_RULES: BotRule[] = [
   // Rifas / Breaks
   {
     keywords: ['rifa', 'break', 'grupo break', 'spot', 'rifas'],
-    response: '🎲 **Rifas y Group Breaks en PullStack:**\n\n**Rifa normal:**\nCompras boletos → se sortea al azar → el ganador se lleva la carta. Desde $10 por boleto.\n\n**Group Break:**\nSe compra una caja entre varios. Cada participante elige un equipo, y las cartas de ese equipo son suyas. Ideal para abrir cajas caras entre amigos.\n\n📅 Tenemos breaks semanales cada viernes 9PM (horario CDMX).\n\n💡 Los group breaks son perfectos para coleccionistas de un solo equipo — en vez de gastar $290 en una caja entera, pagas $20-40 por las cartas de tu equipo.',
+    response: '🎲 **Rifas y Group Breaks en PullStackMX:**\n\n**Rifa normal:**\nCompras boletos → se sortea al azar → el ganador se lleva la carta. Desde $10 por boleto.\n\n**Group Break:**\nSe compra una caja entre varios. Cada participante elige un equipo, y las cartas de ese equipo son suyas. Ideal para abrir cajas caras entre amigos.\n\n📅 Tenemos breaks semanales cada viernes 9PM (horario CDMX).\n\n💡 Los group breaks son perfectos para coleccionistas de un solo equipo — en vez de gastar $290 en una caja entera, pagas $20-40 por las cartas de tu equipo.',
     chips: ['Ver rifas activas', '¿Cómo me uno a un break?', '¿Cuándo es el próximo?'],
   },
   // Pago / Stripe
   {
     keywords: ['pago', 'pagar', 'stripe', 'oxxo', 'transferencia', 'tarjeta', 'precio'],
-    response: '💳 **Métodos de pago en PullStack:**\n\n• **Tarjeta de crédito/débito** — Visa, Mastercard, American Express (Stripe)\n• **OXXO Pay** — Paga en efectivo en cualquier OXXO\n• **Transferencia SPEI** — Para México\n• **Próximamente:** MercadoPago, PayPal\n\n🔒 Todos los pagos son procesados con Stripe — el estándar mundial en seguridad de pagos.\n\n📦 Para ventas internacionales (Argentina, Colombia, Chile): tarjeta o transferencia bancaria.',
+    response: '💳 **Métodos de pago en PullStackMX:**\n\n• **Tarjeta de crédito/débito** — Visa, Mastercard, American Express (Stripe)\n• **OXXO Pay** — Paga en efectivo en cualquier OXXO\n• **Transferencia SPEI** — Para México\n• **Próximamente:** MercadoPago, PayPal\n\n🔒 Todos los pagos son procesados con Stripe — el estándar mundial en seguridad de pagos.\n\n📦 Para ventas internacionales (Argentina, Colombia, Chile): tarjeta o transferencia bancaria.',
     chips: ['¿Cómo compro?', '¿Cuánto cuesta el envío?', 'Ver Explorador'],
   },
   // Envío
   {
     keywords: ['envío', 'envio', 'enviar', 'llegada', 'paquete', 'seguro', 'días'],
-    response: '📦 **Envíos PullStack:**\n\n**México:**\n• 3-5 días hábiles — $99 MXN\n• Express 1-2 días — $199 MXN\n• Sobre seguro con rastreo incluido\n\n**LATAM (Argentina, Colombia, Chile, Perú):**\n• 7-15 días hábiles — desde $12 USD\n• Asegurado hasta el valor declarado\n\n🛡️ **Seguro incluido:** Todas las cartas se envían en top-loader + sobre rígido. Si llega dañada, PullStack cubre el reembolso.\n\n📸 Fotografiamos cada envío antes de sellarlo como evidencia.',
+    response: '📦 **Envíos PullStackMX:**\n\n**México:**\n• 3-5 días hábiles — $99 MXN\n• Express 1-2 días — $199 MXN\n• Sobre seguro con rastreo incluido\n\n**LATAM (Argentina, Colombia, Chile, Perú):**\n• 7-15 días hábiles — desde $12 USD\n• Asegurado hasta el valor declarado\n\n🛡️ **Seguro incluido:** Todas las cartas se envían en top-loader + sobre rígido. Si llega dañada, PullStackMX cubre el reembolso.\n\n📸 Fotografiamos cada envío antes de sellarlo como evidencia.',
     chips: ['¿Cómo compro?', '¿Cómo vendo?', '¿Métodos de pago?'],
   },
   // Comunidad / Grupos
   {
     keywords: ['comunidad', 'grupo', 'chat', 'amigos', 'mensajes', 'dm'],
-    response: '💬 **Comunidad PullStack:**\n\n• **Grupos de interés** — Coleccionistas NBA, Soccer Cards LATAM, NFL Traders MX y más\n• **DMs** — Mensajes directos con otros coleccionistas\n• **Feed** — Comparte tus mejores pulls, colecciones y trades\n• **Live** — Aperturas en vivo con chat y subastas en tiempo real\n\n📲 Es como Instagram + WhatsApp para coleccionistas de cartas.\n\n🤝 Los mejores trades suelen surgir en los grupos — alguien tiene lo que tú quieres y viceversa.',
+    response: '💬 **Comunidad PullStackMX:**\n\n• **Grupos de interés** — Coleccionistas NBA, Soccer Cards LATAM, NFL Traders MX y más\n• **DMs** — Mensajes directos con otros coleccionistas\n• **Feed** — Comparte tus mejores pulls, colecciones y trades\n• **Live** — Aperturas en vivo con chat y subastas en tiempo real\n\n📲 Es como Instagram + WhatsApp para coleccionistas de cartas.\n\n🤝 Los mejores trades suelen surgir en los grupos — alguien tiene lo que tú quieres y viceversa.',
     chips: ['Ver Comunidad', 'Ver Mensajes', 'Ver Live'],
   },
   // Gracias / despedida

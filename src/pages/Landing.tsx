@@ -147,7 +147,7 @@ export default function Landing() {
             {categories.map((cat) => (
               <button
                 key={cat.name}
-                onClick={() => navigate('/marketplace')}
+                onClick={() => navigate(user ? cat.path : '/register')}
                 className="group relative rounded-2xl overflow-hidden aspect-[3/4] cursor-pointer text-left"
               >
                 <img src={cat.img} alt={cat.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
@@ -173,7 +173,7 @@ export default function Landing() {
               <h2 className="text-4xl font-black text-white">Las cartas más hot 🔥</h2>
               <p className="text-gray-500 text-sm mt-1">Precios reales verificados · eBay, Goldin, PSA</p>
             </div>
-            <button onClick={() => navigate('/marketplace')} className="text-sm text-amber-400 hover:text-amber-300 font-semibold border border-amber-500/20 hover:border-amber-500/40 px-4 py-2 rounded-lg transition-all">
+            <button onClick={() => navigate(user ? '/marketplace' : '/register')} className="text-sm text-amber-400 hover:text-amber-300 font-semibold border border-amber-500/20 hover:border-amber-500/40 px-4 py-2 rounded-lg transition-all">
               Ver todo →
             </button>
           </div>
@@ -181,7 +181,7 @@ export default function Landing() {
             {trending.map((card) => (
               <div
                 key={card.player}
-                onClick={() => navigate('/marketplace')}
+                onClick={() => navigate(user ? '/marketplace' : '/register')}
                 className="group bg-[#1c1835] border border-white/5 hover:border-amber-500/30 rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_60px_rgba(245,158,11,0.15)]"
               >
                 <div className="relative h-56 overflow-hidden">
@@ -221,13 +221,13 @@ export default function Landing() {
               </div>
               <h2 className="text-4xl font-black text-white">Entrar al stream</h2>
             </div>
-            <button onClick={() => navigate('/live')} className="text-sm text-red-400 hover:text-red-300 font-semibold border border-red-500/20 hover:border-red-500/40 px-4 py-2 rounded-lg transition-all">
+            <button onClick={() => navigate(user ? '/live' : '/register')} className="text-sm text-red-400 hover:text-red-300 font-semibold border border-red-500/20 hover:border-red-500/40 px-4 py-2 rounded-lg transition-all">
               Ver todos →
             </button>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
             {liveNow.map((a) => (
-              <div key={a.title} onClick={() => navigate('/live')}
+              <div key={a.title} onClick={() => navigate(user ? '/live' : '/register')}
                 className="group bg-[#1c1835] border border-white/5 hover:border-red-500/30 rounded-2xl overflow-hidden cursor-pointer transition-all hover:-translate-y-1">
                 <div className="relative h-44 overflow-hidden">
                   <img src={a.img} alt={a.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
@@ -250,8 +250,11 @@ export default function Landing() {
                       <p className="text-red-400 font-black text-xl font-mono">{a.time}</p>
                     </div>
                   </div>
-                  <button className="w-full bg-red-600 hover:bg-red-500 text-white font-black py-2.5 rounded-xl text-sm transition-all">
-                    🔴 Unirme al live
+                  <button
+                    onClick={e => { e.stopPropagation(); navigate(user ? '/live' : '/register') }}
+                    className="w-full bg-red-600 hover:bg-red-500 text-white font-black py-2.5 rounded-xl text-sm transition-all"
+                  >
+                    {user ? '🔴 Unirme al live' : '🔴 Acceder al live'}
                   </button>
                 </div>
               </div>
@@ -268,7 +271,7 @@ export default function Landing() {
             <h2 className="text-4xl font-black text-white">Todo lo que necesita<br />un coleccionista serio</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            <div className="md:col-span-2 relative rounded-2xl overflow-hidden h-64 group cursor-pointer" onClick={() => navigate('/marketplace')}>
+            <div className="md:col-span-2 relative rounded-2xl overflow-hidden h-64 group cursor-pointer" onClick={() => navigate(user ? '/marketplace' : '/register')}>
               <img src={IMGS.cards} alt="Explorador" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
               <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/70 to-transparent" />
               <div className="absolute inset-0 p-8 flex flex-col justify-end">
@@ -278,7 +281,7 @@ export default function Landing() {
                 <button className="mt-4 self-start text-amber-400 text-sm font-bold border border-amber-500/30 hover:border-amber-500/60 hover:bg-amber-500/5 px-4 py-2 rounded-lg transition-all">Explorar →</button>
               </div>
             </div>
-            <div className="relative rounded-2xl overflow-hidden h-64 group cursor-pointer" onClick={() => navigate('/marketplace')}>
+            <div className="relative rounded-2xl overflow-hidden h-64 group cursor-pointer" onClick={() => navigate(user ? '/marketplace' : '/register')}>
               <img src={IMGS.soccer2} alt="Trading P2P" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/95 to-black/30" />
               <div className="absolute inset-0 p-6 flex flex-col justify-end">
@@ -287,7 +290,7 @@ export default function Landing() {
                 <p className="text-gray-400 text-xs leading-relaxed">Intercambia cartas 1:1 o con diferencia de valor. Sistema de escrow para máxima seguridad.</p>
               </div>
             </div>
-            <div className="relative rounded-2xl overflow-hidden h-64 group cursor-pointer" onClick={() => navigate('/live')}>
+            <div className="relative rounded-2xl overflow-hidden h-64 group cursor-pointer" onClick={() => navigate(user ? '/live' : '/register')}>
               <img src={IMGS.pokemon1} alt="Subastas Live" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/95 to-black/30" />
               <div className="absolute inset-0 p-6 flex flex-col justify-end">
@@ -299,7 +302,7 @@ export default function Landing() {
                 <p className="text-gray-400 text-xs leading-relaxed">Subastas en tiempo real con video streaming. Chat en vivo. Pujas desde tu teléfono.</p>
               </div>
             </div>
-            <div className="md:col-span-2 relative rounded-2xl overflow-hidden h-64 group cursor-pointer" onClick={() => navigate('/raffles')}>
+            <div className="md:col-span-2 relative rounded-2xl overflow-hidden h-64 group cursor-pointer" onClick={() => navigate(user ? '/raffles' : '/register')}>
               <img src={IMGS.nba2} alt="Rifas y breaks" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
               <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/70 to-transparent" />
               <div className="absolute inset-0 p-8 flex flex-col justify-end">
@@ -316,47 +319,49 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ─── POR QUÉ PULLSTACK ─── */}
-      <section className="py-20 px-6 bg-[#13102a]">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-14">
-            <p className="text-emerald-400 text-xs font-bold uppercase tracking-widest mb-3">La diferencia LATAM</p>
-            <h2 className="text-4xl font-black text-white">Lo que no encuentras<br />en eBay, Whatnot o Goldin</h2>
+      {/* ─── GATE DE REGISTRO ─── */}
+      {!user && (
+        <section className="py-20 px-6 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-[#13102a] to-[#0c0a1e]" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] rounded-full bg-amber-500/8 blur-[120px] pointer-events-none" />
+          <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[400px] h-[400px] rounded-full bg-violet-600/8 blur-[100px] pointer-events-none" />
+          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber-500/20 to-transparent" />
+          <div className="relative max-w-3xl mx-auto text-center">
+            <div className="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-bold px-4 py-1.5 rounded-full mb-8 uppercase tracking-widest">
+              <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
+              Acceso gratuito · LATAM
+            </div>
+            <h2 className="text-4xl sm:text-5xl font-black text-white mb-5 leading-tight">
+              Ya viste lo que hay adentro.<br />
+              <span className="bg-gradient-to-r from-amber-400 to-yellow-300 bg-clip-text text-transparent">Regístrate gratis.</span>
+            </h2>
+            <p className="text-gray-400 text-lg mb-10 max-w-xl mx-auto leading-relaxed">
+              Compra, vende, subasta y haz trading de cartas deportivas en la plataforma #1 de LATAM. Sin complicaciones.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button
+                onClick={() => navigate('/register')}
+                className="bg-amber-500 hover:bg-amber-400 text-black font-black px-10 py-4 rounded-xl text-base transition-all hover:scale-105 shadow-2xl shadow-amber-500/25"
+              >
+                Crear cuenta gratis →
+              </button>
+              <button
+                onClick={() => navigate('/login')}
+                className="border border-white/15 hover:border-white/30 text-gray-300 hover:text-white font-semibold px-10 py-4 rounded-xl text-base transition-all"
+              >
+                Ya tengo cuenta
+              </button>
+            </div>
+            <div className="mt-10 flex flex-wrap justify-center gap-6 text-sm text-gray-600">
+              {['Sin tarjeta requerida', 'SPEI · OXXO · MercadoPago', 'Soporte en español'].map(f => (
+                <span key={f} className="flex items-center gap-1.5">
+                  <span className="text-emerald-500 font-bold">✓</span> {f}
+                </span>
+              ))}
+            </div>
           </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-            {([
-              ['🏦', 'emerald', 'Pagos 100% LATAM', 'SPEI, OXXO, MercadoPago. Sin tarjeta USD ni PayPal.'],
-              ['🇲🇽', 'red',     'Precios en MXN',   'Ve exactamente cuánto pagas en pesos, tipo de cambio incluido.'],
-              ['📬', 'blue',    'Grading Concierge', 'Enviamos tus cartas a PSA/BGS desde México con seguro y tracking.'],
-              ['🤝', 'violet',  'Trading P2P Seguro','Escrow integrado. Sin riesgo de estafas en grupos de Facebook.'],
-              ['📦', 'amber',   'Sin Aduanas Sorpresa','Costo real: precio + envío + impuestos + aranceles MX calculados.'],
-              ['🎓', 'cyan',    'Educación en Español','RC, parallels, PSA pop, comps. Todo en español, todo gratis.'],
-              ['📊', 'fuchsia', 'Precios Reales LATAM','Comps de eBay, Goldin, Fanatics. Sin inflación de WhatsApp.'],
-              ['🎙️', 'orange',  'Comunidad Española', 'Subastas live con hosts mexicanos. No más streams en inglés.'],
-            ] as [string, string, string, string][]).map(([icon, color, title, desc]) => {
-              const c: Record<string, string> = {
-                emerald:'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
-                red:'text-red-400 bg-red-500/10 border-red-500/20',
-                blue:'text-blue-400 bg-blue-500/10 border-blue-500/20',
-                violet:'text-violet-400 bg-violet-500/10 border-violet-500/20',
-                amber:'text-amber-400 bg-amber-500/10 border-amber-500/20',
-                cyan:'text-cyan-400 bg-cyan-500/10 border-cyan-500/20',
-                fuchsia:'text-fuchsia-400 bg-fuchsia-500/10 border-fuchsia-500/20',
-                orange:'text-orange-400 bg-orange-500/10 border-orange-500/20',
-              }
-              return (
-                <div key={title} className="bg-[#1c1835] border border-white/5 rounded-2xl p-5 hover:border-white/10 transition-all">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl mb-3 border ${c[color]}`}>{icon}</div>
-                  <h3 className="text-white font-black text-sm mb-1.5">{title}</h3>
-                  <p className="text-gray-500 text-xs leading-relaxed">{desc}</p>
-                </div>
-              )
-            })}
-          </div>
-
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* ─── MARCAS ─── */}
       <section className="py-16 px-6 relative overflow-hidden">
@@ -419,15 +424,9 @@ export default function Landing() {
       </section>
 
       {/* ─── FOOTER ─── */}
-      <footer className="border-t border-white/5 py-10 px-6">
+      <footer className="border-t border-white/5 py-8 px-6">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 bg-gradient-to-br from-amber-400 to-orange-500 rounded-lg flex items-center justify-center">
-              <span className="text-black font-black text-xs">PS</span>
-            </div>
-            <span className="text-white font-black">PullStack</span>
-          </div>
-          <p className="text-gray-700 text-sm">© 2026 PullStack · Todos los derechos reservados</p>
+          <p className="text-gray-700 text-sm">© 2026 PullStackMX · Todos los derechos reservados</p>
           <div className="flex gap-6">
             {['Términos', 'Privacidad', 'Contacto'].map((l) => (
               <a key={l} href="#" className="text-gray-700 hover:text-gray-400 text-sm transition-colors">{l}</a>

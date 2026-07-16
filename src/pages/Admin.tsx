@@ -116,7 +116,7 @@ export default function Admin() {
 
   // Pagos config
   const [payConfig, setPayConfig] = useState({
-    spei_banco: '', spei_clabe: '', spei_beneficiario: 'PullStack',
+    spei_banco: '', spei_clabe: '', spei_beneficiario: 'PullStackMX',
     mp_usuario: '', mp_link: '',
     oxxo_link: '',
     tarjeta_link: '',
@@ -335,7 +335,7 @@ export default function Admin() {
         <div className="mb-7">
           <div className="flex items-center gap-2 mb-1">
             <span className="bg-red-500/15 text-red-400 border border-red-500/30 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest">Admin</span>
-            <span className="text-gray-600 text-xs">PullStack · Panel de Control</span>
+            <span className="text-gray-600 text-xs">PullStackMX · Panel de Control</span>
           </div>
           <h1 className="text-3xl font-black text-white">Panel Admin</h1>
           <p className="text-gray-500 text-sm mt-0.5">Gestión completa de la plataforma</p>
@@ -765,7 +765,7 @@ export default function Admin() {
                   {[
                     { key: 'spei_banco',        label: 'Banco',        placeholder: 'Ej: BBVA, Banorte, HSBC' },
                     { key: 'spei_clabe',         label: 'CLABE (18 dígitos)', placeholder: '012345678901234567' },
-                    { key: 'spei_beneficiario',  label: 'Beneficiario', placeholder: 'PullStack' },
+                    { key: 'spei_beneficiario',  label: 'Beneficiario', placeholder: 'PullStackMX' },
                   ].map(f => (
                     <div key={f.key}>
                       <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1.5 block">{f.label}</label>
@@ -842,7 +842,7 @@ export default function Admin() {
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h3 className="text-white font-black text-lg">Catálogo PullStack</h3>
+                <h3 className="text-white font-black text-lg">Catálogo PullStackMX</h3>
                 <p className="text-gray-500 text-xs mt-0.5">
                   {CATALOG.length - hiddenIds.size + extraItems.length} visibles · {hiddenIds.size} ocultos · {extraItems.length} agregados
                 </p>

@@ -64,7 +64,7 @@ export default function ResetPassword() {
             <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-fuchsia-600 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/30">
               <span className="text-black font-black text-base">PS</span>
             </div>
-            <span className="text-white font-black text-2xl">PullStack</span>
+            <span className="text-white font-black text-2xl">PullStackMX</span>
           </Link>
           <h1 className="text-3xl font-black text-white mb-2">Nueva contraseña</h1>
           <p className="text-gray-500 text-sm">Elige una contraseña segura para tu cuenta</p>

@@ -75,7 +75,7 @@ export default function Live() {
           <div className="p-4 flex items-center justify-between gap-4">
             <div className="min-w-0">
               <h3 className="text-white font-bold truncate">{SCHEDULE[0].title}</h3>
-              <p className="text-gray-500 text-sm">PullStack Live · Comenzó hace 12 min</p>
+              <p className="text-gray-500 text-sm">PullStackMX Live · Comenzó hace 12 min</p>
             </div>
             <a href="https://youtube.com" target="_blank" rel="noopener noreferrer"
               className="bg-red-500 hover:bg-red-400 text-white font-black px-4 py-2 rounded-xl text-sm transition-all shrink-0">

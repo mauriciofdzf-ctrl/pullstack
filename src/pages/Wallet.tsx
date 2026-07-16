@@ -387,7 +387,7 @@ export default function Wallet() {
 
         {/* Header */}
         <div className="mb-6">
-          <p className="text-violet-400 text-[10px] font-bold uppercase tracking-widest mb-1">PullStack</p>
+          <p className="text-violet-400 text-[10px] font-bold uppercase tracking-widest mb-1">PullStackMX</p>
           <h1 className="text-4xl font-black text-white mb-1">Mi Portfolio</h1>
           <p className="text-gray-600 text-sm">Colección · Anuncios activos · Lista de deseos</p>
         </div>
@@ -511,7 +511,7 @@ export default function Wallet() {
               <div className="flex flex-col items-center justify-center py-28 text-center">
                 <div className="text-6xl mb-5">📢</div>
                 <h2 className="text-white font-black text-2xl mb-2">Sin anuncios</h2>
-                <p className="text-gray-500 text-sm mb-8 max-w-sm">Publica cartas, cajas o accesorios para que los coleccionistas de PullStack los encuentren.</p>
+                <p className="text-gray-500 text-sm mb-8 max-w-sm">Publica cartas, cajas o accesorios para que los coleccionistas de PullStackMX los encuentren.</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
