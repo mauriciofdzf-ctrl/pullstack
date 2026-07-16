@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { IMAGE_DEFAULTS, loadImageOverridesFromDB } from '../lib/imageConfig'
+import { useAuth } from '../contexts/AuthContext'
 
 export default function Landing() {
   const navigate = useNavigate()
+  const { user } = useAuth()
   const [IMGS, setIMGS] = useState(IMAGE_DEFAULTS)
 
   useEffect(() => {
@@ -103,17 +105,18 @@ export default function Landing() {
             </p>
             <div className="flex flex-wrap gap-3 mb-14">
               <button
-                onClick={() => navigate('/marketplace')}
+                onClick={() => navigate(user ? '/marketplace' : '/register')}
                 className="bg-amber-500 hover:bg-amber-400 text-black font-black px-8 py-3.5 rounded-xl text-sm transition-all hover:scale-105 shadow-lg shadow-amber-500/25 uppercase tracking-wide"
               >
-                Explorar ahora
+                {user ? 'Explorar ahora' : 'Crear cuenta gratis'}
               </button>
               <button
-                onClick={() => navigate('/live')}
-                className="flex items-center gap-2 border border-white/15 hover:border-red-500/50 text-white hover:text-red-400 font-semibold px-8 py-3.5 rounded-xl text-sm transition-all"
+                onClick={() => navigate(user ? '/live' : '/login')}
+                className="flex items-center gap-2 border border-white/15 hover:border-amber-500/40 text-white hover:text-amber-400 font-semibold px-8 py-3.5 rounded-xl text-sm transition-all"
               >
-                <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-                Ver en vivo
+                {user ? (
+                  <><span className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />Ver en vivo</>
+                ) : 'Iniciar sesión →'}
               </button>
             </div>
             <div className="flex gap-10 pt-8 border-t border-white/5">
@@ -356,26 +359,62 @@ export default function Landing() {
       </section>
 
       {/* ─── MARCAS ─── */}
-      <section className="py-14 px-6 border-y border-white/5">
-        <div className="max-w-6xl mx-auto">
-          <p className="text-center text-gray-700 text-[10px] uppercase tracking-[0.3em] mb-8">Marcas y juegos disponibles</p>
+      <section className="py-16 px-6 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0c0a1e] to-[#13102a]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[200px] rounded-full bg-violet-600/8 blur-[80px] pointer-events-none" />
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/8 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/8 to-transparent" />
+        <div className="relative max-w-6xl mx-auto">
+          <p className="text-center text-gray-600 text-[10px] uppercase tracking-[0.3em] mb-10">Marcas y juegos disponibles</p>
           <div className="flex flex-wrap justify-center items-center gap-x-10 gap-y-5">
             {['TOPPS', 'PANINI', 'UPPER DECK', 'BOWMAN', 'DONRUSS', 'POKÉMON TCG', 'ONE PIECE TCG', 'DRAGON BALL SUPER', 'YU-GI-OH!', 'MAGIC: THE GATHERING'].map((b) => (
-              <span key={b} className="text-gray-700 hover:text-amber-400 font-black text-sm tracking-tight transition-colors cursor-pointer">{b}</span>
+              <span key={b} className="text-gray-600 hover:text-amber-400 font-black text-sm tracking-tight transition-all cursor-pointer hover:scale-105">{b}</span>
             ))}
           </div>
         </div>
       </section>
 
       {/* ─── CTA ─── */}
-      <section className="py-28 px-6 text-center relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-amber-950/10 to-black pointer-events-none" />
+      <section className="py-32 px-6 text-center relative overflow-hidden">
+        {/* Background layers */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#13102a] via-[#0c0a1e] to-[#08061a]" />
+        {/* Glow orbs */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full bg-amber-500/10 blur-[120px] pointer-events-none" />
+        <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[400px] h-[400px] rounded-full bg-violet-600/10 blur-[100px] pointer-events-none" />
+        <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-[400px] h-[400px] rounded-full bg-amber-600/8 blur-[100px] pointer-events-none" />
+        {/* Top separator glow */}
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber-500/30 to-transparent" />
+        {/* Subtle grid */}
+        <div className="absolute inset-0 opacity-[0.03]" style={{backgroundImage:'linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px)',backgroundSize:'60px 60px'}} />
+
         <div className="relative max-w-2xl mx-auto">
-          <h2 className="text-5xl font-black text-white mb-4">¿Listo para tu<br /><span className="text-amber-400">primer pull?</span></h2>
-          <p className="text-gray-400 mb-10 text-lg">Únete a +50,000 coleccionistas en la plataforma #1 de LATAM.</p>
-          <button onClick={() => navigate('/marketplace')} className="bg-amber-500 hover:bg-amber-400 text-black font-black px-12 py-4 rounded-xl text-lg transition-all hover:scale-105 shadow-2xl shadow-amber-500/20">
-            Empezar ahora →
-          </button>
+          <div className="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-bold px-4 py-1.5 rounded-full mb-8 uppercase tracking-widest">
+            <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
+            Plataforma #1 de LATAM
+          </div>
+          <h2 className="text-5xl sm:text-6xl font-black text-white mb-5 leading-tight">
+            ¿Listo para tu<br />
+            <span className="bg-gradient-to-r from-amber-400 to-yellow-300 bg-clip-text text-transparent">primer pull?</span>
+          </h2>
+          <p className="text-gray-400 mb-12 text-lg max-w-md mx-auto leading-relaxed">
+            Únete a miles de coleccionistas. Compra, vende y subasta cartas deportivas con total seguridad.
+          </p>
+          <div className="flex flex-wrap gap-4 justify-center">
+            <button
+              onClick={() => navigate(user ? '/marketplace' : '/register')}
+              className="bg-amber-500 hover:bg-amber-400 text-black font-black px-12 py-4 rounded-xl text-lg transition-all hover:scale-105 shadow-2xl shadow-amber-500/30"
+            >
+              {user ? 'Ir al mercado →' : 'Crear cuenta gratis →'}
+            </button>
+            {!user && (
+              <button
+                onClick={() => navigate('/login')}
+                className="border border-white/15 hover:border-white/30 text-gray-300 hover:text-white font-semibold px-8 py-4 rounded-xl text-lg transition-all"
+              >
+                Iniciar sesión
+              </button>
+            )}
+          </div>
         </div>
       </section>
 

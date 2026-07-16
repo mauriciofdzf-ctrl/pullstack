@@ -80,29 +80,31 @@ export default function Navbar() {
             <LogoWordmark />
           </Link>
 
-          {/* Desktop Nav */}
-          <div className="hidden lg:flex items-center gap-1">
-            {links.map((link) => (
-              <Link key={link.to} to={link.to}
-                className={`relative flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                  link.grading
-                    ? isActive(link.to)
-                      ? 'bg-violet-500/20 text-violet-400 border border-violet-500/30'
-                      : 'text-violet-400 hover:bg-violet-500/10 border border-violet-500/20'
-                    : isActive(link.to)
-                    ? 'bg-violet-500/10 text-violet-400'
-                    : 'text-gray-400 hover:text-white hover:bg-white/5'
-                }`}>
-                {link.live && <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />}
-                {link.label}
-                {('badge' in link) && (link.badge ?? 0) > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-black min-w-[16px] h-4 rounded-full flex items-center justify-center px-0.5">
-                    {(link.badge ?? 0) > 9 ? '9+' : link.badge}
-                  </span>
-                )}
-              </Link>
-            ))}
-          </div>
+          {/* Desktop Nav — solo visible con sesión */}
+          {user && (
+            <div className="hidden lg:flex items-center gap-1">
+              {links.map((link) => (
+                <Link key={link.to} to={link.to}
+                  className={`relative flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                    link.grading
+                      ? isActive(link.to)
+                        ? 'bg-violet-500/20 text-violet-400 border border-violet-500/30'
+                        : 'text-violet-400 hover:bg-violet-500/10 border border-violet-500/20'
+                      : isActive(link.to)
+                      ? 'bg-violet-500/10 text-violet-400'
+                      : 'text-gray-400 hover:text-white hover:bg-white/5'
+                  }`}>
+                  {link.live && <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />}
+                  {link.label}
+                  {('badge' in link) && (link.badge ?? 0) > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-black min-w-[16px] h-4 rounded-full flex items-center justify-center px-0.5">
+                      {(link.badge ?? 0) > 9 ? '9+' : link.badge}
+                    </span>
+                  )}
+                </Link>
+              ))}
+            </div>
+          )}
 
           {/* Right: auth */}
           <div className="hidden lg:flex items-center gap-3 shrink-0">
@@ -188,7 +190,7 @@ export default function Navbar() {
         {/* Mobile Menu */}
         {menuOpen && (
           <div className="lg:hidden border-t border-white/5 py-4 flex flex-col gap-1">
-            {links.map((link) => (
+            {user && links.map((link) => (
               <Link key={link.to} to={link.to} onClick={() => setMenuOpen(false)}
                 className={`flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
                   isActive(link.to) ? 'bg-violet-500/10 text-violet-400' : 'text-gray-400 hover:text-white'
