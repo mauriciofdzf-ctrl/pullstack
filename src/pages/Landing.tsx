@@ -14,6 +14,11 @@ export default function Landing() {
     })
   }, [])
 
+  // Redirige a marketplace si ya tiene sesión
+  useEffect(() => {
+    if (user) navigate('/marketplace', { replace: true })
+  }, [user, navigate])
+
   // Arrays inside component so they can reference IMGS
   const trending = [
     { player: 'Lamine Yamal',        detail: '2024 Topps Chrome UEFA Euro · SuperFractor Auto 1/1', team: 'FC Barcelona · Selección España', grade: 'PSA 10',      price: '$396,500',    change: '+585% en ventas / último año',    sport: '⚽ Soccer',   hot: true, img: IMGS.soccer1 },
@@ -39,95 +44,142 @@ export default function Landing() {
 
   return (
     <main className="bg-[#0c0a1e] text-white pt-16">
+      <style>{`
+        @keyframes cardFloat1{0%,100%{transform:rotate(-8deg) translateY(0px)}50%{transform:rotate(-8deg) translateY(-12px)}}
+        @keyframes cardFloat2{0%,100%{transform:rotate(12deg) translateY(0px)}50%{transform:rotate(12deg) translateY(-8px)}}
+        @keyframes cardFloat3{0%,100%{transform:rotate(3deg) translateY(0px)}50%{transform:rotate(3deg) translateY(-16px)}}
+        @keyframes shimmer{0%{transform:translateX(-150%)}100%{transform:translateX(250%)}}
+      `}</style>
 
       {/* ─── HERO ─── */}
       <section className="relative min-h-screen flex items-center overflow-hidden">
-        <div className="absolute inset-0 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: `url('${IMGS.cards}')` }} />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#08061a] via-[#0c0a1e]/92 to-[#08061a]/40" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#08061a] via-transparent to-[#08061a]/20" />
-        {/* Glow ambiental */}
-        <div className="absolute left-1/4 top-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full bg-amber-500/6 blur-[120px] pointer-events-none" />
-        <div className="absolute right-1/3 top-1/4 w-[500px] h-[500px] rounded-full bg-violet-600/8 blur-[100px] pointer-events-none" />
+        {/* Background */}
+        <div className="absolute inset-0 bg-[#08061a]" />
+        <div className="absolute inset-0" style={{background:'radial-gradient(ellipse 80% 60% at 20% 50%, rgba(109,40,217,0.12) 0%, transparent 70%)'}} />
+        <div className="absolute inset-0" style={{background:'radial-gradient(ellipse 60% 50% at 75% 40%, rgba(245,158,11,0.08) 0%, transparent 70%)'}} />
+        {/* Subtle grid */}
+        <div className="absolute inset-0 opacity-[0.025]" style={{backgroundImage:'linear-gradient(rgba(255,255,255,1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,1) 1px,transparent 1px)',backgroundSize:'50px 50px'}} />
 
-        {/* Floating cards */}
-        <div className="absolute right-0 top-0 bottom-0 w-1/2 hidden lg:flex items-center justify-end pr-12">
-          <div className="relative w-80 h-[440px]">
-            <div className="absolute left-0 top-10 w-44 h-64 rounded-2xl overflow-hidden rotate-[-8deg] opacity-60 shadow-2xl border border-white/10">
-              <img src={IMGS.soccer2} alt="Soccer" className="w-full h-full object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 to-transparent" />
-              <div className="absolute bottom-3 left-3 right-3">
-                <p className="text-violet-400 text-[10px] font-bold uppercase tracking-widest">Soccer · Topps Chrome</p>
-                <p className="text-white font-black text-sm">Lamine Yamal</p>
-                <p className="text-gray-300 text-[10px]">RC Euro 2024 · /150</p>
+        {/* ── Animated Cards (right side) ── */}
+        <div className="absolute right-0 top-0 bottom-0 w-[48%] hidden lg:flex items-center justify-center">
+          <div className="relative w-80 h-[460px]">
+
+            {/* Card 1 — Pokémon (back-left) */}
+            <div className="absolute left-0 top-8 w-44 h-[248px] rounded-2xl overflow-hidden shadow-2xl border border-yellow-500/30"
+              style={{animation:'cardFloat1 6s ease-in-out infinite',background:'linear-gradient(135deg,#7c2d12 0%,#c2410c 40%,#92400e 100%)'}}>
+              <div className="absolute inset-0 opacity-20" style={{backgroundImage:'radial-gradient(circle at 30% 30%,rgba(255,255,255,0.4) 0%,transparent 60%)'}} />
+              {/* shimmer */}
+              <div className="absolute inset-0 overflow-hidden">
+                <div className="absolute inset-0 w-1/3 h-full opacity-30 skew-x-[-20deg]"
+                  style={{background:'linear-gradient(90deg,transparent,rgba(255,255,255,0.6),transparent)',animation:'shimmer 4s ease-in-out infinite 2s'}} />
               </div>
-            </div>
-            <div className="absolute right-2 top-6 w-40 h-56 rounded-2xl overflow-hidden rotate-[11deg] opacity-70 shadow-2xl border border-yellow-500/20">
-              <img src={IMGS.pokemon1} alt="Pokemon" className="w-full h-full object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 to-transparent" />
-              <div className="absolute bottom-3 left-3 right-3">
-                <p className="text-yellow-400 text-[10px] font-bold uppercase tracking-widest">Pokémon TCG</p>
-                <p className="text-white font-black text-sm">Charizard Holo</p>
-                <p className="text-gray-300 text-[10px]">1st Ed. PSA 10</p>
-              </div>
-            </div>
-            <div className="absolute left-10 bottom-0 w-52 rounded-2xl overflow-hidden rotate-[3deg] z-10 shadow-[0_0_80px_rgba(245,158,11,0.3)] border border-violet-400/40" style={{height:'304px'}}>
-              <img src={IMGS.nba1} alt="NBA" className="w-full h-full object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
-              <div className="absolute bottom-4 left-4 right-4">
-                <p className="text-violet-400 text-[10px] font-bold uppercase tracking-widest mb-0.5">NBA · Topps Now 2025</p>
-                <p className="text-white font-black text-xl leading-tight">Cooper Flagg</p>
-                <p className="text-gray-300 text-xs">Dallas Mavericks · #1 Draft RC Auto</p>
-                <div className="flex items-center justify-between mt-2">
-                  <p className="text-violet-400 font-black text-lg">$27,500</p>
-                  <span className="bg-violet-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full">BGS 9.5</span>
+              <div className="absolute inset-0 p-3 flex flex-col">
+                <div className="flex items-center justify-between mb-auto">
+                  <span className="text-yellow-200 text-[9px] font-black bg-black/30 px-1.5 py-0.5 rounded">120 HP ⚡</span>
+                  <span className="text-[18px]">🔥</span>
+                </div>
+                <div className="bg-black/40 backdrop-blur-sm rounded-xl p-2.5">
+                  <p className="text-orange-300 text-[9px] font-bold uppercase tracking-widest mb-0.5">Pokémon TCG</p>
+                  <p className="text-white font-black text-base leading-tight">Charizard Holo</p>
+                  <p className="text-orange-200/70 text-[10px]">1st Edition · PSA 10</p>
+                  <p className="text-yellow-400 font-black text-sm mt-1.5">$550,000</p>
                 </div>
               </div>
             </div>
+
+            {/* Card 2 — Soccer (back-right) */}
+            <div className="absolute right-0 top-4 w-40 h-[220px] rounded-2xl overflow-hidden shadow-2xl border border-emerald-500/25"
+              style={{animation:'cardFloat2 5s ease-in-out infinite 1s',background:'linear-gradient(135deg,#064e3b 0%,#065f46 50%,#047857 100%)'}}>
+              <div className="absolute inset-0 opacity-15" style={{backgroundImage:'radial-gradient(circle at 70% 20%,rgba(255,255,255,0.4) 0%,transparent 60%)'}} />
+              <div className="absolute inset-0 overflow-hidden">
+                <div className="absolute inset-0 w-1/3 h-full opacity-25 skew-x-[-20deg]"
+                  style={{background:'linear-gradient(90deg,transparent,rgba(255,255,255,0.7),transparent)',animation:'shimmer 5s ease-in-out infinite 0.5s'}} />
+              </div>
+              <div className="absolute inset-0 p-3 flex flex-col">
+                <p className="text-emerald-300 text-[9px] font-bold uppercase tracking-widest mb-auto">⚽ Soccer · Topps</p>
+                <div className="bg-black/40 backdrop-blur-sm rounded-xl p-2">
+                  <p className="text-white font-black text-sm leading-tight">Lamine Yamal</p>
+                  <p className="text-emerald-200/70 text-[9px]">RC Euro 2024 · /150</p>
+                  <div className="flex items-center justify-between mt-1.5">
+                    <p className="text-emerald-400 font-black text-xs">$396,500</p>
+                    <span className="bg-violet-600/80 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full">PSA 10</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Card 3 — NBA (front hero card) */}
+            <div className="absolute left-8 bottom-0 w-52 rounded-2xl overflow-hidden z-10 border border-violet-400/50"
+              style={{height:'300px',animation:'cardFloat3 4.5s ease-in-out infinite 0.3s',
+                background:'linear-gradient(135deg,#1e1060 0%,#2d1b8a 50%,#120b55 100%)',
+                boxShadow:'0 0 60px rgba(139,92,246,0.35),0 20px 60px rgba(0,0,0,0.6)'}}>
+              {/* Holographic overlay */}
+              <div className="absolute inset-0 opacity-10" style={{backgroundImage:'repeating-linear-gradient(45deg,transparent,transparent 4px,rgba(255,255,255,0.08) 4px,rgba(255,255,255,0.08) 5px)'}} />
+              <div className="absolute inset-0 overflow-hidden">
+                <div className="absolute inset-0 w-1/2 h-full opacity-20 skew-x-[-15deg]"
+                  style={{background:'linear-gradient(90deg,transparent,rgba(167,139,250,0.8),transparent)',animation:'shimmer 3.5s ease-in-out infinite 1s'}} />
+              </div>
+              {/* Stars */}
+              <div className="absolute top-2 right-3 text-yellow-400 text-xs opacity-60">✦ ✦</div>
+              <div className="absolute inset-0 p-4 flex flex-col">
+                <p className="text-violet-400 text-[9px] font-bold uppercase tracking-widest mb-auto">🏀 NBA · Topps Now 2025</p>
+                <div>
+                  <p className="text-white font-black text-2xl leading-tight">Cooper Flagg</p>
+                  <p className="text-gray-400 text-[11px] mb-4">Dallas Mavericks · #1 Draft RC Auto</p>
+                  <div className="flex items-center justify-between">
+                    <p className="text-violet-300 font-black text-xl">$27,500</p>
+                    <span className="bg-violet-600 text-white text-[10px] font-black px-2.5 py-1 rounded-full">BGS 9.5</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
 
+        {/* ── Hero text ── */}
         <div className="relative max-w-7xl mx-auto px-6 py-28 w-full">
           <div className="max-w-xl">
             <div className="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold px-3 py-1.5 rounded-full mb-8 uppercase tracking-widest">
               <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
-              NBA · NFL · Soccer · MLB · Pokémon · One Piece
+              Deportes · TCG · Coleccionables
             </div>
-            <h1 className="text-6xl sm:text-7xl font-black leading-[0.88] mb-6 tracking-tighter">
-              TU COLECCIÓN.<br />
-              TU{' '}
+            <h1 className="text-6xl sm:text-7xl font-black leading-[0.9] mb-6 tracking-tighter">
+              COLECCIONA<br />LO QUE{' '}
               <span className="bg-gradient-to-r from-amber-400 to-yellow-300 bg-clip-text text-transparent">
-                INVERSIÓN.
+                AMAS.
               </span>
             </h1>
             <p className="text-gray-400 text-lg leading-relaxed mb-10 max-w-md">
-              El marketplace más completo para cartas deportivas y TCG en LATAM.
-              Compra, vende, subasta y haz trading — todo en un solo lugar seguro.
+              La plataforma de LATAM para comprar, vender e intercambiar cartas.
+              Todos los deportes, todos los gustos — en un solo lugar.
             </p>
             <div className="flex flex-wrap gap-3 mb-14">
               <button
-                onClick={() => navigate(user ? '/marketplace' : '/register')}
+                onClick={() => navigate('/register')}
                 className="bg-amber-500 hover:bg-amber-400 text-black font-black px-8 py-3.5 rounded-xl text-sm transition-all hover:scale-105 shadow-lg shadow-amber-500/25 uppercase tracking-wide"
               >
-                {user ? 'Explorar ahora' : 'Crear cuenta gratis'}
+                Crear cuenta gratis
               </button>
               <button
-                onClick={() => navigate(user ? '/live' : '/login')}
-                className="flex items-center gap-2 border border-white/15 hover:border-amber-500/40 text-white hover:text-amber-400 font-semibold px-8 py-3.5 rounded-xl text-sm transition-all"
+                onClick={() => navigate('/login')}
+                className="border border-white/15 hover:border-amber-500/40 text-white hover:text-amber-400 font-semibold px-8 py-3.5 rounded-xl text-sm transition-all"
               >
-                {user ? (
-                  <><span className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />Ver en vivo</>
-                ) : 'Iniciar sesión →'}
+                Iniciar sesión →
               </button>
             </div>
-            <div className="flex gap-10 pt-8 border-t border-white/5">
+            <div className="flex flex-wrap gap-8 pt-8 border-t border-white/5">
               {[
-                { value: 'SPEI', label: 'OXXO · MercadoPago · Tarjeta', color: 'text-emerald-400' },
-                { value: 'MXN',  label: 'Precios en pesos disponibles',   color: 'text-violet-400' },
-                { value: 'LATAM', label: 'Plataforma #1 de cartas',        color: 'text-amber-400' },
+                { icon: '💳', label: 'Pagos fáciles',       sub: 'OXXO, SPEI, tarjeta y más' },
+                { icon: '🇲🇽', label: 'Precios en MXN',     sub: 'Sin conversiones complicadas' },
+                { icon: '🔒', label: 'Transacciones seguras', sub: 'Escrow integrado P2P' },
               ].map((s) => (
-                <div key={s.label}>
-                  <div className={`text-3xl font-black ${s.color}`}>{s.value}</div>
-                  <div className="text-gray-600 text-xs mt-1 uppercase tracking-wide">{s.label}</div>
+                <div key={s.label} className="flex items-start gap-2.5">
+                  <span className="text-xl mt-0.5">{s.icon}</span>
+                  <div>
+                    <div className="text-white text-sm font-black">{s.label}</div>
+                    <div className="text-gray-600 text-xs mt-0.5">{s.sub}</div>
+                  </div>
                 </div>
               ))}
             </div>
@@ -336,7 +388,7 @@ export default function Landing() {
               <span className="bg-gradient-to-r from-amber-400 to-yellow-300 bg-clip-text text-transparent">Regístrate gratis.</span>
             </h2>
             <p className="text-gray-400 text-lg mb-10 max-w-xl mx-auto leading-relaxed">
-              Compra, vende, subasta y haz trading de cartas deportivas en la plataforma #1 de LATAM. Sin complicaciones.
+              Compra, vende, subasta y haz trading de cartas deportivas en la plataforma de LATAM. Sin complicaciones.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
@@ -379,49 +431,6 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ─── CTA ─── */}
-      <section className="py-32 px-6 text-center relative overflow-hidden">
-        {/* Background layers */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#13102a] via-[#0c0a1e] to-[#08061a]" />
-        {/* Glow orbs */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full bg-amber-500/10 blur-[120px] pointer-events-none" />
-        <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[400px] h-[400px] rounded-full bg-violet-600/10 blur-[100px] pointer-events-none" />
-        <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-[400px] h-[400px] rounded-full bg-amber-600/8 blur-[100px] pointer-events-none" />
-        {/* Top separator glow */}
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber-500/30 to-transparent" />
-        {/* Subtle grid */}
-        <div className="absolute inset-0 opacity-[0.03]" style={{backgroundImage:'linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px)',backgroundSize:'60px 60px'}} />
-
-        <div className="relative max-w-2xl mx-auto">
-          <div className="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-bold px-4 py-1.5 rounded-full mb-8 uppercase tracking-widest">
-            <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
-            Plataforma #1 de LATAM
-          </div>
-          <h2 className="text-5xl sm:text-6xl font-black text-white mb-5 leading-tight">
-            ¿Listo para tu<br />
-            <span className="bg-gradient-to-r from-amber-400 to-yellow-300 bg-clip-text text-transparent">primer pull?</span>
-          </h2>
-          <p className="text-gray-400 mb-12 text-lg max-w-md mx-auto leading-relaxed">
-            Únete a miles de coleccionistas. Compra, vende y subasta cartas deportivas con total seguridad.
-          </p>
-          <div className="flex flex-wrap gap-4 justify-center">
-            <button
-              onClick={() => navigate(user ? '/marketplace' : '/register')}
-              className="bg-amber-500 hover:bg-amber-400 text-black font-black px-12 py-4 rounded-xl text-lg transition-all hover:scale-105 shadow-2xl shadow-amber-500/30"
-            >
-              {user ? 'Ir al mercado →' : 'Crear cuenta gratis →'}
-            </button>
-            {!user && (
-              <button
-                onClick={() => navigate('/login')}
-                className="border border-white/15 hover:border-white/30 text-gray-300 hover:text-white font-semibold px-8 py-4 rounded-xl text-lg transition-all"
-              >
-                Iniciar sesión
-              </button>
-            )}
-          </div>
-        </div>
-      </section>
 
       {/* ─── FOOTER ─── */}
       <footer className="border-t border-white/5 py-8 px-6">
