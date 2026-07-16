@@ -159,12 +159,6 @@ export default function Landing() {
               <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
               Deportes · TCG · Coleccionables
             </div>
-            <h1 className="text-6xl sm:text-7xl font-black leading-[0.9] mb-6 tracking-tighter">
-              COLECCIONA<br />LO QUE{' '}
-              <span className="bg-gradient-to-r from-amber-400 to-yellow-300 bg-clip-text text-transparent">
-                AMAS.
-              </span>
-            </h1>
             <p className="text-gray-400 text-lg leading-relaxed mb-10 max-w-md">
               La plataforma de LATAM para comprar, vender e intercambiar cartas.
               Todos los deportes, todos los gustos — en un solo lugar.
