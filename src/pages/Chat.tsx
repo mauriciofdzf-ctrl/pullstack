@@ -45,16 +45,24 @@ function timeLabel(iso: string) {
 
 export default function Chat() {
   const { user, profile } = useAuth()
-  const navigate  = useNavigate()
+  const navigate = useNavigate()
+
   const [room, setRoom]       = useState('general')
   const [msgs, setMsgs]       = useState<ChatMsg[]>([])
   const [input, setInput]     = useState('')
   const [sending, setSending] = useState(false)
   const [online, setOnline]   = useState(0)
+  const [connected, setConnected] = useState(false)
   const [rooms, setRooms]     = useState<ChatRoom[]>(BASE_ROOMS)
-  const bottomRef  = useRef<HTMLDivElement>(null)
-  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null)
 
+  const bottomRef  = useRef<HTMLDivElement>(null)
+  // IDs of messages sent by this client — lets Realtime skip duplicates
+  const sentIds    = useRef(new Set<number>())
+  // Always-fresh profile ref so subscribe callback doesn't go stale
+  const profileRef = useRef(profile)
+  profileRef.current = profile
+
+  // Load custom rooms from settings
   useEffect(() => {
     supabase.from('settings').select('value').eq('key', 'chat_rooms').maybeSingle()
       .then(({ data }) => {
@@ -68,58 +76,101 @@ export default function Chat() {
       })
   }, [])
 
+  // Fetch history + subscribe on room / user change
   useEffect(() => {
-    loadMessages()
+    if (!user) return
+    let mounted = true
+    setMsgs([])
+    setConnected(false)
+
+    // 1. Load history
+    supabase
+      .from('chat_messages')
+      .select('*')
+      .eq('room', room)
+      .order('created_at', { ascending: true })
+      .limit(100)
+      .then(({ data }) => {
+        if (mounted) setMsgs((data as ChatMsg[]) || [])
+      })
+
+    // 2. Realtime — NO column filter (filter client-side for reliability)
+    //    Supabase requires REPLICA IDENTITY FULL for column-filtered subscriptions;
+    //    filtering client-side avoids that requirement and is more reliable.
     const ch = supabase
       .channel(`chat:${room}`)
       .on('postgres_changes', {
         event: 'INSERT',
         schema: 'public',
         table: 'chat_messages',
-        filter: `room=eq.${room}`,
       }, payload => {
-        setMsgs(prev => [...prev, payload.new as ChatMsg])
+        const msg = payload.new as ChatMsg
+        if (msg.room !== room) return           // client-side room filter
+        if (sentIds.current.has(msg.id)) {
+          sentIds.current.delete(msg.id)
+          return                                 // already shown optimistically
+        }
+        if (!mounted) return
+        setMsgs(prev => prev.some(m => m.id === msg.id) ? prev : [...prev, msg])
       })
       .on('presence', { event: 'sync' }, () => {
-        const state = ch.presenceState()
-        setOnline(Object.keys(state).length)
+        if (mounted) setOnline(Object.keys(ch.presenceState()).length)
+      })
+      .on('presence', { event: 'leave' }, () => {
+        if (mounted) setOnline(Object.keys(ch.presenceState()).length)
       })
       .subscribe(async status => {
-        if (status === 'SUBSCRIBED' && user) {
-          await ch.track({ user_id: user.id, display_name: profile?.display_name || 'Anon' })
+        if (!mounted) return
+        setConnected(status === 'SUBSCRIBED')
+        if (status === 'SUBSCRIBED') {
+          await ch.track({
+            user_id:      user.id,
+            display_name: profileRef.current?.display_name || 'Anon',
+          })
         }
       })
-    channelRef.current = ch
-    return () => { supabase.removeChannel(ch) }
+
+    return () => {
+      mounted = false
+      supabase.removeChannel(ch)
+    }
   }, [room, user])
 
+  // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [msgs])
 
-  const loadMessages = async () => {
-    setMsgs([])
-    const { data } = await supabase
-      .from('chat_messages')
-      .select('*')
-      .eq('room', room)
-      .order('created_at', { ascending: true })
-      .limit(80)
-    setMsgs((data as ChatMsg[]) || [])
-  }
-
   const send = async () => {
     if (!input.trim() || !user || sending) return
-    if (!user) { navigate('/login', { state: { from: '/chat' } }); return }
-    const content = input.trim()
+    const content   = input.trim()
+    const tempId    = -(Date.now())            // negative → never clashes with real bigint IDs
+    const displayName = profileRef.current?.display_name || user.email?.split('@')[0] || 'Anon'
+
     setInput('')
     setSending(true)
-    await supabase.from('chat_messages').insert({
-      user_id:      user.id,
-      display_name: profile?.display_name || user.email?.split('@')[0] || 'Anon',
-      room,
-      content,
-    })
+
+    // Optimistic: show immediately for the sender
+    setMsgs(prev => [...prev, {
+      id: tempId, user_id: user.id, display_name: displayName,
+      room, content, created_at: new Date().toISOString(),
+    }])
+
+    const { data, error } = await supabase
+      .from('chat_messages')
+      .insert({ user_id: user.id, display_name: displayName, room, content })
+      .select()
+      .single()
+
+    if (data) {
+      const real = data as ChatMsg
+      sentIds.current.add(real.id)            // Realtime will skip this ID
+      setMsgs(prev => prev.map(m => m.id === tempId ? real : m))
+    } else {
+      // Roll back on error
+      setMsgs(prev => prev.filter(m => m.id !== tempId))
+      console.error('Chat error:', error?.message)
+    }
     setSending(false)
   }
 
@@ -148,7 +199,12 @@ export default function Chat() {
           <div className="p-3 sm:p-4 border-b border-white/5">
             <p className="text-white font-black text-sm hidden sm:block">Chat</p>
             <p className="text-gray-600 text-[10px] hidden sm:block mt-0.5">
-              {online > 0 ? <span className="text-green-400 font-bold">{online} en línea</span> : 'Conectando...'}
+              {connected
+                ? online > 0
+                  ? <span className="text-green-400 font-bold">{online} en línea</span>
+                  : <span className="text-green-400 font-bold">Conectado</span>
+                : <span className="text-amber-400 animate-pulse">Conectando...</span>
+              }
             </p>
           </div>
           <div className="flex-1 overflow-y-auto py-2">
@@ -161,7 +217,7 @@ export default function Chat() {
                 }`}>
                 <span className="text-lg shrink-0">{r.icon}</span>
                 <span className="text-sm font-bold hidden sm:block truncate flex-1">{r.label}</span>
-                {r.custom && <span className="hidden sm:block w-1.5 h-1.5 rounded-full bg-amber-500/60 shrink-0" title="Grupo personalizado" />}
+                {r.custom && <span className="hidden sm:block w-1.5 h-1.5 rounded-full bg-amber-500/60 shrink-0" />}
               </button>
             ))}
           </div>
@@ -172,11 +228,13 @@ export default function Chat() {
           {/* Room header */}
           <div className="flex items-center gap-3 px-4 py-3 border-b border-white/5 shrink-0">
             <span className="text-xl">{currentRoom?.icon}</span>
-            <div>
+            <div className="flex-1">
               <p className="text-white font-bold text-sm">#{currentRoom?.label}</p>
               <div className="flex items-center gap-1.5">
-                <span className="w-2 h-2 bg-green-400 rounded-full" />
-                <span className="text-green-400 text-[10px]">{online} en línea</span>
+                <span className={`w-2 h-2 rounded-full ${connected ? 'bg-green-400' : 'bg-amber-400 animate-pulse'}`} />
+                <span className={`text-[10px] ${connected ? 'text-green-400' : 'text-amber-400'}`}>
+                  {connected ? `${online} en línea` : 'Conectando...'}
+                </span>
               </div>
             </div>
           </div>
@@ -192,7 +250,8 @@ export default function Chat() {
               </div>
             ) : (
               msgs.map((m, i) => {
-                const isMe = m.user_id === user?.id
+                const isMe     = m.user_id === user.id
+                const isTemp   = m.id < 0
                 const prevSame = i > 0 && msgs[i - 1].user_id === m.user_id
                 return (
                   <div key={m.id} className={`flex items-start gap-2.5 ${isMe ? 'flex-row-reverse' : ''}`}>
@@ -209,9 +268,9 @@ export default function Chat() {
                           <span className="text-gray-600 text-[10px]">{timeLabel(m.created_at)}</span>
                         </div>
                       )}
-                      <div className={`px-3.5 py-2.5 rounded-2xl text-sm leading-relaxed ${
+                      <div className={`px-3.5 py-2.5 rounded-2xl text-sm leading-relaxed transition-opacity ${
                         isMe
-                          ? 'bg-violet-600 text-white font-medium rounded-tr-md'
+                          ? `bg-violet-600 text-white font-medium rounded-tr-md ${isTemp ? 'opacity-60' : 'opacity-100'}`
                           : 'bg-[#26213d] border border-white/5 text-gray-200 rounded-tl-md'
                       }`}>
                         {m.content}
@@ -233,10 +292,11 @@ export default function Chat() {
                 onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() } }}
                 placeholder={`Mensaje en #${currentRoom?.label}...`}
                 maxLength={500}
-                className="flex-1 bg-[#26213d] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-violet-500/50 transition-colors"
+                disabled={!connected}
+                className="flex-1 bg-[#26213d] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-violet-500/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               />
-              <button onClick={send} disabled={!input.trim() || sending}
-                className="bg-violet-600 hover:bg-violet-500 disabled:opacity-40 text-black font-black px-4 py-2.5 rounded-xl transition-all shrink-0">
+              <button onClick={send} disabled={!input.trim() || sending || !connected}
+                className="bg-violet-600 hover:bg-violet-500 disabled:opacity-40 text-white font-black px-4 py-2.5 rounded-xl transition-all shrink-0">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                 </svg>
