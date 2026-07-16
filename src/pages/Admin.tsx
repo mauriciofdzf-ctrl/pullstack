@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import { CATALOG } from '../lib/catalog'
 import { IMAGE_DEFAULTS, IMAGE_LABELS, IMAGE_SECTIONS, type ImageKey, loadImageOverridesFromDB, saveImageOverridesToDB } from '../lib/imageConfig'
+import { DEFAULT_SECTIONS, type SectionKey, type SectionsConfig } from '../contexts/SectionsContext'
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 type AdminUser    = { id: string; display_name: string | null; role: string; created_at: string }
@@ -65,7 +66,7 @@ const TXN_CSS: Record<string, string> = {
   trade:   'text-blue-400',
 }
 
-type Tab = 'overview' | 'users' | 'listings' | 'orders' | 'transactions' | 'pagos' | 'mensajes' | 'catalog' | 'landing' | 'chat'
+type Tab = 'overview' | 'users' | 'listings' | 'orders' | 'transactions' | 'pagos' | 'mensajes' | 'catalog' | 'landing' | 'chat' | 'secciones'
 
 // ─── Panel principal ──────────────────────────────────────────────────────────
 export default function Admin() {
@@ -119,6 +120,19 @@ export default function Admin() {
   const [msgsLoading, setML]       = useState(false)
   const [msgTab,     setMsgTab]    = useState<'support' | 'dms'>('support')
 
+  // Secciones
+  const SECTION_DEFS: { key: SectionKey; label: string; icon: string; desc: string }[] = [
+    { key: 'community', label: 'Comunidad',  icon: '🌐', desc: 'Foros y posts entre usuarios' },
+    { key: 'grading',   label: 'Grading',    icon: '🔬', desc: 'Servicio de calificación concierge' },
+    { key: 'raffles',   label: 'Rifas',      icon: '🎰', desc: 'Rifas y sorteos de cartas' },
+    { key: 'live',      label: 'En Vivo',    icon: '📹', desc: 'Breaks y livestreams' },
+    { key: 'chat',      label: 'Chat',       icon: '💬', desc: 'Chat comunitario por salas' },
+    { key: 'aprende',   label: 'Aprende',    icon: '📚', desc: 'Guías, tipos de cartas y calculadora' },
+  ]
+  const [sectionsConfig, setSectionsConfig] = useState<SectionsConfig>(DEFAULT_SECTIONS)
+  const [sectionsLoading, setSectionsLoading] = useState(false)
+  const [sectionsSaved, setSectionsSaved] = useState(false)
+
   // Chat rooms
   type ChatRoom = { id: string; label: string; icon: string }
   const BASE_ROOM_IDS = new Set(['general','nba','nfl','soccer','mlb','pokemon','onepiece','grading'])
@@ -165,6 +179,7 @@ export default function Admin() {
     if (tab === 'catalog')      loadCatalogHidden()
     if (tab === 'landing')      loadLanding()
     if (tab === 'chat')         loadChatRooms()
+    if (tab === 'secciones')    loadSecciones()
   }, [tab])
 
   const loadStats = async () => {
@@ -384,6 +399,23 @@ export default function Admin() {
     setTimeout(() => setImageSaved(false), 2000)
   }
 
+  const loadSecciones = async () => {
+    setSectionsLoading(true)
+    const { data } = await supabase.from('settings').select('value').eq('key', 'sections').maybeSingle()
+    if (data?.value) {
+      try { setSectionsConfig({ ...DEFAULT_SECTIONS, ...JSON.parse(data.value) }) } catch { /* noop */ }
+    }
+    setSectionsLoading(false)
+  }
+
+  const toggleSection = async (key: SectionKey, value: boolean) => {
+    const next = { ...sectionsConfig, [key]: value }
+    setSectionsConfig(next)
+    await supabase.from('settings').upsert({ key: 'sections', value: JSON.stringify(next), updated_at: new Date().toISOString() })
+    setSectionsSaved(true)
+    setTimeout(() => setSectionsSaved(false), 2000)
+  }
+
   const loadChatRooms = async () => {
     setCRLoading(true)
     const { data } = await supabase.from('settings').select('value').eq('key', 'chat_rooms').maybeSingle()
@@ -435,6 +467,7 @@ export default function Admin() {
     { id: 'catalog',       label: 'Catálogo',        icon: '🗂️', badge: hiddenIds.size || undefined },
     { id: 'landing',       label: 'Landing',          icon: '🏠' },
     { id: 'chat',          label: 'Grupos Chat',      icon: '💬' },
+    { id: 'secciones',     label: 'Secciones',        icon: '🔌' },
   ]
 
   return (
@@ -1350,6 +1383,58 @@ export default function Admin() {
                 </button>
               </div>
             )}
+          </div>
+        )}
+
+        {/* ── SECCIONES ── */}
+        {tab === 'secciones' && (
+          <div className="max-w-xl">
+            <div className="mb-6">
+              <h3 className="text-white font-black text-lg">Secciones de la plataforma</h3>
+              <p className="text-gray-500 text-xs mt-0.5">
+                Las secciones desactivadas desaparecen del menú y muestran "Próximamente" si alguien entra directo.
+              </p>
+              {sectionsSaved && (
+                <p className="text-emerald-400 text-xs font-bold mt-2">✅ Guardado — el cambio aplica de inmediato</p>
+              )}
+            </div>
+
+            {sectionsLoading
+              ? <div className="flex justify-center py-16"><div className="w-8 h-8 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" /></div>
+              : (
+                <div className="space-y-3">
+                  {SECTION_DEFS.map(s => {
+                    const enabled = sectionsConfig[s.key]
+                    return (
+                      <div key={s.key}
+                        className={`flex items-center gap-4 bg-[#1c1835] border rounded-2xl px-5 py-4 transition-all ${enabled ? 'border-white/5' : 'border-red-500/15 opacity-70'}`}>
+                        <span className="text-2xl shrink-0">{s.icon}</span>
+                        <div className="flex-1 min-w-0">
+                          <p className={`font-black text-sm ${enabled ? 'text-white' : 'text-gray-500'}`}>{s.label}</p>
+                          <p className="text-gray-600 text-xs mt-0.5">{s.desc}</p>
+                        </div>
+                        <div className="flex items-center gap-3 shrink-0">
+                          <span className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${enabled ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' : 'bg-red-500/15 text-red-400 border-red-500/30'}`}>
+                            {enabled ? '● Activa' : '○ Desactivada'}
+                          </span>
+                          <button
+                            onClick={() => toggleSection(s.key, !enabled)}
+                            className={`relative w-12 h-6 rounded-full transition-all ${enabled ? 'bg-emerald-600' : 'bg-white/10'}`}>
+                            <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all ${enabled ? 'left-7' : 'left-1'}`} />
+                          </button>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )
+            }
+
+            <div className="mt-6 bg-[#13102a] border border-white/5 rounded-2xl p-4">
+              <p className="text-gray-600 text-xs leading-relaxed">
+                <span className="text-gray-400 font-bold">Marketplace, Mensajes, Perfil y Wallet</span> siempre están activos — son funciones core de la plataforma.
+              </p>
+            </div>
           </div>
         )}
 

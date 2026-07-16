@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { useSections, type SectionKey } from '../contexts/SectionsContext'
 import { supabase } from '../lib/supabase'
 import { LogoIcon, LogoWordmark } from './Logo'
 
@@ -24,6 +25,7 @@ export default function Navbar() {
   const location = useLocation()
   const navigate = useNavigate()
   const { user, profile, isAdmin, signOut } = useAuth()
+  const sections = useSections()
 
   useEffect(() => {
     if (!user) { setUnreadDMs(0); return }
@@ -41,15 +43,16 @@ export default function Navbar() {
     return () => { supabase.removeChannel(ch) }
   }, [user])
 
-  const links = [
+  type NavLink = { to: string; label: string; section?: SectionKey; grading?: boolean; live?: boolean; badge?: number }
+  const links: NavLink[] = ([
     { to: '/marketplace', label: 'Mercado' },
-    { to: '/aprende',     label: 'Aprende' },
-    { to: '/grading',     label: 'Grading', grading: true },
-    { to: '/live',        label: 'En Vivo',  live: true },
-    { to: '/community',   label: 'Comunidad' },
-    { to: '/raffles',     label: 'Rifas' },
-    { to: '/messages',    label: 'Mensajes', badge: unreadDMs > 0 ? unreadDMs : 0 },
-  ]
+    { to: '/aprende',     label: 'Aprende',   section: 'aprende'   as SectionKey },
+    { to: '/grading',     label: 'Grading',   grading: true, section: 'grading'   as SectionKey },
+    { to: '/live',        label: 'En Vivo',   live: true,    section: 'live'      as SectionKey },
+    { to: '/community',   label: 'Comunidad', section: 'community' as SectionKey },
+    { to: '/raffles',     label: 'Rifas',     section: 'raffles'   as SectionKey },
+    { to: '/messages',    label: 'Mensajes',  badge: unreadDMs > 0 ? unreadDMs : 0 },
+  ] satisfies NavLink[]).filter(link => !link.section || sections[link.section])
 
   const isActive = (path: string) => location.pathname === path
 
