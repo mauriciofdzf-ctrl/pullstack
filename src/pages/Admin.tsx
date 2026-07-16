@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import { CATALOG } from '../lib/catalog'
+import { IMAGE_DEFAULTS, IMAGE_LABELS, IMAGE_SECTIONS, type ImageKey, loadImageOverridesFromDB, saveImageOverridesToDB } from '../lib/imageConfig'
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 type AdminUser    = { id: string; display_name: string | null; role: string; created_at: string }
@@ -11,6 +12,10 @@ type AdminOrder   = { id: number; contact_name: string; total: string; status: s
 type AdminTxn     = { id: number; buyer_name: string; seller_name: string; listing_title: string; sale_price: string; commission_pct: number; commission_amt: number; total_paid: number; payment_method: string; payment_reference: string; status: string; created_at: string; tracking_number: string | null; tracking_carrier: string | null; tracking_url: string | null; estimated_delivery: string | null }
 type AdminMessage = { id: number; user_id: string; content: string; from_admin: boolean; created_at: string }
 type AdminDM      = { id: number; from_user_id: string; to_user_id: string; from_name: string; to_name: string; content: string; listing_title: string | null; action_type: string; created_at: string; read: boolean }
+
+// ─── Tipos ────────────────────────────────────────────────────────────────────
+type TrendingItem = { player: string; detail: string; team: string; grade: string; price: string; change: string; sport: string; img: string }
+const BLANK_TRENDING: TrendingItem = { player: '', detail: '', team: '', grade: '', price: '', change: '', sport: '⚽ Soccer', img: '' }
 
 // ─── Sub-componentes ──────────────────────────────────────────────────────────
 function StatCard({ label, value, icon, accent }: { label: string; value: number | string; icon: string; accent: string }) {
@@ -60,7 +65,7 @@ const TXN_CSS: Record<string, string> = {
   trade:   'text-blue-400',
 }
 
-type Tab = 'overview' | 'users' | 'listings' | 'orders' | 'transactions' | 'pagos' | 'mensajes' | 'catalog'
+type Tab = 'overview' | 'users' | 'listings' | 'orders' | 'transactions' | 'pagos' | 'mensajes' | 'catalog' | 'landing'
 
 // ─── Panel principal ──────────────────────────────────────────────────────────
 export default function Admin() {
@@ -114,6 +119,18 @@ export default function Admin() {
   const [msgsLoading, setML]       = useState(false)
   const [msgTab,     setMsgTab]    = useState<'support' | 'dms'>('support')
 
+  // Landing tab
+  const [landingSubTab, setLandingSubTab] = useState<'trending' | 'images'>('trending')
+  const [trendingItems, setTrendingItems] = useState<TrendingItem[]>([])
+  const [trendingLoading, setTrendingLoading] = useState(false)
+  const [trendingSaved, setTrendingSaved] = useState(false)
+  const [showTrendingForm, setShowTrendingForm] = useState(false)
+  const [trendingForm, setTrendingForm] = useState<TrendingItem>(BLANK_TRENDING)
+  const [editTrendingIdx, setEditTrendingIdx] = useState<number | null>(null)
+  const [imageOverrides, setImageOverrides] = useState<Partial<Record<ImageKey, string>>>({})
+  const [imageSaved, setImageSaved] = useState(false)
+  const [imageSaving, setImageSaving] = useState(false)
+
   // Pagos config
   const [payConfig, setPayConfig] = useState({
     spei_banco: '', spei_clabe: '', spei_beneficiario: 'PullStackMX',
@@ -134,6 +151,7 @@ export default function Admin() {
     if (tab === 'pagos')        loadPayConfig()
     if (tab === 'mensajes')     loadMessages()
     if (tab === 'catalog')      loadCatalogHidden()
+    if (tab === 'landing')      loadLanding()
   }, [tab])
 
   const loadStats = async () => {
@@ -310,6 +328,49 @@ export default function Admin() {
     await supabase.from('settings').upsert({ key: 'catalog_hidden', value: '[]', updated_at: new Date().toISOString() })
   }
 
+  const loadLanding = async () => {
+    setTrendingLoading(true)
+    const [tResult, overrides] = await Promise.all([
+      supabase.from('settings').select('value').eq('key', 'trending_items').maybeSingle(),
+      loadImageOverridesFromDB(),
+    ])
+    if (tResult.data?.value) {
+      try { setTrendingItems(JSON.parse(tResult.data.value)) } catch { setTrendingItems([]) }
+    } else { setTrendingItems([]) }
+    setImageOverrides(overrides)
+    setTrendingLoading(false)
+  }
+
+  const saveTrending = async (items: TrendingItem[]) => {
+    await supabase.from('settings').upsert({ key: 'trending_items', value: JSON.stringify(items), updated_at: new Date().toISOString() })
+    setTrendingItems(items)
+    setTrendingSaved(true)
+    setTimeout(() => setTrendingSaved(false), 2000)
+  }
+
+  const commitTrendingForm = async () => {
+    if (!trendingForm.player.trim()) return
+    const next = editTrendingIdx !== null
+      ? trendingItems.map((item, i) => i === editTrendingIdx ? { ...trendingForm } : item)
+      : [...trendingItems, { ...trendingForm }]
+    setShowTrendingForm(false)
+    setEditTrendingIdx(null)
+    setTrendingForm(BLANK_TRENDING)
+    await saveTrending(next)
+  }
+
+  const deleteTrendingItem = async (idx: number) => {
+    await saveTrending(trendingItems.filter((_, i) => i !== idx))
+  }
+
+  const saveImages = async () => {
+    setImageSaving(true)
+    await saveImageOverridesToDB(imageOverrides)
+    setImageSaving(false)
+    setImageSaved(true)
+    setTimeout(() => setImageSaved(false), 2000)
+  }
+
   const filteredUsers = users.filter(u =>
     !userSearch || (u.display_name || '').toLowerCase().includes(userSearch.toLowerCase())
   )
@@ -325,6 +386,7 @@ export default function Admin() {
     { id: 'mensajes',      label: 'Mensajes',        icon: '💬' },
     { id: 'pagos',         label: 'Métodos de Pago', icon: '⚙️' },
     { id: 'catalog',       label: 'Catálogo',        icon: '🗂️', badge: hiddenIds.size || undefined },
+    { id: 'landing',       label: 'Landing',          icon: '🏠' },
   ]
 
   return (
@@ -1025,6 +1087,221 @@ export default function Admin() {
                 </div>
               )
             }
+          </div>
+        )}
+
+        {/* ── LANDING ── */}
+        {tab === 'landing' && (
+          <div>
+            {/* Sub-tabs */}
+            <div className="flex gap-2 mb-6">
+              <button onClick={() => setLandingSubTab('trending')}
+                className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${landingSubTab === 'trending' ? 'bg-amber-500 text-black' : 'bg-[#1c1835] border border-white/10 text-gray-400 hover:border-amber-500/30 hover:text-amber-400'}`}>
+                🔥 Trending
+              </button>
+              <button onClick={() => setLandingSubTab('images')}
+                className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${landingSubTab === 'images' ? 'bg-amber-500 text-black' : 'bg-[#1c1835] border border-white/10 text-gray-400 hover:border-amber-500/30 hover:text-amber-400'}`}>
+                🖼️ Imágenes
+              </button>
+            </div>
+
+            {/* ─ Trending ─ */}
+            {landingSubTab === 'trending' && (
+              <div>
+                <div className="flex items-start justify-between gap-4 mb-5">
+                  <div>
+                    <h3 className="text-white font-black text-lg">Cartas trending en Landing</h3>
+                    <p className="text-gray-500 text-xs mt-0.5">
+                      {trendingItems.length === 0 ? 'Sin override — landing usa los 4 items por defecto' : `${trendingItems.length} items guardados`}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    {trendingSaved && <span className="text-emerald-400 text-xs font-bold">✅ Guardado</span>}
+                    {trendingItems.length > 0 && (
+                      <button onClick={() => { if (confirm('¿Restaurar los defaults de la landing?')) saveTrending([]) }}
+                        className="text-xs font-bold px-3 py-1.5 rounded-lg border border-white/10 text-gray-500 hover:border-red-500/30 hover:text-red-400 transition-all">
+                        ↩ Restaurar defaults
+                      </button>
+                    )}
+                    <button onClick={() => { setEditTrendingIdx(null); setTrendingForm(BLANK_TRENDING); setShowTrendingForm(v => !v) }}
+                      className={`text-xs font-bold px-4 py-2 rounded-lg border transition-all ${showTrendingForm && editTrendingIdx === null ? 'bg-amber-500 text-black border-amber-500' : 'bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20'}`}>
+                      {showTrendingForm && editTrendingIdx === null ? '✕ Cancelar' : '+ Agregar'}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Formulario agregar/editar */}
+                {showTrendingForm && (
+                  <div className="bg-[#13102a] border border-amber-500/20 rounded-2xl p-5 mb-5 space-y-3">
+                    <p className="text-amber-400 text-sm font-black mb-1">{editTrendingIdx !== null ? 'Editar item' : 'Nuevo item trending'}</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-gray-500 text-[10px] uppercase tracking-widest block mb-1">Jugador / Carta *</label>
+                        <input value={trendingForm.player} onChange={e => setTrendingForm(f => ({ ...f, player: e.target.value }))}
+                          placeholder="Ej: Lamine Yamal"
+                          className="w-full bg-[#1c1835] border border-white/10 text-white px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-amber-500/50 placeholder-gray-700" />
+                      </div>
+                      <div>
+                        <label className="text-gray-500 text-[10px] uppercase tracking-widest block mb-1">Precio</label>
+                        <input value={trendingForm.price} onChange={e => setTrendingForm(f => ({ ...f, price: e.target.value }))}
+                          placeholder="$396,500"
+                          className="w-full bg-[#1c1835] border border-white/10 text-white px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-amber-500/50 placeholder-gray-700" />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="text-gray-500 text-[10px] uppercase tracking-widest block mb-1">Detalle del set</label>
+                        <input value={trendingForm.detail} onChange={e => setTrendingForm(f => ({ ...f, detail: e.target.value }))}
+                          placeholder="2024 Topps Chrome UEFA Euro · SuperFractor Auto 1/1"
+                          className="w-full bg-[#1c1835] border border-white/10 text-white px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-amber-500/50 placeholder-gray-700" />
+                      </div>
+                      <div>
+                        <label className="text-gray-500 text-[10px] uppercase tracking-widest block mb-1">Equipo / Info</label>
+                        <input value={trendingForm.team} onChange={e => setTrendingForm(f => ({ ...f, team: e.target.value }))}
+                          placeholder="FC Barcelona · Selección España"
+                          className="w-full bg-[#1c1835] border border-white/10 text-white px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-amber-500/50 placeholder-gray-700" />
+                      </div>
+                      <div>
+                        <label className="text-gray-500 text-[10px] uppercase tracking-widest block mb-1">Grado</label>
+                        <input value={trendingForm.grade} onChange={e => setTrendingForm(f => ({ ...f, grade: e.target.value }))}
+                          placeholder="PSA 10"
+                          className="w-full bg-[#1c1835] border border-white/10 text-white px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-amber-500/50 placeholder-gray-700" />
+                      </div>
+                      <div>
+                        <label className="text-gray-500 text-[10px] uppercase tracking-widest block mb-1">Tendencia / Cambio</label>
+                        <input value={trendingForm.change} onChange={e => setTrendingForm(f => ({ ...f, change: e.target.value }))}
+                          placeholder="+585% en ventas / último año"
+                          className="w-full bg-[#1c1835] border border-white/10 text-white px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-amber-500/50 placeholder-gray-700" />
+                      </div>
+                      <div>
+                        <label className="text-gray-500 text-[10px] uppercase tracking-widest block mb-1">Deporte (badge)</label>
+                        <input value={trendingForm.sport} onChange={e => setTrendingForm(f => ({ ...f, sport: e.target.value }))}
+                          placeholder="⚽ Soccer"
+                          className="w-full bg-[#1c1835] border border-white/10 text-white px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-amber-500/50 placeholder-gray-700" />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="text-gray-500 text-[10px] uppercase tracking-widest block mb-1">URL de imagen</label>
+                        <input value={trendingForm.img} onChange={e => setTrendingForm(f => ({ ...f, img: e.target.value }))}
+                          placeholder="https://... (URL directa de la imagen de la carta)"
+                          className="w-full bg-[#1c1835] border border-white/10 text-white px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-amber-500/50 placeholder-gray-700 font-mono" />
+                      </div>
+                    </div>
+                    <div className="flex gap-2 mt-1">
+                      <button onClick={commitTrendingForm} disabled={!trendingForm.player.trim()}
+                        className="flex-1 bg-amber-500 hover:bg-amber-400 disabled:opacity-40 text-black font-black py-2.5 rounded-xl text-sm transition-all">
+                        {editTrendingIdx !== null ? 'Guardar cambios' : '+ Agregar al trending'}
+                      </button>
+                      <button onClick={() => { setShowTrendingForm(false); setEditTrendingIdx(null); setTrendingForm(BLANK_TRENDING) }}
+                        className="px-4 py-2.5 rounded-xl text-sm font-bold border border-white/10 text-gray-500 hover:text-gray-300 transition-all">
+                        Cancelar
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Lista de items */}
+                {trendingLoading
+                  ? <div className="flex justify-center py-16"><div className="w-8 h-8 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" /></div>
+                  : trendingItems.length === 0
+                  ? (
+                    <div className="text-center py-14 bg-[#1c1835] border border-white/5 rounded-2xl">
+                      <p className="text-4xl mb-3">🔥</p>
+                      <p className="text-white font-bold mb-1">Sin override</p>
+                      <p className="text-gray-500 text-sm">El landing mostrará las 4 cartas por defecto.<br />Agrega items para personalizar.</p>
+                    </div>
+                  )
+                  : (
+                    <div className="space-y-2">
+                      {trendingItems.map((item, i) => (
+                        <div key={i} className="flex items-center gap-3 bg-[#1c1835] border border-white/5 rounded-xl px-4 py-3 hover:border-white/10 transition-all">
+                          {item.img && (
+                            <img src={item.img} alt={item.player}
+                              className="w-12 h-12 rounded-lg object-cover shrink-0 bg-[#26213d]"
+                              onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <p className="text-white font-bold text-sm truncate">{item.player}</p>
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 border border-red-500/20 shrink-0">{item.sport}</span>
+                            </div>
+                            <p className="text-gray-500 text-[11px] truncate">{item.price} · {item.grade}</p>
+                          </div>
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <button
+                              onClick={() => { setEditTrendingIdx(i); setTrendingForm({ ...item }); setShowTrendingForm(true) }}
+                              className="text-[11px] font-bold px-3 py-1.5 rounded-lg border border-white/10 text-gray-400 hover:border-amber-500/30 hover:text-amber-400 transition-all">
+                              ✏️ Editar
+                            </button>
+                            <button onClick={() => deleteTrendingItem(i)}
+                              className="text-[11px] font-bold px-3 py-1.5 rounded-lg border border-red-500/20 text-red-400 hover:bg-red-500/10 transition-all">
+                              🗑️
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )
+                }
+              </div>
+            )}
+
+            {/* ─ Imágenes ─ */}
+            {landingSubTab === 'images' && (
+              <div>
+                <div className="flex items-center justify-between mb-5">
+                  <div>
+                    <h3 className="text-white font-black text-lg">Imágenes del Landing</h3>
+                    <p className="text-gray-500 text-xs mt-0.5">Pega URLs directas. Dejar vacío = imagen por defecto.</p>
+                  </div>
+                  <button onClick={saveImages} disabled={imageSaving}
+                    className={`text-sm font-black px-5 py-2.5 rounded-xl transition-all disabled:opacity-50 ${imageSaved ? 'bg-emerald-600 text-white' : 'bg-amber-500 hover:bg-amber-400 text-black'}`}>
+                    {imageSaved ? '✅ Guardado' : imageSaving ? 'Guardando...' : 'Guardar cambios'}
+                  </button>
+                </div>
+
+                {IMAGE_SECTIONS.map(section => (
+                  <div key={section.label} className="mb-8">
+                    <p className="text-gray-600 text-[10px] font-black uppercase tracking-widest mb-3">{section.label}</p>
+                    <div className="space-y-3">
+                      {section.keys.map(key => (
+                        <div key={key} className="flex items-center gap-3 bg-[#1c1835] border border-white/5 rounded-xl p-3">
+                          <img
+                            src={imageOverrides[key] || IMAGE_DEFAULTS[key]}
+                            alt={IMAGE_LABELS[key]}
+                            className="w-16 h-16 rounded-lg object-cover shrink-0 bg-[#26213d]"
+                            onError={e => { (e.target as HTMLImageElement).src = IMAGE_DEFAULTS[key] }}
+                          />
+                          <div className="flex-1 min-w-0">
+                            <label className="text-gray-400 text-xs font-bold block mb-1.5">{IMAGE_LABELS[key]}</label>
+                            <input
+                              value={imageOverrides[key] || ''}
+                              onChange={e => {
+                                const val = e.target.value
+                                setImageOverrides(prev =>
+                                  val ? { ...prev, [key]: val } : Object.fromEntries(Object.entries(prev).filter(([k]) => k !== key))
+                                )
+                              }}
+                              placeholder="URL personalizada (dejar vacío = default)"
+                              className="w-full bg-[#26213d] border border-white/10 text-white text-xs px-3 py-2 rounded-lg focus:outline-none focus:border-amber-500/50 font-mono placeholder-gray-700"
+                            />
+                          </div>
+                          {imageOverrides[key] && (
+                            <button
+                              onClick={() => setImageOverrides(prev => Object.fromEntries(Object.entries(prev).filter(([k]) => k !== key)))}
+                              className="text-gray-600 hover:text-red-400 text-sm shrink-0 transition-colors px-1">
+                              ✕
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+
+                <button onClick={saveImages} disabled={imageSaving}
+                  className={`w-full py-3 rounded-xl font-black text-sm transition-all disabled:opacity-50 ${imageSaved ? 'bg-emerald-600 text-white' : 'bg-amber-500 hover:bg-amber-400 text-black'}`}>
+                  {imageSaved ? '✅ Cambios guardados — la landing ya usa las nuevas imágenes' : imageSaving ? 'Guardando...' : 'Guardar cambios de imágenes'}
+                </button>
+              </div>
+            )}
           </div>
         )}
 

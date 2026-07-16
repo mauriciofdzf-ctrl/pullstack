@@ -2,15 +2,29 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { IMAGE_DEFAULTS, loadImageOverridesFromDB } from '../lib/imageConfig'
 import { useAuth } from '../contexts/AuthContext'
+import { supabase } from '../lib/supabase'
+
+type TrendingCard = { player: string; detail: string; team: string; grade: string; price: string; change: string; sport: string; hot: boolean; img: string }
 
 export default function Landing() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const [IMGS, setIMGS] = useState(IMAGE_DEFAULTS)
+  const [trendingFromDB, setTrendingFromDB] = useState<TrendingCard[] | null>(null)
 
   useEffect(() => {
-    loadImageOverridesFromDB().then(overrides => {
+    Promise.all([
+      loadImageOverridesFromDB(),
+      supabase.from('settings').select('value').eq('key', 'trending_items').maybeSingle(),
+    ]).then(([overrides, { data }]) => {
       if (Object.keys(overrides).length > 0) setIMGS({ ...IMAGE_DEFAULTS, ...overrides })
+      if (data?.value) {
+        try {
+          const items = JSON.parse(data.value)
+          if (Array.isArray(items) && items.length > 0)
+            setTrendingFromDB(items.map((i: Record<string, string>) => ({ ...i, hot: true } as TrendingCard)))
+        } catch { /* noop */ }
+      }
     })
   }, [])
 
@@ -20,12 +34,13 @@ export default function Landing() {
   }, [user, navigate])
 
   // Arrays inside component so they can reference IMGS
-  const trending = [
+  const defaultTrending: TrendingCard[] = [
     { player: 'Lamine Yamal',        detail: '2024 Topps Chrome UEFA Euro · SuperFractor Auto 1/1', team: 'FC Barcelona · Selección España', grade: 'PSA 10',      price: '$396,500',    change: '+585% en ventas / último año',    sport: '⚽ Soccer',   hot: true, img: IMGS.soccer1 },
     { player: 'Cooper Flagg',         detail: '2025 Topps Now RC Auto · Draft Night #1',             team: 'Dallas Mavericks · #1 Draft 2025', grade: 'BGS 9.5',     price: '$27,500',     change: '+210% desde Draft Night',         sport: '🏀 NBA',      hot: true, img: IMGS.nba1 },
     { player: 'Charizard Holo 1st Ed.', detail: '1999 Base Set 1st Edition · Holo Rare · #4/102',   team: 'Pokémon TCG · Base Set',           grade: 'PSA 10',      price: '$550,000',    change: '+89% en 12 meses',                sport: '⚡ Pokémon',  hot: true, img: IMGS.pokemon1 },
     { player: 'Pikachu Illustrator',  detail: '1998 CoroCoro Comics Promo · Solo 41 en el mundo',   team: 'Pokémon TCG · Promo',              grade: 'PSA 10',      price: '$16,492,000', change: 'Récord mundial Feb 2026 🏆',       sport: '⚡ Pokémon',  hot: true, img: IMGS.pokemon1 },
   ]
+  const trending = trendingFromDB ?? defaultTrending
 
   const categories = [
     { name: 'NBA 🏀',        sub: 'Cooper Flagg · Wembanyama · LeBron',    count: '12,400 cartas', img: IMGS.nba2,      path: '/marketplace?sport=NBA' },
@@ -427,6 +442,7 @@ export default function Landing() {
             {['TOPPS', 'PANINI', 'UPPER DECK', 'BOWMAN', 'DONRUSS', 'POKÉMON TCG', 'ONE PIECE TCG', 'DRAGON BALL SUPER', 'YU-GI-OH!', 'MAGIC: THE GATHERING'].map((b) => (
               <span key={b} className="text-gray-600 hover:text-amber-400 font-black text-sm tracking-tight transition-all cursor-pointer hover:scale-105">{b}</span>
             ))}
+            <span className="text-amber-500/60 font-black text-sm tracking-tight">+ 50 marcas más</span>
           </div>
         </div>
       </section>
