@@ -12,7 +12,9 @@ type ChatMsg = {
   created_at: string
 }
 
-const ROOMS = [
+type ChatRoom = { id: string; label: string; icon: string; custom?: boolean }
+
+const BASE_ROOMS: ChatRoom[] = [
   { id: 'general',   label: 'General',    icon: '💬' },
   { id: 'nba',       label: 'NBA',        icon: '🏀' },
   { id: 'nfl',       label: 'NFL',        icon: '🏈' },
@@ -44,13 +46,27 @@ function timeLabel(iso: string) {
 export default function Chat() {
   const { user, profile } = useAuth()
   const navigate  = useNavigate()
-  const [room, setRoom]     = useState('general')
-  const [msgs, setMsgs]     = useState<ChatMsg[]>([])
-  const [input, setInput]   = useState('')
+  const [room, setRoom]       = useState('general')
+  const [msgs, setMsgs]       = useState<ChatMsg[]>([])
+  const [input, setInput]     = useState('')
   const [sending, setSending] = useState(false)
-  const [online, setOnline] = useState(0)
-  const bottomRef = useRef<HTMLDivElement>(null)
+  const [online, setOnline]   = useState(0)
+  const [rooms, setRooms]     = useState<ChatRoom[]>(BASE_ROOMS)
+  const bottomRef  = useRef<HTMLDivElement>(null)
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null)
+
+  useEffect(() => {
+    supabase.from('settings').select('value').eq('key', 'chat_rooms').maybeSingle()
+      .then(({ data }) => {
+        if (data?.value) {
+          try {
+            const custom: ChatRoom[] = JSON.parse(data.value)
+            if (Array.isArray(custom) && custom.length > 0)
+              setRooms([...BASE_ROOMS, ...custom.map(r => ({ ...r, custom: true }))])
+          } catch { /* noop */ }
+        }
+      })
+  }, [])
 
   useEffect(() => {
     loadMessages()
@@ -121,7 +137,7 @@ export default function Chat() {
     </div>
   )
 
-  const currentRoom = ROOMS.find(r => r.id === room)
+  const currentRoom = rooms.find(r => r.id === room)
 
   return (
     <div className="bg-[#0c0a1e] pt-16" style={{ height: '100dvh', display: 'flex', flexDirection: 'column' }}>
@@ -136,7 +152,7 @@ export default function Chat() {
             </p>
           </div>
           <div className="flex-1 overflow-y-auto py-2">
-            {ROOMS.map(r => (
+            {rooms.map(r => (
               <button key={r.id} onClick={() => setRoom(r.id)}
                 className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-left transition-all ${
                   room === r.id
@@ -144,7 +160,8 @@ export default function Chat() {
                     : 'text-gray-500 hover:text-gray-300 hover:bg-white/3'
                 }`}>
                 <span className="text-lg shrink-0">{r.icon}</span>
-                <span className="text-sm font-bold hidden sm:block truncate">{r.label}</span>
+                <span className="text-sm font-bold hidden sm:block truncate flex-1">{r.label}</span>
+                {r.custom && <span className="hidden sm:block w-1.5 h-1.5 rounded-full bg-amber-500/60 shrink-0" title="Grupo personalizado" />}
               </button>
             ))}
           </div>

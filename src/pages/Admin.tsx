@@ -65,7 +65,7 @@ const TXN_CSS: Record<string, string> = {
   trade:   'text-blue-400',
 }
 
-type Tab = 'overview' | 'users' | 'listings' | 'orders' | 'transactions' | 'pagos' | 'mensajes' | 'catalog' | 'landing'
+type Tab = 'overview' | 'users' | 'listings' | 'orders' | 'transactions' | 'pagos' | 'mensajes' | 'catalog' | 'landing' | 'chat'
 
 // ─── Panel principal ──────────────────────────────────────────────────────────
 export default function Admin() {
@@ -119,6 +119,18 @@ export default function Admin() {
   const [msgsLoading, setML]       = useState(false)
   const [msgTab,     setMsgTab]    = useState<'support' | 'dms'>('support')
 
+  // Chat rooms
+  type ChatRoom = { id: string; label: string; icon: string }
+  const BASE_ROOM_IDS = new Set(['general','nba','nfl','soccer','mlb','pokemon','onepiece','grading'])
+  const makeRoomId = (label: string) =>
+    label.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').slice(0, 30)
+  const [chatRooms, setChatRooms]           = useState<ChatRoom[]>([])
+  const [chatRoomsLoading, setCRLoading]    = useState(false)
+  const [newRoomLabel, setNewRoomLabel]     = useState('')
+  const [newRoomIcon, setNewRoomIcon]       = useState('💬')
+  const [chatRoomSaved, setChatRoomSaved]   = useState(false)
+  const [chatRoomError, setChatRoomError]   = useState('')
+
   // Landing tab
   const [landingSubTab, setLandingSubTab] = useState<'trending' | 'images'>('trending')
   const [trendingItems, setTrendingItems] = useState<TrendingItem[]>([])
@@ -152,6 +164,7 @@ export default function Admin() {
     if (tab === 'mensajes')     loadMessages()
     if (tab === 'catalog')      loadCatalogHidden()
     if (tab === 'landing')      loadLanding()
+    if (tab === 'chat')         loadChatRooms()
   }, [tab])
 
   const loadStats = async () => {
@@ -371,6 +384,40 @@ export default function Admin() {
     setTimeout(() => setImageSaved(false), 2000)
   }
 
+  const loadChatRooms = async () => {
+    setCRLoading(true)
+    const { data } = await supabase.from('settings').select('value').eq('key', 'chat_rooms').maybeSingle()
+    if (data?.value) {
+      try { setChatRooms(JSON.parse(data.value)) } catch { setChatRooms([]) }
+    } else { setChatRooms([]) }
+    setCRLoading(false)
+  }
+
+  const saveChatRooms = async (rooms: ChatRoom[]) => {
+    await supabase.from('settings').upsert({ key: 'chat_rooms', value: JSON.stringify(rooms), updated_at: new Date().toISOString() })
+    setChatRooms(rooms)
+    setChatRoomSaved(true)
+    setTimeout(() => setChatRoomSaved(false), 2000)
+  }
+
+  const addChatRoom = async () => {
+    setChatRoomError('')
+    const label = newRoomLabel.trim()
+    if (!label) return
+    const id = makeRoomId(label)
+    if (!id) { setChatRoomError('Nombre inválido — usa letras y espacios'); return }
+    if (BASE_ROOM_IDS.has(id) || chatRooms.some(r => r.id === id))
+      { setChatRoomError('Ya existe una sala con ese nombre'); return }
+    await saveChatRooms([...chatRooms, { id, label, icon: newRoomIcon || '💬' }])
+    setNewRoomLabel('')
+    setNewRoomIcon('💬')
+  }
+
+  const deleteChatRoom = async (id: string) => {
+    if (!confirm('¿Eliminar esta sala? Los mensajes guardados se mantienen.')) return
+    await saveChatRooms(chatRooms.filter(r => r.id !== id))
+  }
+
   const filteredUsers = users.filter(u =>
     !userSearch || (u.display_name || '').toLowerCase().includes(userSearch.toLowerCase())
   )
@@ -387,6 +434,7 @@ export default function Admin() {
     { id: 'pagos',         label: 'Métodos de Pago', icon: '⚙️' },
     { id: 'catalog',       label: 'Catálogo',        icon: '🗂️', badge: hiddenIds.size || undefined },
     { id: 'landing',       label: 'Landing',          icon: '🏠' },
+    { id: 'chat',          label: 'Grupos Chat',      icon: '💬' },
   ]
 
   return (
@@ -1302,6 +1350,106 @@ export default function Admin() {
                 </button>
               </div>
             )}
+          </div>
+        )}
+
+        {/* ── GRUPOS CHAT ── */}
+        {tab === 'chat' && (
+          <div className="max-w-2xl">
+            <div className="mb-6">
+              <h3 className="text-white font-black text-lg">Grupos del Chat Comunitario</h3>
+              <p className="text-gray-500 text-xs mt-0.5">Las 8 salas base siempre están disponibles. Crea grupos adicionales aquí.</p>
+            </div>
+
+            {/* Salas base — solo lectura */}
+            <div className="bg-[#1c1835] border border-white/5 rounded-2xl p-5 mb-5">
+              <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest mb-3">Salas base (no eliminables)</p>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {['💬 General','🏀 NBA','🏈 NFL','⚽ Soccer','⚾ MLB','🃏 Pokémon','🏴‍☠️ One Piece','🔬 Grading'].map(s => (
+                  <div key={s} className="flex items-center gap-2 bg-white/3 border border-white/5 rounded-lg px-3 py-2">
+                    <span className="text-xs text-gray-400 font-bold truncate">{s}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Formulario nuevo grupo */}
+            <div className="bg-[#13102a] border border-amber-500/20 rounded-2xl p-5 mb-5">
+              <p className="text-amber-400 text-sm font-black mb-4">Crear nuevo grupo</p>
+              <div className="flex gap-3 mb-3">
+                <div className="w-20">
+                  <label className="text-gray-500 text-[10px] uppercase tracking-widest block mb-1.5">Icono</label>
+                  <input
+                    value={newRoomIcon}
+                    onChange={e => setNewRoomIcon(e.target.value)}
+                    maxLength={4}
+                    placeholder="💬"
+                    className="w-full bg-[#1c1835] border border-white/10 text-white text-center text-xl px-2 py-2 rounded-lg focus:outline-none focus:border-amber-500/50"
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="text-gray-500 text-[10px] uppercase tracking-widest block mb-1.5">Nombre del grupo *</label>
+                  <input
+                    value={newRoomLabel}
+                    onChange={e => { setNewRoomLabel(e.target.value); setChatRoomError('') }}
+                    onKeyDown={e => { if (e.key === 'Enter') addChatRoom() }}
+                    placeholder="Ej: Breaks México, Fútbol Europeo..."
+                    maxLength={40}
+                    className="w-full bg-[#1c1835] border border-white/10 text-white px-3 py-2.5 rounded-lg text-sm focus:outline-none focus:border-amber-500/50 placeholder-gray-700"
+                  />
+                </div>
+              </div>
+              {newRoomLabel && (
+                <p className="text-gray-600 text-[10px] mb-3 font-mono">
+                  ID: <span className="text-gray-400">{makeRoomId(newRoomLabel)}</span>
+                </p>
+              )}
+              {chatRoomError && (
+                <p className="text-red-400 text-xs mb-3 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">{chatRoomError}</p>
+              )}
+              {chatRoomSaved && (
+                <p className="text-emerald-400 text-xs mb-3 font-bold">✅ Guardado — ya aparece en el chat</p>
+              )}
+              <button
+                onClick={addChatRoom}
+                disabled={!newRoomLabel.trim()}
+                className="w-full bg-amber-500 hover:bg-amber-400 disabled:opacity-40 text-black font-black py-2.5 rounded-xl text-sm transition-all">
+                + Crear grupo
+              </button>
+            </div>
+
+            {/* Grupos personalizados existentes */}
+            {chatRoomsLoading
+              ? <div className="flex justify-center py-10"><div className="w-7 h-7 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" /></div>
+              : chatRooms.length === 0
+              ? (
+                <div className="text-center py-10 bg-[#1c1835] border border-white/5 rounded-2xl">
+                  <p className="text-3xl mb-2">💬</p>
+                  <p className="text-gray-500 text-sm">Sin grupos personalizados aún</p>
+                </div>
+              )
+              : (
+                <div>
+                  <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest mb-3">Grupos creados por admin ({chatRooms.length})</p>
+                  <div className="space-y-2">
+                    {chatRooms.map(r => (
+                      <div key={r.id} className="flex items-center gap-3 bg-[#1c1835] border border-amber-500/10 rounded-xl px-4 py-3">
+                        <span className="text-2xl shrink-0">{r.icon}</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-white font-bold text-sm">{r.label}</p>
+                          <p className="text-gray-600 text-[10px] font-mono">#{r.id}</p>
+                        </div>
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/20 shrink-0">Personalizado</span>
+                        <button onClick={() => deleteChatRoom(r.id)}
+                          className="text-[11px] font-bold px-3 py-1.5 rounded-lg border border-red-500/20 text-red-400 hover:bg-red-500/10 transition-all shrink-0">
+                          🗑️ Eliminar
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )
+            }
           </div>
         )}
 
