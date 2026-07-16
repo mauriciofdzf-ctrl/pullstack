@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
-import { AdminRoute } from './components/ProtectedRoute'
+import { ProtectedRoute, AdminRoute } from './components/ProtectedRoute'
 import Navbar from './components/Navbar'
 import ChatBot from './components/ChatBot'
 import Landing from './pages/Landing'
@@ -29,21 +29,21 @@ function App() {
           <Navbar />
           <Routes>
             <Route path="/"            element={<Landing />} />
-            <Route path="/marketplace" element={<Marketplace />} />
+            <Route path="/marketplace" element={<ProtectedRoute><Marketplace /></ProtectedRoute>} />
             <Route path="/shop"        element={<Navigate to="/marketplace" replace />} />
-            <Route path="/live"        element={<Live />} />
-            <Route path="/community"   element={<Community />} />
-            <Route path="/raffles"     element={<Raffles />} />
-            <Route path="/messages"    element={<Messages />} />
+            <Route path="/live"        element={<ProtectedRoute><Live /></ProtectedRoute>} />
+            <Route path="/community"   element={<ProtectedRoute><Community /></ProtectedRoute>} />
+            <Route path="/raffles"     element={<ProtectedRoute><Raffles /></ProtectedRoute>} />
+            <Route path="/messages"    element={<ProtectedRoute><Messages /></ProtectedRoute>} />
             <Route path="/login"          element={<Login />} />
             <Route path="/register"       element={<Register />} />
-            <Route path="/profile"        element={<Profile />} />
+            <Route path="/profile"        element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/wallet"         element={<Wallet />} />
-            <Route path="/aprende"        element={<Aprende />} />
-            <Route path="/grading"        element={<Grading />} />
-            <Route path="/chat"           element={<Chat />} />
-            <Route path="/listing/:id" element={<ListingDetail />} />
+            <Route path="/wallet"         element={<ProtectedRoute><Wallet /></ProtectedRoute>} />
+            <Route path="/aprende"        element={<ProtectedRoute><Aprende /></ProtectedRoute>} />
+            <Route path="/grading"        element={<ProtectedRoute><Grading /></ProtectedRoute>} />
+            <Route path="/chat"           element={<ProtectedRoute><Chat /></ProtectedRoute>} />
+            <Route path="/listing/:id" element={<ProtectedRoute><ListingDetail /></ProtectedRoute>} />
             <Route path="/admin"       element={<AdminRoute><Admin /></AdminRoute>} />
           </Routes>
           <ChatBot />
