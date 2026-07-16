@@ -1,0 +1,147 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500">
+  <defs>
+    <radialGradient id="bgGrad" cx="50%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#211d95"/>
+      <stop offset="100%" stop-color="#07054a"/>
+    </radialGradient>
+    <linearGradient id="amber" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#fb923c"/>
+    </linearGradient>
+    <linearGradient id="boxBg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1c1888"/>
+      <stop offset="100%" stop-color="#0d0a60"/>
+    </linearGradient>
+    <clipPath id="mainClip">
+      <circle cx="250" cy="250" r="232"/>
+    </clipPath>
+    <filter id="cs" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="2" dy="4" stdDeviation="5" flood-color="#000" flood-opacity="0.6"/>
+    </filter>
+  </defs>
+
+  <!-- Outer rings -->
+  <circle cx="250" cy="250" r="249" fill="url(#amber)"/>
+  <circle cx="250" cy="250" r="241" fill="white"/>
+  <circle cx="250" cy="250" r="237" fill="#06043a"/>
+  <circle cx="250" cy="250" r="233" fill="url(#amber)"/>
+  <!-- Main background -->
+  <circle cx="250" cy="250" r="232" fill="url(#bgGrad)"/>
+
+  <g clip-path="url(#mainClip)">
+
+    <!-- ── Card fan + PS badge ───────────────────────────── -->
+    <g transform="translate(250,148)">
+      <rect x="-38" y="-60" width="34" height="50" rx="4" fill="#11108a" stroke="#f59e0b" stroke-width="1.5" opacity="0.75" transform="rotate(-28)"/>
+      <rect x="-24" y="-64" width="34" height="50" rx="4" fill="#11108a" stroke="#f59e0b" stroke-width="1.5" opacity="0.82" transform="rotate(-14)"/>
+      <rect x="-8"  y="-66" width="34" height="50" rx="4" fill="#13118c" stroke="#f59e0b" stroke-width="1.5" opacity="0.90" transform="rotate(-1)"/>
+      <rect x="8"  y="-62" width="34" height="50" rx="4" fill="#11108a" stroke="#f59e0b" stroke-width="1.5" opacity="0.82" transform="rotate(13)"/>
+      <rect x="23"  y="-54" width="34" height="50" rx="4" fill="#11108a" stroke="#f59e0b" stroke-width="1.5" opacity="0.75" transform="rotate(27)"/>
+      <!-- Shield -->
+      <path d="M-27,-34 L27,-34 L31,8 L0,26 L-31,8 Z" fill="#0e0c7a" stroke="url(#amber)" stroke-width="2.5"/>
+      <text x="0" y="7" text-anchor="middle" dominant-baseline="middle" fill="white" font-size="21" font-weight="900" font-family="'Arial Black',Arial,sans-serif">PS</text>
+    </g>
+
+    <!-- ── LEFT box — BASEBALL CARDS ────────────────────── -->
+    <g transform="translate(153,225) rotate(-10)" filter="url(#cs)">
+      <rect x="-40" y="-68" width="80" height="112" rx="6" fill="url(#boxBg)" stroke="#f59e0b" stroke-width="1.5"/>
+      <rect x="-40" y="-68" width="80" height="27" rx="6" fill="#07054a"/>
+      <rect x="-40" y="-47" width="80" height="6" fill="#07054a"/>
+      <text x="0" y="-56" text-anchor="middle" fill="#f59e0b" font-size="8" font-weight="bold" font-family="Arial,sans-serif">BASEBALL</text>
+      <text x="0" y="-47" text-anchor="middle" fill="#f59e0b" font-size="8" font-family="Arial,sans-serif">CARDS</text>
+      <circle cx="-28" cy="-57" r="7" fill="#f59e0b"/>
+      <text x="-28" y="-54" text-anchor="middle" fill="#07054a" font-size="7" font-weight="900">★</text>
+      <!-- player area -->
+      <rect x="-24" y="-32" width="48" height="68" rx="3" fill="#0c0a62" opacity="0.5"/>
+      <!-- bat silhouette -->
+      <rect x="6" y="-28" width="5" height="50" rx="2.5" fill="#191680" transform="rotate(18,8,11)"/>
+      <ellipse cx="-5" cy="22" rx="18" ry="28" fill="#141175" opacity="0.6"/>
+    </g>
+
+    <!-- ── CENTER box — FOOTBALL CARDS ──────────────────── -->
+    <g transform="translate(250,218)" filter="url(#cs)">
+      <rect x="-44" y="-76" width="88" height="124" rx="7" fill="url(#boxBg)" stroke="#f59e0b" stroke-width="2"/>
+      <rect x="-44" y="-76" width="88" height="29" rx="7" fill="#07054a"/>
+      <rect x="-44" y="-53" width="88" height="6" fill="#07054a"/>
+      <text x="0" y="-62" text-anchor="middle" fill="#f59e0b" font-size="9" font-weight="bold" font-family="Arial,sans-serif">FOOTBALL</text>
+      <text x="0" y="-52" text-anchor="middle" fill="#f59e0b" font-size="9" font-family="Arial,sans-serif">CARDS</text>
+      <circle cx="-33" cy="-65" r="8.5" fill="#f59e0b"/>
+      <text x="-33" y="-62" text-anchor="middle" fill="#07054a" font-size="8.5" font-weight="900">★</text>
+      <!-- player area -->
+      <rect x="-30" y="-35" width="60" height="76" rx="3" fill="#0c0a62" opacity="0.5"/>
+      <!-- helmet -->
+      <ellipse cx="0" cy="-18" rx="17" ry="14" fill="#16138a"/>
+      <ellipse cx="0" cy="15" rx="22" ry="32" fill="#141175" opacity="0.65"/>
+    </g>
+
+    <!-- ── RIGHT box — BASKETBALL CARDS ─────────────────── -->
+    <g transform="translate(347,225) rotate(10)" filter="url(#cs)">
+      <rect x="-40" y="-68" width="80" height="112" rx="6" fill="url(#boxBg)" stroke="#f59e0b" stroke-width="1.5"/>
+      <rect x="-40" y="-68" width="80" height="27" rx="6" fill="#07054a"/>
+      <rect x="-40" y="-47" width="80" height="6" fill="#07054a"/>
+      <text x="0" y="-56" text-anchor="middle" fill="#f59e0b" font-size="7.2" font-weight="bold" font-family="Arial,sans-serif">BASKETBALL</text>
+      <text x="0" y="-47" text-anchor="middle" fill="#f59e0b" font-size="8" font-family="Arial,sans-serif">CARDS</text>
+      <circle cx="28" cy="-57" r="7" fill="#f59e0b"/>
+      <text x="28" y="-54" text-anchor="middle" fill="#07054a" font-size="7" font-weight="900">★</text>
+      <!-- player area -->
+      <rect x="-24" y="-32" width="48" height="68" rx="3" fill="#0c0a62" opacity="0.5"/>
+      <!-- ball -->
+      <circle cx="10" cy="-5" r="13" fill="#16138a"/>
+      <ellipse cx="5" cy="22" rx="18" ry="28" fill="#141175" opacity="0.6"/>
+    </g>
+
+    <!-- ── PULLSTACKMX RIBBON BANNER ──────────────────────── -->
+    <g transform="translate(250,311)">
+      <!-- shadow -->
+      <path d="M-168,-22 L168,-22 L171,22 L-171,22 Z" fill="#000" opacity="0.22" transform="translate(4,5)"/>
+      <!-- tails -->
+      <path d="M-168,-22 L-182,0 L-171,22 Z" fill="#050328"/>
+      <path d="M168,-22 L182,0 L171,22 Z" fill="#050328"/>
+      <!-- body -->
+      <rect x="-168" y="-22" width="336" height="44" fill="#050328"/>
+      <line x1="-168" y1="-22" x2="168" y2="-22" stroke="#f59e0b" stroke-width="2.5"/>
+      <line x1="-171" y1="22" x2="171" y2="22" stroke="#f59e0b" stroke-width="2.5"/>
+      <text x="0" y="9" text-anchor="middle" dominant-baseline="middle" fill="white" font-size="27" font-weight="900" font-family="'Arial Black',Impact,Arial,sans-serif" letter-spacing="1.5">PULLSTACKMX</text>
+    </g>
+
+    <!-- ── Separator ──────────────────────────────────────── -->
+    <line x1="90" y1="344" x2="410" y2="344" stroke="#f59e0b" stroke-width="1" opacity="0.75"/>
+
+    <!-- ── BUY / SELL ─────────────────────────────────────── -->
+    <g transform="translate(148,373)" fill="#f59e0b">
+      <rect x="-11" y="-16" width="17" height="23" rx="2.5" fill="none" stroke="#f59e0b" stroke-width="1.5" transform="rotate(-12)"/>
+      <rect x="-5"  y="-17" width="17" height="23" rx="2.5" fill="none" stroke="#f59e0b" stroke-width="1.5"/>
+      <text x="2" y="23" text-anchor="middle" font-size="8.5" font-weight="bold" font-family="Arial,sans-serif">BUY / SELL</text>
+    </g>
+
+    <line x1="208" y1="352" x2="208" y2="390" stroke="#f59e0b" stroke-width="1" opacity="0.5"/>
+
+    <!-- ── LIVE ────────────────────────────────────────────── -->
+    <g transform="translate(250,368)" fill="#f59e0b">
+      <circle cx="0" cy="-5" r="20" fill="none" stroke="#f59e0b" stroke-width="1.5" opacity="0.35"/>
+      <circle cx="0" cy="-6" r="5" fill="#f59e0b"/>
+      <path d="M-10,-13 A12,12 0 0,1 10,-13" fill="none" stroke="#f59e0b" stroke-width="1.8" stroke-linecap="round"/>
+      <path d="M-17,-21 A21,21 0 0,1 17,-21" fill="none" stroke="#f59e0b" stroke-width="1.8" stroke-linecap="round"/>
+      <text x="0" y="25" text-anchor="middle" font-size="8.5" font-weight="bold" font-family="Arial,sans-serif">LIVE</text>
+    </g>
+
+    <line x1="292" y1="352" x2="292" y2="390" stroke="#f59e0b" stroke-width="1" opacity="0.5"/>
+
+    <!-- ── BOX SALES ───────────────────────────────────────── -->
+    <g transform="translate(352,373)" fill="#f59e0b">
+      <rect x="-15" y="-15" width="30" height="24" rx="2.5" fill="none" stroke="#f59e0b" stroke-width="1.5"/>
+      <line x1="-15" y1="-7" x2="15" y2="-7" stroke="#f59e0b" stroke-width="1.5"/>
+      <line x1="-4" y1="-15" x2="-4" y2="-7" stroke="#f59e0b" stroke-width="1.5"/>
+      <line x1="4"  y1="-15" x2="4"  y2="-7" stroke="#f59e0b" stroke-width="1.5"/>
+      <text x="0" y="23" text-anchor="middle" font-size="8.5" font-weight="bold" font-family="Arial,sans-serif">BOX SALES</text>
+    </g>
+
+    <!-- ── CARDS • COMMUNITY • COLLECT ───────────────────── -->
+    <text x="250" y="410" text-anchor="middle" fill="#f59e0b" font-size="9.5" font-weight="bold" font-family="Arial,sans-serif" letter-spacing="2">CARDS  •  COMMUNITY  •  COLLECT</text>
+
+    <!-- ── Stars ──────────────────────────────────────────── -->
+    <text x="168" y="432" text-anchor="middle" fill="#f59e0b" font-size="18">★</text>
+    <text x="332" y="432" text-anchor="middle" fill="#f59e0b" font-size="18">★</text>
+
+  </g>
+</svg>
