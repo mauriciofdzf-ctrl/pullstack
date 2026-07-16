@@ -43,13 +43,14 @@ export default function Navbar() {
     return () => { supabase.removeChannel(ch) }
   }, [user])
 
-  type NavLink = { to: string; label: string; section?: SectionKey; grading?: boolean; live?: boolean; badge?: number }
+  type NavLink = { to: string; label: string; section?: SectionKey; grading?: boolean; live?: boolean; chat?: boolean; badge?: number }
   const links: NavLink[] = ([
     { to: '/marketplace', label: 'Mercado' },
     { to: '/aprende',     label: 'Aprende',   section: 'aprende'   as SectionKey },
     { to: '/grading',     label: 'Grading',   grading: true, section: 'grading'   as SectionKey },
     { to: '/live',        label: 'En Vivo',   live: true,    section: 'live'      as SectionKey },
     { to: '/community',   label: 'Comunidad', section: 'community' as SectionKey },
+    { to: '/chat',        label: 'Chat',      chat: true,    section: 'chat'      as SectionKey },
     { to: '/raffles',     label: 'Rifas',     section: 'raffles'   as SectionKey },
     { to: '/messages',    label: 'Mensajes',  badge: unreadDMs > 0 ? unreadDMs : 0 },
   ] satisfies NavLink[]).filter(link => !link.section || sections[link.section])
@@ -97,7 +98,8 @@ export default function Navbar() {
                       ? 'bg-violet-500/10 text-violet-400'
                       : 'text-gray-400 hover:text-white hover:bg-white/5'
                   }`}>
-                  {link.live && <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />}
+                  {link.live  && <span className="w-1.5 h-1.5 bg-red-500   rounded-full animate-pulse" />}
+                  {link.chat  && <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />}
                   {link.label}
                   {('badge' in link) && (link.badge ?? 0) > 0 && (
                     <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-black min-w-[16px] h-4 rounded-full flex items-center justify-center px-0.5">
@@ -198,7 +200,8 @@ export default function Navbar() {
                 className={`flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
                   isActive(link.to) ? 'bg-violet-500/10 text-violet-400' : 'text-gray-400 hover:text-white'
                 }`}>
-                {link.live && <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />}
+                {link.live  && <span className="w-1.5 h-1.5 bg-red-500   rounded-full animate-pulse" />}
+                {link.chat  && <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />}
                 {link.label}
               </Link>
             ))}
