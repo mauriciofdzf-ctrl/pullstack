@@ -212,6 +212,12 @@ export default function Navbar() {
                     className="flex-1 text-center bg-[#26213d] border border-white/10 text-gray-300 text-sm font-bold py-2 rounded-lg">
                     Mi perfil
                   </Link>
+                  {isAdmin && (
+                    <Link to="/admin" onClick={() => setMenuOpen(false)}
+                      className="flex-1 text-center bg-violet-500/10 border border-violet-500/20 text-violet-400 text-sm font-bold py-2 rounded-lg">
+                      ⚙️ Admin
+                    </Link>
+                  )}
                   <button onClick={() => { setMenuOpen(false); handleSignOut() }}
                     className="flex-1 bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-bold py-2 rounded-lg">
                     Salir
