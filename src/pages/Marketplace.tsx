@@ -31,7 +31,7 @@ type UserListing = {
 
 
 // ─── Filtros ──────────────────────────────────────────────────────────────────
-const SPORTS  = ['Todos', 'NBA', 'NFL', 'Soccer', 'MLB', 'Pokémon', 'One Piece']
+const BASE_SPORTS = ['Todos', 'NBA', 'NFL', 'Soccer', 'MLB', 'Pokémon', 'One Piece']
 const KINDS   = [
   { label: 'Todo',                value: 'all'       },
   { label: '🃏 Cartas Individuales', value: 'card'   },
@@ -748,6 +748,12 @@ export default function Marketplace() {
       .then(({ data }) => setListings((data as UserListing[]) || []))
   }, [])
 
+  const dynamicSports = useMemo(() => {
+    const fromListings = listings.map(l => l.sport).filter(s => s && s !== 'General' && !BASE_SPORTS.includes(s))
+    const unique = [...new Set(fromListings)]
+    return [...BASE_SPORTS, ...unique]
+  }, [listings])
+
   const deleteMyListing = async (id: number) => {
     if (!confirm('¿Retirar este anuncio del mercado?')) return
     setDeletingId(id)
@@ -931,7 +937,7 @@ export default function Marketplace() {
           </div>
           {/* Categoría + Sort */}
           <div className="flex gap-2 flex-wrap items-center">
-            {SPORTS.map((s) => (
+            {dynamicSports.map((s) => (
               <button key={s} onClick={() => setSport(s)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${sport === s ? 'bg-white/10 text-white border border-white/20' : 'text-gray-500 hover:text-gray-300'}`}>
                 {s}

@@ -193,10 +193,6 @@ export default function CheckoutModal({ listing, user, profile, onClose }: {
                 <span>Precio del artículo</span>
                 <span className="text-white font-bold">{rawPrice || '—'}</span>
               </div>
-              <div className="flex justify-between text-gray-400">
-                <span>Comisión PullStackMX ({COMMISSION_PCT}%)</span>
-                <span className="text-violet-400 font-bold">{formatMXN(commission)}</span>
-              </div>
               <div className="border-t border-white/10 pt-2 flex justify-between">
                 <span className="text-white font-black">Total a pagar</span>
                 <span className="text-white font-black text-lg">{formatMXN(total)}</span>
