@@ -65,7 +65,7 @@ function cardAttrs(item: Item) {
   return { isRC, isAuto, is1of1, numbered, gradeCo, gradeNum }
 }
 
-const SPORT_OPTIONS = ['NBA', 'NFL', 'Soccer', 'MLB', 'Pokémon', 'One Piece', 'General']
+const SPORT_OPTIONS = ['NBA', 'NFL', 'Soccer', 'MLB', 'Pokémon', 'One Piece', 'Magic: The Gathering', 'Dragon Ball', 'Yu-Gi-Oh!', 'General', 'Otra...']
 const CONDITION_OPTIONS = ['Sin gradear (Raw)', 'Near Mint (NM)', 'Excellent (EX)', 'Very Good (VG)', 'Good (G)']
 const LISTING_SPORT_ICON: Record<string, string> = {
   NBA:'🏀', NFL:'🏈', Soccer:'⚽', MLB:'⚾', 'Pokémon':'🃏', 'One Piece':'🏴‍☠️', General:'🛡️'
@@ -155,7 +155,7 @@ function ContactSellerModal({ listing, actionType, user, profile, onClose }: {
 
               {actionType === 'auction' && (
                 <div>
-                  <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1.5 block">Tu puja (USD) *</label>
+                  <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1.5 block">Tu puja MXN — mínimo</label>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-bold">$</span>
                     <input type="number" value={bidAmount} onChange={e => setBidAmount(e.target.value)} placeholder="0.00"
@@ -194,7 +194,7 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
   const navigate = useNavigate()
   const [form, setForm] = useState({
     title: '', description: '',
-    sport: 'NBA', kind: 'card' as 'card' | 'box' | 'accessory',
+    sport: 'NBA', custom_sport: '', kind: 'card' as 'card' | 'box' | 'accessory',
     txn_type: 'sale' as 'sale' | 'auction' | 'trade',
     price: '', min_bid: '', reserve_price: '', grade: '', condition: 'Sin gradear (Raw)',
     duration_hours: '72',
@@ -269,7 +269,7 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
       display_name:  profile?.display_name || user.id.slice(0, 8),
       title:         form.title.trim(),
       description:   form.description.trim() || null,
-      sport:         form.sport,
+      sport:         form.sport === 'Otra...' ? (form.custom_sport.trim() || 'General') : form.sport,
       kind:          form.kind,
       txn_type:      form.txn_type,
       price:         form.price ? `$${form.price}` : null,
@@ -402,13 +402,18 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                {/* Deporte */}
-                <div>
-                  <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1 block">Deporte</label>
+                {/* Categoría */}
+                <div className={form.sport === 'Otra...' ? 'col-span-2' : ''}>
+                  <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1 block">Categoría</label>
                   <select value={form.sport} onChange={e => set('sport', e.target.value)}
                     className="w-full bg-[#26213d] border border-white/10 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none">
                     {SPORT_OPTIONS.map(s => <option key={s}>{s}</option>)}
                   </select>
+                  {form.sport === 'Otra...' && (
+                    <input value={form.custom_sport} onChange={e => set('custom_sport', e.target.value)}
+                      placeholder="Ej: Fútbol Mexicano, Béisbol, Funko Pop..."
+                      className="w-full mt-2 bg-[#26213d] border border-violet-500/30 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-violet-500/60 placeholder-gray-700" />
+                  )}
                 </div>
                 {/* Tipo */}
                 <div>
@@ -424,7 +429,7 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
                 {/* Precio */}
                 {form.txn_type === 'sale' && (
                   <div>
-                    <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1 block">Precio USD *</label>
+                    <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1 block">Precio MXN *</label>
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-bold">$</span>
                       <input type="number" value={form.price} onChange={e => set('price', e.target.value)}
@@ -437,7 +442,7 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
                 {/* Puja inicial */}
                 {form.txn_type === 'auction' && (
                   <div>
-                    <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1 block">Puja inicial USD *</label>
+                    <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1 block">Puja inicial MXN *</label>
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-bold">$</span>
                       <input type="number" value={form.min_bid} onChange={e => set('min_bid', e.target.value)}
@@ -451,7 +456,7 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
                 {/* Precio de reserva */}
                 {form.txn_type === 'auction' && (
                   <div>
-                    <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1 block">Precio de reserva USD</label>
+                    <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1 block">Precio de reserva MXN</label>
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-bold">$</span>
                       <input type="number" value={form.reserve_price} onChange={e => set('reserve_price', e.target.value)}
@@ -546,11 +551,11 @@ function BidModal({ item, onClose, user, navigate }: {
   const submit = async () => {
     if (!user) { onClose(); navigate('/login'); return }
     const n = parseFloat(amount)
-    if (isNaN(n) || n < minBid) { setError(`La puja mínima es $${minBid.toLocaleString()} USD`); return }
+    if (isNaN(n) || n < minBid) { setError(`La puja mínima es $${minBid.toLocaleString()} MXN`); return }
     setLoading(true); setError('')
     await supabase.from('messages').insert({
       user_id: user.id,
-      content: `🔨 Puja de $${n.toLocaleString()} USD por "${item.name}" — ${item.detail} (${item.price})`,
+      content: `🔨 Puja de $${n.toLocaleString()} MXN por "${item.name}" — ${item.detail} (${item.price})`,
       from_admin: false,
     })
     setLoading(false); setDone(true)
@@ -585,7 +590,7 @@ function BidModal({ item, onClose, user, navigate }: {
               <span className="text-white font-black">{item.price}</span>
             </div>
             <div className="mb-4">
-              <label className="text-gray-400 text-xs mb-1.5 block">Tu puja (USD) — mínimo <span className="text-violet-400 font-bold">${minBid.toLocaleString()}</span></label>
+              <label className="text-gray-400 text-xs mb-1.5 block">Tu puja (MXN) — mínimo <span className="text-violet-400 font-bold">${minBid.toLocaleString()}</span></label>
               <div className="relative">
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold">$</span>
                 <input type="number" value={amount} onChange={e => { setAmount(e.target.value); setError('') }}
@@ -683,7 +688,7 @@ export default function Marketplace() {
   const [cartOpen,   setCartOpen]   = useState(false)
   const [savedIds,   setSavedIds]   = useState<Set<number>>(new Set())
   const [savingId,   setSavingId]   = useState<number | null>(null)
-  const [showMXN,    setShowMXN]    = useState(false)
+  const showMXN = true
   const [bidItem,       setBidItem]       = useState<Item | null>(null)
   const [tradeItem,     setTradeItem]     = useState<Item | null>(null)
   const [listings,      setListings]      = useState<UserListing[]>([])
@@ -924,7 +929,7 @@ export default function Marketplace() {
               </button>
             ))}
           </div>
-          {/* Deporte + Sort + MXN toggle */}
+          {/* Categoría + Sort */}
           <div className="flex gap-2 flex-wrap items-center">
             {SPORTS.map((s) => (
               <button key={s} onClick={() => setSport(s)}
@@ -933,11 +938,6 @@ export default function Marketplace() {
               </button>
             ))}
             <div className="ml-auto flex items-center gap-2">
-              <button onClick={() => setShowMXN(!showMXN)}
-                title="Cambiar moneda"
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${showMXN ? 'bg-violet-500/10 border-violet-500/30 text-violet-400' : 'bg-[#1c1835] border-white/10 text-gray-500 hover:text-gray-300'}`}>
-                {showMXN ? '🇲🇽 MXN' : '🇺🇸 USD'}
-              </button>
               <select value={sort} onChange={(e) => setSort(e.target.value)}
                 className="bg-[#1c1835] border border-white/10 text-gray-400 px-3 py-1.5 rounded-lg text-xs focus:outline-none focus:border-violet-500/50">
                 {SORTS.map((s) => <option key={s}>{s}</option>)}
@@ -946,7 +946,7 @@ export default function Marketplace() {
           </div>
           {/* Rango de precio */}
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-gray-600 text-xs font-bold uppercase tracking-widest">Precio USD:</span>
+            <span className="text-gray-600 text-xs font-bold uppercase tracking-widest">Precio MXN:</span>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600 text-xs">$</span>
               <input type="number" value={minPrice} onChange={e => setMinPrice(e.target.value)} placeholder="Mín"
@@ -962,9 +962,6 @@ export default function Marketplace() {
               <button onClick={() => { setMinPrice(''); setMaxPrice('') }} className="text-xs text-gray-600 hover:text-gray-300 transition-colors">✕ limpiar</button>
             )}
           </div>
-          {showMXN && (
-            <p className="text-[10px] text-gray-600">Precios convertidos a MXN usando tipo de cambio de referencia $17.50 MXN/USD. Precios reales pueden variar.</p>
-          )}
         </div>
 
         {/* ── Área de productos con decoración ── */}
