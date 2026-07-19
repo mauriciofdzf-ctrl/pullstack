@@ -6,12 +6,15 @@ import { supabase } from '../lib/supabase'
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 type CollectionItem = {
   id: number
-  catalog_id: number
+  catalog_id: number | null
   name: string
   sport: string
   kind: string
   price: string
   added_at: string
+  image_url?: string | null
+  condition?: string | null
+  custom?: boolean
 }
 
 type WishItem = {
@@ -300,6 +303,14 @@ export default function Wallet() {
   const [sportFilter, setSport]     = useState('Todos')
   const [removing,   setRemoving]   = useState<number | null>(null)
 
+  const [showAddOwn,    setShowAddOwn]    = useState(false)
+  const [ownForm,       setOwnForm]       = useState({ name:'', sport:'NBA', kind:'card', condition:'Sin gradear (Raw)', grade:'', price:'' })
+  const [ownImage,      setOwnImage]      = useState<File | null>(null)
+  const [ownPreview,    setOwnPreview]    = useState<string | null>(null)
+  const [ownSaving,     setOwnSaving]     = useState(false)
+  const [ownError,      setOwnError]      = useState('')
+  const ownFileRef = useRef<HTMLInputElement>(null)
+
   const [showWishForm, setShowWishForm] = useState(false)
   const [wishName,     setWishName]     = useState('')
   const [wishSport,    setWishSport]    = useState('NBA')
@@ -340,6 +351,36 @@ export default function Wallet() {
     await supabase.from('wishlist_items').delete().eq('id', id)
     setWishes(prev => prev.filter(w => w.id !== id))
     setRemoving(null)
+  }
+
+  const submitOwnItem = async () => {
+    if (!user || !ownForm.name.trim()) { setOwnError('El nombre es obligatorio'); return }
+    setOwnSaving(true); setOwnError('')
+    let image_url: string | null = null
+    if (ownImage) {
+      const ext  = ownImage.name.split('.').pop() || 'jpg'
+      const path = `${user.id}/${Date.now()}.${ext}`
+      const { error: uploadErr } = await supabase.storage.from('listing-images').upload(path, ownImage, { upsert: true })
+      if (!uploadErr) {
+        const { data: u } = supabase.storage.from('listing-images').getPublicUrl(path)
+        image_url = u.publicUrl
+      }
+    }
+    const { data, error: err } = await supabase.from('collection_items').insert({
+      user_id: user.id,
+      catalog_id: null,
+      name: ownForm.name.trim(),
+      sport: ownForm.sport,
+      kind: ownForm.kind,
+      condition: ownForm.condition,
+      price: ownForm.price ? `$${ownForm.price} MXN` : '$0',
+      image_url,
+      custom: true,
+    }).select().single()
+    if (err) { setOwnError('Error al guardar'); setOwnSaving(false); return }
+    setItems(prev => [data as CollectionItem, ...prev])
+    setOwnForm({ name:'', sport:'NBA', kind:'card', condition:'Sin gradear (Raw)', grade:'', price:'' })
+    setOwnImage(null); setOwnPreview(null); setShowAddOwn(false); setOwnSaving(false)
   }
 
   const addWish = async () => {
@@ -427,33 +468,104 @@ export default function Wallet() {
         {/* ══════════════════ COLECCIÓN ══════════════════ */}
         {tab === 'collection' && (
           <>
-            {Object.keys(sportBreak).length > 0 && (
-              <div className="bg-[#1c1835] border border-white/5 rounded-2xl p-4 mb-5">
-                <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-2">Por deporte</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {Object.entries(sportBreak).map(([sport, count]) => (
-                    <button key={sport} onClick={() => setSport(sport === sportFilter ? 'Todos' : sport)}
-                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs transition-all ${sportFilter === sport ? 'bg-violet-500/20 border border-violet-500/30 text-violet-400' : 'bg-[#26213d] border border-white/5 text-gray-400 hover:border-white/10'}`}>
-                      {SPORT_ICONS[sport] || '🃏'} {sport} <span className="font-black">{count}</span>
-                    </button>
-                  ))}
-                  {sportFilter !== 'Todos' && (
-                    <button onClick={() => setSport('Todos')} className="text-gray-600 hover:text-gray-300 text-xs px-2 transition-colors">✕ Todo</button>
-                  )}
+            {/* Toolbar colección */}
+            <div className="flex items-center justify-between gap-3 mb-5">
+              <div className="flex gap-1.5 flex-wrap">
+                {Object.entries(sportBreak).map(([sport, count]) => (
+                  <button key={sport} onClick={() => setSport(sport === sportFilter ? 'Todos' : sport)}
+                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs transition-all ${sportFilter === sport ? 'bg-violet-500/20 border border-violet-500/30 text-violet-400' : 'bg-[#1c1835] border border-white/5 text-gray-400 hover:border-white/10'}`}>
+                    {SPORT_ICONS[sport] || '🃏'} {sport} <span className="font-black">{count}</span>
+                  </button>
+                ))}
+                {sportFilter !== 'Todos' && (
+                  <button onClick={() => setSport('Todos')} className="text-gray-600 hover:text-gray-300 text-xs px-2 transition-colors">✕ Todo</button>
+                )}
+              </div>
+              <button onClick={() => setShowAddOwn(v => !v)}
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black border transition-all shrink-0 ${showAddOwn ? 'bg-amber-500 text-black border-amber-500' : 'bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20'}`}>
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+                {showAddOwn ? 'Cancelar' : 'Agregar carta'}
+              </button>
+            </div>
+
+            {/* Form agregar carta propia */}
+            {showAddOwn && (
+              <div className="bg-[#1c1835] border border-amber-500/20 rounded-2xl p-5 mb-6">
+                <p className="text-amber-400 text-[10px] font-bold uppercase tracking-widest mb-4">Nueva carta en tu colección</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {/* Foto */}
+                  <div className="sm:col-span-2">
+                    {ownPreview ? (
+                      <div className="relative h-32 rounded-xl overflow-hidden border border-white/10">
+                        <img src={ownPreview} className="w-full h-full object-contain bg-[#08061a]" alt="preview" />
+                        <button onClick={() => { setOwnImage(null); setOwnPreview(null) }}
+                          className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-lg hover:bg-red-500/80 transition-colors">✕</button>
+                        <div className="absolute bottom-2 right-2 bg-green-500/90 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">✓ Lista</div>
+                      </div>
+                    ) : (
+                      <div onClick={() => ownFileRef.current?.click()}
+                        className="flex items-center justify-center h-24 border-2 border-dashed border-white/15 rounded-xl cursor-pointer hover:border-amber-500/40 hover:bg-amber-500/5 transition-all">
+                        <div className="flex items-center gap-3 px-4">
+                          <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                          <div>
+                            <p className="text-gray-300 text-sm font-bold">Foto de la carta</p>
+                            <p className="text-gray-600 text-[10px]">Opcional · JPG, PNG, WEBP</p>
+                          </div>
+                        </div>
+                        <input ref={ownFileRef} type="file" accept="image/*" className="hidden"
+                          onChange={e => { const f = e.target.files?.[0]; if (f) { setOwnImage(f); setOwnPreview(URL.createObjectURL(f)) }; e.target.value = '' }} />
+                      </div>
+                    )}
+                  </div>
+                  <input value={ownForm.name} onChange={e => setOwnForm(f => ({ ...f, name: e.target.value }))}
+                    placeholder="Nombre de la carta *"
+                    className="sm:col-span-2 bg-[#26213d] border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-500/50 placeholder-gray-700" />
+                  <select value={ownForm.sport} onChange={e => setOwnForm(f => ({ ...f, sport: e.target.value }))}
+                    className="bg-[#26213d] border border-white/10 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none">
+                    {SPORT_OPTIONS.map(s => <option key={s}>{s}</option>)}
+                  </select>
+                  <select value={ownForm.kind} onChange={e => setOwnForm(f => ({ ...f, kind: e.target.value }))}
+                    className="bg-[#26213d] border border-white/10 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none">
+                    <option value="card">🃏 Carta individual</option>
+                    <option value="box">📦 Caja sellada</option>
+                    <option value="accessory">🛡️ Accesorio</option>
+                  </select>
+                  <select value={ownForm.condition} onChange={e => setOwnForm(f => ({ ...f, condition: e.target.value }))}
+                    className="bg-[#26213d] border border-white/10 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none">
+                    {CONDITION_OPTIONS.map(c => <option key={c}>{c}</option>)}
+                  </select>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-xs font-bold">$</span>
+                    <input type="number" value={ownForm.price} onChange={e => setOwnForm(f => ({ ...f, price: e.target.value }))}
+                      placeholder="Valor estimado MXN"
+                      className="w-full bg-[#26213d] border border-white/10 text-white rounded-xl pl-7 pr-4 py-2.5 text-sm focus:outline-none focus:border-amber-500/40 placeholder-gray-700" />
+                  </div>
                 </div>
+                {ownError && <p className="text-red-400 text-xs mt-2 bg-red-500/10 px-3 py-1.5 rounded-lg border border-red-500/20">{ownError}</p>}
+                <button onClick={submitOwnItem} disabled={ownSaving || !ownForm.name.trim()}
+                  className="w-full mt-4 bg-amber-500 hover:bg-amber-400 disabled:opacity-40 text-black font-black py-2.5 rounded-xl text-sm transition-all flex items-center justify-center gap-2">
+                  {ownSaving
+                    ? <><div className="w-3.5 h-3.5 border-2 border-black/30 border-t-black rounded-full animate-spin" />Guardando...</>
+                    : '🃏 Agregar a mi colección'}
+                </button>
               </div>
             )}
 
-            {items.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-28 text-center">
+            {items.length === 0 && !showAddOwn ? (
+              <div className="flex flex-col items-center justify-center py-20 text-center">
                 <div className="text-6xl mb-5">🃏</div>
                 <h2 className="text-white font-black text-2xl mb-2">Colección vacía</h2>
-                <p className="text-gray-500 text-sm mb-8 max-w-sm">Guarda cartas desde el Mercado con el botón 🔖 para armar tu portfolio.</p>
-                <Link to="/marketplace" className="bg-violet-600 hover:bg-violet-500 text-white font-black px-6 py-3 rounded-xl transition-all">
-                  Explorar el Mercado →
-                </Link>
+                <p className="text-gray-500 text-sm mb-6 max-w-sm">Agrega tus propias cartas o guarda desde el Mercado con el ícono 🔖.</p>
+                <div className="flex gap-3">
+                  <button onClick={() => setShowAddOwn(true)} className="bg-amber-500 hover:bg-amber-400 text-black font-black px-5 py-2.5 rounded-xl text-sm transition-all">
+                    + Agregar carta propia
+                  </button>
+                  <Link to="/marketplace" className="bg-violet-500/10 hover:bg-violet-500/20 border border-violet-500/30 text-violet-400 font-black px-5 py-2.5 rounded-xl text-sm transition-all">
+                    Explorar Mercado
+                  </Link>
+                </div>
               </div>
-            ) : (
+            ) : items.length > 0 ? (
               <>
                 <p className="text-gray-600 text-xs mb-4">
                   <span className="text-white font-bold">{filtered.length}</span> artículo{filtered.length !== 1 ? 's' : ''}
@@ -461,38 +573,41 @@ export default function Wallet() {
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                   {filtered.map(item => (
-                    <div key={item.id} className="group bg-[#1c1835] border border-white/5 hover:border-violet-500/20 rounded-2xl p-4 transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-violet-500/5">
-                      <div className="flex items-start justify-between gap-2 mb-3">
-                        <div className="flex items-center gap-2">
-                          <span className="text-2xl">{SPORT_ICONS[item.sport] || '🃏'}</span>
-                          <div>
-                            <p className="text-[10px] text-violet-400 font-bold uppercase tracking-widest">{item.sport}</p>
-                            <p className="text-[10px] text-gray-600">{KIND_LABEL[item.kind] || item.kind}</p>
-                          </div>
+                    <div key={item.id} className="group bg-[#1c1835] border border-white/5 hover:border-violet-500/20 rounded-2xl overflow-hidden transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-violet-500/5">
+                      {item.image_url && (
+                        <div className="w-full bg-[#08061a]" style={{ aspectRatio: '4/3' }}>
+                          <img src={item.image_url} alt={item.name} className="w-full h-full object-contain" onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
                         </div>
-                        <button onClick={() => removeItem(item.id)} disabled={removing === item.id}
-                          className="text-gray-600 hover:text-red-400 transition-colors p-1 opacity-0 group-hover:opacity-100 shrink-0">
-                          {removing === item.id
-                            ? <div className="w-4 h-4 border-2 border-red-400/50 border-t-transparent rounded-full animate-spin" />
-                            : <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                          }
-                        </button>
-                      </div>
-                      <h3 className="text-white font-black text-sm leading-tight mb-1 line-clamp-2">{item.name}</h3>
-                      <div className="flex items-end justify-between mt-3 pt-3 border-t border-white/5">
-                        <p className="text-violet-400 font-black text-lg">{item.price}</p>
-                        <p className="text-gray-600 text-[10px]">{new Date(item.added_at).toLocaleDateString('es-MX', { month: 'short', day: 'numeric' })}</p>
+                      )}
+                      <div className="p-4">
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xl">{SPORT_ICONS[item.sport] || '🃏'}</span>
+                            <div>
+                              <p className="text-[10px] text-violet-400 font-bold uppercase tracking-widest">{item.sport}</p>
+                              <p className="text-[10px] text-gray-600">{KIND_LABEL[item.kind] || item.kind}{item.custom && ' · Personal'}</p>
+                            </div>
+                          </div>
+                          <button onClick={() => removeItem(item.id)} disabled={removing === item.id}
+                            className="text-gray-600 hover:text-red-400 transition-colors p-1 opacity-0 group-hover:opacity-100 shrink-0">
+                            {removing === item.id
+                              ? <div className="w-4 h-4 border-2 border-red-400/50 border-t-transparent rounded-full animate-spin" />
+                              : <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                            }
+                          </button>
+                        </div>
+                        <h3 className="text-white font-black text-sm leading-tight mb-1 line-clamp-2">{item.name}</h3>
+                        {item.condition && <p className="text-gray-600 text-[10px] mb-2">{item.condition}</p>}
+                        <div className="flex items-end justify-between pt-2 border-t border-white/5">
+                          <p className="text-violet-400 font-black">{item.price}</p>
+                          <p className="text-gray-600 text-[10px]">{new Date(item.added_at).toLocaleDateString('es-MX', { month: 'short', day: 'numeric' })}</p>
+                        </div>
                       </div>
                     </div>
                   ))}
                 </div>
-                <div className="mt-8 text-center">
-                  <Link to="/marketplace" className="inline-flex items-center gap-2 bg-violet-500/10 hover:bg-violet-500/20 border border-violet-500/30 text-violet-400 font-bold px-5 py-2.5 rounded-xl text-sm transition-all">
-                    + Agregar más al portfolio
-                  </Link>
-                </div>
               </>
-            )}
+            ) : null}
           </>
         )}
 

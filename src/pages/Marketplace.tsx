@@ -698,6 +698,8 @@ export default function Marketplace() {
   const [listings,      setListings]      = useState<UserListing[]>([])
   const [showPublish,   setShowPublish]   = useState(false)
   const [deletingId,    setDeletingId]    = useState<number | null>(null)
+  const [wishedIds,     setWishedIds]     = useState<Set<number>>(new Set())
+  const [wishingId,     setWishingId]     = useState<number | null>(null)
   const [contactModal,  setContactModal]  = useState<{ listing: UserListing; action: 'sale' | 'auction' | 'trade' } | null>(null)
   const [checkoutModal, setCheckoutModal] = useState<UserListing | null>(null)
   const [showCatalog,   setShowCatalog]   = useState(true)
@@ -740,10 +742,14 @@ export default function Marketplace() {
   const IMG = useMemo(() => getImages(), [])
 
   useEffect(() => {
-    if (!user) { setSavedIds(new Set()); return }
+    if (!user) { setSavedIds(new Set()); setWishedIds(new Set()); return }
     supabase.from('collection_items').select('catalog_id').eq('user_id', user.id)
       .then(({ data }) => {
         if (data) setSavedIds(new Set(data.map((d) => d.catalog_id as number)))
+      })
+    supabase.from('wishlist_items').select('listing_id').eq('user_id', user.id).not('listing_id', 'is', null)
+      .then(({ data }) => {
+        if (data) setWishedIds(new Set(data.map((d) => d.listing_id as number)))
       })
   }, [user])
 
@@ -764,6 +770,20 @@ export default function Marketplace() {
     await supabase.from('listings').delete().eq('id', id)
     setListings(prev => prev.filter(l => l.id !== id))
     setDeletingId(null)
+  }
+
+  const toggleWish = async (listing: UserListing) => {
+    if (!user) { navigate('/login'); return }
+    const isWished = wishedIds.has(listing.id)
+    setWishingId(listing.id)
+    if (isWished) {
+      await supabase.from('wishlist_items').delete().eq('user_id', user.id).eq('listing_id', listing.id)
+      setWishedIds(prev => { const s = new Set(prev); s.delete(listing.id); return s })
+    } else {
+      await supabase.from('wishlist_items').insert({ user_id: user.id, listing_id: listing.id, name: listing.title, sport: listing.sport, image_url: listing.image_url })
+      setWishedIds(prev => new Set(prev).add(listing.id))
+    }
+    setWishingId(null)
   }
 
 
@@ -975,105 +995,38 @@ export default function Marketplace() {
         </div>
 
         {/* ── Área de productos con decoración ── */}
-        <div className="relative overflow-hidden" style={{isolation: 'isolate'}}>
+        <div className="relative">
 
-          {/* ── Rayos eléctricos decorativos ── */}
-          <div className="absolute inset-0 pointer-events-none select-none" style={{zIndex: 0}}>
-
-          {/* ESQUINA INFERIOR-IZQUIERDA — naranja */}
-          <div className="absolute -bottom-6 -left-5 w-36 h-52 pointer-events-none select-none">
-            <div className="absolute bottom-0 left-0 w-28 h-28 rounded-full" style={{background:'radial-gradient(circle, rgba(249,115,22,0.25) 0%, transparent 70%)'}}/>
-            <svg viewBox="0 0 90 130" className="absolute inset-0 w-full h-full" fill="none" style={{filter:'drop-shadow(0 0 4px #f97316) drop-shadow(0 0 12px #ea580c) drop-shadow(0 0 22px #c2410c)'}}>
-              <path d="M22,130 L36,78 L23,68 L46,12 L40,48 L60,42 L42,94 L55,90 L25,130Z" fill="#f97316" opacity="0.75"/>
-              <path d="M24,130 L37,80 L25,71 L47,16 L41,50 L59,45 L43,95 L54,91 L27,130Z" fill="#fed7aa" opacity="0.45"/>
-              <line x1="46" y1="12" x2="66" y2="2" stroke="#fbbf24" strokeWidth="1.5" opacity="0.6" strokeLinecap="round"/>
-              <line x1="60" y1="42" x2="78" y2="32" stroke="#f97316" strokeWidth="1.2" opacity="0.5" strokeLinecap="round"/>
-              <line x1="55" y1="90" x2="70" y2="82" stroke="#fb923c" strokeWidth="1" opacity="0.4" strokeLinecap="round"/>
-              {/* rayo secundario */}
-              <path d="M58,130 L65,100 L59,95 L70,70" stroke="#f97316" strokeWidth="1.5" opacity="0.35" strokeLinecap="round" strokeLinejoin="round"/>
+          {/* ── Rayos costados: izquierdo ── */}
+          <div className="absolute top-0 bottom-0 -left-6 w-10 pointer-events-none select-none flex flex-col justify-around py-8">
+            <svg viewBox="0 0 32 90" className="w-full" fill="none" style={{filter:'drop-shadow(0 0 5px #8b5cf6) drop-shadow(0 0 14px #6d28d9)'}}>
+              <path d="M18,0 L10,38 L20,44 L4,90 L12,56 L2,52 L18,0Z" fill="#8b5cf6" opacity="0.8"/>
+              <path d="M19,0 L11,37 L21,43 L5,90 L13,57 L3,53 L19,0Z" fill="#ddd6fe" opacity="0.35"/>
+            </svg>
+            <svg viewBox="0 0 26 70" className="w-4/5 ml-1" fill="none" style={{filter:'drop-shadow(0 0 4px #f97316) drop-shadow(0 0 10px #ea580c)'}}>
+              <path d="M14,0 L8,28 L16,33 L3,70 L9,42 L1,38 L14,0Z" fill="#f97316" opacity="0.7"/>
+              <path d="M15,0 L9,27 L17,32 L4,70 L10,43 L2,39 L15,0Z" fill="#fed7aa" opacity="0.3"/>
+            </svg>
+            <svg viewBox="0 0 22 55" className="w-3/5 ml-2" fill="none" style={{filter:'drop-shadow(0 0 3px #8b5cf6) drop-shadow(0 0 8px #6d28d9)'}}>
+              <path d="M12,0 L6,22 L13,26 L2,55 L8,32 L1,29 L12,0Z" fill="#8b5cf6" opacity="0.55"/>
             </svg>
           </div>
 
-          {/* ESQUINA INFERIOR-DERECHA — naranja */}
-          <div className="absolute -bottom-6 -right-5 w-36 h-52 pointer-events-none select-none" style={{transform:'scaleX(-1)'}}>
-            <div className="absolute bottom-0 left-0 w-28 h-28 rounded-full" style={{background:'radial-gradient(circle, rgba(249,115,22,0.25) 0%, transparent 70%)'}}/>
-            <svg viewBox="0 0 90 130" className="absolute inset-0 w-full h-full" fill="none" style={{filter:'drop-shadow(0 0 4px #f97316) drop-shadow(0 0 12px #ea580c) drop-shadow(0 0 22px #c2410c)'}}>
-              <path d="M22,130 L36,78 L23,68 L46,12 L40,48 L60,42 L42,94 L55,90 L25,130Z" fill="#f97316" opacity="0.75"/>
-              <path d="M24,130 L37,80 L25,71 L47,16 L41,50 L59,45 L43,95 L54,91 L27,130Z" fill="#fed7aa" opacity="0.45"/>
-              <line x1="46" y1="12" x2="66" y2="2" stroke="#fbbf24" strokeWidth="1.5" opacity="0.6" strokeLinecap="round"/>
-              <line x1="60" y1="42" x2="78" y2="32" stroke="#f97316" strokeWidth="1.2" opacity="0.5" strokeLinecap="round"/>
-              <line x1="55" y1="90" x2="70" y2="82" stroke="#fb923c" strokeWidth="1" opacity="0.4" strokeLinecap="round"/>
-              <path d="M58,130 L65,100 L59,95 L70,70" stroke="#f97316" strokeWidth="1.5" opacity="0.35" strokeLinecap="round" strokeLinejoin="round"/>
+          {/* ── Rayos costados: derecho ── */}
+          <div className="absolute top-0 bottom-0 -right-6 w-10 pointer-events-none select-none flex flex-col justify-around py-8" style={{transform:'scaleX(-1)'}}>
+            <svg viewBox="0 0 32 90" className="w-full" fill="none" style={{filter:'drop-shadow(0 0 5px #f97316) drop-shadow(0 0 14px #ea580c)'}}>
+              <path d="M18,0 L10,38 L20,44 L4,90 L12,56 L2,52 L18,0Z" fill="#f97316" opacity="0.8"/>
+              <path d="M19,0 L11,37 L21,43 L5,90 L13,57 L3,53 L19,0Z" fill="#fed7aa" opacity="0.35"/>
+            </svg>
+            <svg viewBox="0 0 26 70" className="w-4/5 ml-1" fill="none" style={{filter:'drop-shadow(0 0 4px #8b5cf6) drop-shadow(0 0 10px #6d28d9)'}}>
+              <path d="M14,0 L8,28 L16,33 L3,70 L9,42 L1,38 L14,0Z" fill="#8b5cf6" opacity="0.7"/>
+              <path d="M15,0 L9,27 L17,32 L4,70 L10,43 L2,39 L15,0Z" fill="#ddd6fe" opacity="0.3"/>
+            </svg>
+            <svg viewBox="0 0 22 55" className="w-3/5 ml-2" fill="none" style={{filter:'drop-shadow(0 0 3px #f97316) drop-shadow(0 0 8px #ea580c)'}}>
+              <path d="M12,0 L6,22 L13,26 L2,55 L8,32 L1,29 L12,0Z" fill="#f97316" opacity="0.55"/>
             </svg>
           </div>
 
-          {/* ESQUINA SUPERIOR-IZQUIERDA — morado */}
-          <div className="absolute -top-6 -left-5 w-32 h-44 pointer-events-none select-none" style={{transform:'rotate(180deg)'}}>
-            <div className="absolute bottom-0 left-0 w-24 h-24 rounded-full" style={{background:'radial-gradient(circle, rgba(139,92,246,0.22) 0%, transparent 70%)'}}/>
-            <svg viewBox="0 0 80 110" className="absolute inset-0 w-full h-full" fill="none" style={{filter:'drop-shadow(0 0 4px #7c3aed) drop-shadow(0 0 10px #6d28d9) drop-shadow(0 0 20px #4c1d95)'}}>
-              <path d="M18,110 L30,64 L19,56 L38,8 L33,40 L50,35 L35,78 L46,74 L20,110Z" fill="#8b5cf6" opacity="0.75"/>
-              <path d="M20,110 L31,66 L21,58 L39,10 L34,42 L49,37 L36,79 L45,75 L22,110Z" fill="#ddd6fe" opacity="0.4"/>
-              <line x1="38" y1="8" x2="56" y2="0" stroke="#c4b5fd" strokeWidth="1.5" opacity="0.55" strokeLinecap="round"/>
-              <line x1="50" y1="35" x2="65" y2="26" stroke="#7c3aed" strokeWidth="1" opacity="0.45" strokeLinecap="round"/>
-            </svg>
-          </div>
-
-          {/* ESQUINA SUPERIOR-DERECHA — morado */}
-          <div className="absolute -top-6 -right-5 w-32 h-44 pointer-events-none select-none" style={{transform:'rotate(180deg) scaleX(-1)'}}>
-            <div className="absolute bottom-0 left-0 w-24 h-24 rounded-full" style={{background:'radial-gradient(circle, rgba(139,92,246,0.22) 0%, transparent 70%)'}}/>
-            <svg viewBox="0 0 80 110" className="absolute inset-0 w-full h-full" fill="none" style={{filter:'drop-shadow(0 0 4px #7c3aed) drop-shadow(0 0 10px #6d28d9) drop-shadow(0 0 20px #4c1d95)'}}>
-              <path d="M18,110 L30,64 L19,56 L38,8 L33,40 L50,35 L35,78 L46,74 L20,110Z" fill="#8b5cf6" opacity="0.75"/>
-              <path d="M20,110 L31,66 L21,58 L39,10 L34,42 L49,37 L36,79 L45,75 L22,110Z" fill="#ddd6fe" opacity="0.4"/>
-              <line x1="38" y1="8" x2="56" y2="0" stroke="#c4b5fd" strokeWidth="1.5" opacity="0.55" strokeLinecap="round"/>
-              <line x1="50" y1="35" x2="65" y2="26" stroke="#7c3aed" strokeWidth="1" opacity="0.45" strokeLinecap="round"/>
-            </svg>
-          </div>
-
-          {/* LADO IZQUIERDO superior — morado */}
-          <div className="absolute top-1/4 -left-5 w-20 h-32 pointer-events-none select-none">
-            <svg viewBox="0 0 50 80" className="w-full h-full" fill="none" style={{filter:'drop-shadow(0 0 3px #7c3aed) drop-shadow(0 0 8px #6d28d9)'}}>
-              <path d="M12,80 L20,50 L13,44 L26,8 L22,30 L34,26 L24,56 L31,53 L14,80Z" fill="#8b5cf6" opacity="0.6"/>
-            </svg>
-          </div>
-          {/* LADO IZQUIERDO inferior — naranja */}
-          <div className="absolute top-2/3 -left-4 w-14 h-24 pointer-events-none select-none">
-            <svg viewBox="0 0 40 60" className="w-full h-full" fill="none" style={{filter:'drop-shadow(0 0 3px #f97316) drop-shadow(0 0 7px #ea580c)'}}>
-              <path d="M8,60 L15,37 L9,32 L20,4 L17,22 L27,19 L18,42 L24,39 L10,60Z" fill="#f97316" opacity="0.5"/>
-            </svg>
-          </div>
-
-          {/* LADO DERECHO superior — naranja */}
-          <div className="absolute top-1/4 -right-5 w-20 h-32 pointer-events-none select-none" style={{transform:'scaleX(-1)'}}>
-            <svg viewBox="0 0 50 80" className="w-full h-full" fill="none" style={{filter:'drop-shadow(0 0 3px #f97316) drop-shadow(0 0 8px #ea580c)'}}>
-              <path d="M12,80 L20,50 L13,44 L26,8 L22,30 L34,26 L24,56 L31,53 L14,80Z" fill="#f97316" opacity="0.55"/>
-            </svg>
-          </div>
-          {/* LADO DERECHO inferior — morado */}
-          <div className="absolute top-2/3 -right-4 w-14 h-24 pointer-events-none select-none" style={{transform:'scaleX(-1)'}}>
-            <svg viewBox="0 0 40 60" className="w-full h-full" fill="none" style={{filter:'drop-shadow(0 0 3px #7c3aed) drop-shadow(0 0 7px #6d28d9)'}}>
-              <path d="M8,60 L15,37 L9,32 L20,4 L17,22 L27,19 L18,42 L24,39 L10,60Z" fill="#8b5cf6" opacity="0.5"/>
-            </svg>
-          </div>
-
-          {/* CENTRO TOP — rayo horizontal naranja */}
-          <div className="absolute -top-4 left-1/4 w-28 h-10 pointer-events-none select-none">
-            <svg viewBox="0 0 110 40" className="w-full h-full" fill="none" style={{filter:'drop-shadow(0 0 3px #f97316) drop-shadow(0 0 8px #ea580c)'}}>
-              <path d="M0,30 L25,18 L20,14 L50,2 L42,12 L60,8 L38,22 L48,18 L25,32 Z" fill="#f97316" opacity="0.5"/>
-              <path d="M55,38 L75,24 L70,20 L95,10 L88,20 L105,16" stroke="#fb923c" strokeWidth="1.2" opacity="0.35" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </div>
-          {/* CENTRO TOP — rayo horizontal morado */}
-          <div className="absolute -top-4 right-1/4 w-28 h-10 pointer-events-none select-none" style={{transform:'scaleX(-1)'}}>
-            <svg viewBox="0 0 110 40" className="w-full h-full" fill="none" style={{filter:'drop-shadow(0 0 3px #7c3aed) drop-shadow(0 0 8px #6d28d9)'}}>
-              <path d="M0,30 L25,18 L20,14 L50,2 L42,12 L60,8 L38,22 L48,18 L25,32 Z" fill="#8b5cf6" opacity="0.5"/>
-              <path d="M55,38 L75,24 L70,20 L95,10 L88,20 L105,16" stroke="#a78bfa" strokeWidth="1.2" opacity="0.35" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </div>
-
-          </div>{/* /rayos */}
-
-        {/* ── Contenido sobre los rayos ── */}
-        <div className="relative" style={{zIndex: 1}}>
 
         {/* ── Anuncios de usuarios ────────────────────────────── */}
         {filteredListings.length > 0 && (
@@ -1137,16 +1090,28 @@ export default function Marketplace() {
                           {listingTypes.includes('auction') && listing.min_bid && <p className="text-gray-600 text-[10px]">Puja mín.</p>}
                           {listing.condition && listing.grade && <p className="text-gray-500 text-[10px]">{listing.condition}</p>}
                         </div>
-                        {isOwner && (
-                          <button onClick={e => { e.stopPropagation(); deleteMyListing(listing.id) }} disabled={deletingId === listing.id}
-                            title="Retirar anuncio"
-                            className="text-gray-500 hover:text-red-400 transition-colors p-1.5 rounded-lg hover:bg-red-500/10 border border-transparent hover:border-red-500/20">
-                            {deletingId === listing.id
-                              ? <div className="w-3.5 h-3.5 border border-red-400/50 border-t-transparent rounded-full animate-spin" />
-                              : <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                            }
-                          </button>
-                        )}
+                        <div className="flex items-center gap-1">
+                          {!isOwner && (
+                            <button onClick={e => { e.stopPropagation(); toggleWish(listing) }} disabled={wishingId === listing.id}
+                              title={wishedIds.has(listing.id) ? 'Quitar de guardados' : 'Guardar para después'}
+                              className={`p-1.5 rounded-lg border transition-all ${wishedIds.has(listing.id) ? 'bg-amber-500/20 border-amber-500/40 text-amber-400' : 'border-transparent text-gray-500 hover:bg-amber-500/10 hover:border-amber-500/20 hover:text-amber-400'}`}>
+                              {wishingId === listing.id
+                                ? <div className="w-3.5 h-3.5 border border-amber-400/50 border-t-amber-400 rounded-full animate-spin" />
+                                : <svg className="w-3.5 h-3.5" fill={wishedIds.has(listing.id) ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>
+                              }
+                            </button>
+                          )}
+                          {isOwner && (
+                            <button onClick={e => { e.stopPropagation(); deleteMyListing(listing.id) }} disabled={deletingId === listing.id}
+                              title="Retirar anuncio"
+                              className="text-gray-500 hover:text-red-400 transition-colors p-1.5 rounded-lg hover:bg-red-500/10 border border-transparent hover:border-red-500/20">
+                              {deletingId === listing.id
+                                ? <div className="w-3.5 h-3.5 border border-red-400/50 border-t-transparent rounded-full animate-spin" />
+                                : <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                              }
+                            </button>
+                          )}
+                        </div>
                       </div>
 
                       {listing.kind === 'card' ? (
@@ -1430,7 +1395,6 @@ export default function Marketplace() {
           )}
           </>
         )}
-        </div>{/* /contenido */}
         </div>{/* /productos wrapper */}
       </div>
 
