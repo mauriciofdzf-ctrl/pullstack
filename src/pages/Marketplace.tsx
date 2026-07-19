@@ -195,7 +195,7 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
   const [form, setForm] = useState({
     title: '', description: '',
     sport: 'NBA', custom_sport: '', kind: 'card' as 'card' | 'box' | 'accessory',
-    txn_type: 'sale' as 'sale' | 'auction' | 'trade',
+    txn_types: ['sale'] as string[],
     price: '', min_bid: '', reserve_price: '', grade: '', condition: 'Sin gradear (Raw)',
     duration_hours: '72',
   })
@@ -209,6 +209,10 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }))
+  const toggleTxn = (val: string) => setForm(f => ({
+    ...f,
+    txn_types: f.txn_types.includes(val) ? f.txn_types.filter(t => t !== val) : [...f.txn_types, val]
+  }))
 
   const processFile = (file: File) => {
     if (!file.type.startsWith('image/')) { setError('Solo se aceptan imágenes (JPG, PNG, WEBP)'); return }
@@ -242,9 +246,9 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
   const submit = async () => {
     if (!user) { onClose(); navigate('/login'); return }
     if (!form.title.trim()) { setError('El título es obligatorio'); return }
-    if (form.txn_type !== 'trade' && !form.price && !form.min_bid) {
-      setError('Ingresa un precio o puja mínima'); return
-    }
+    if (form.txn_types.length === 0) { setError('Selecciona al menos una modalidad'); return }
+    if (form.txn_types.includes('sale') && !form.price) { setError('Ingresa el precio de venta'); return }
+    if (form.txn_types.includes('auction') && !form.min_bid) { setError('Ingresa la puja inicial'); return }
     setLoading(true); setError('')
 
     let image_url: string | null = null
@@ -260,7 +264,7 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
       setUploading(false)
     }
 
-    const ends_at = form.txn_type === 'auction'
+    const ends_at = form.txn_types.includes('auction')
       ? new Date(Date.now() + parseInt(form.duration_hours) * 3600000).toISOString()
       : null
 
@@ -271,7 +275,7 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
       description:   form.description.trim() || null,
       sport:         form.sport === 'Otra...' ? (form.custom_sport.trim() || 'General') : form.sport,
       kind:          form.kind,
-      txn_type:      form.txn_type,
+      txn_type:      form.txn_types.join(','),
       price:         form.price ? `$${form.price}` : null,
       min_bid:       form.min_bid ? `$${form.min_bid}` : null,
       reserve_price: form.reserve_price ? parseFloat(form.reserve_price) : null,
@@ -312,23 +316,23 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
             </div>
 
             <div className="overflow-y-auto flex-1 px-6 py-5 space-y-4">
-              {/* ① Tipo de transacción */}
+              {/* ① Tipo de transacción — multi-select */}
               <div>
-                <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-2 block">¿Qué quieres hacer?</label>
+                <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1 block">¿Qué quieres ofrecer? <span className="text-gray-600 normal-case font-normal">(puedes elegir varios)</span></label>
                 <div className="grid grid-cols-3 gap-2">
-                  {([['sale','🛒','Vender'],['auction','🔨','Subastar'],['trade','🔄','Tradear']] as const).map(([val, ico, lbl]) => (
-                    <button key={val} onClick={() => set('txn_type', val)}
-                      className={`py-3 rounded-xl text-sm font-black border transition-all flex flex-col items-center gap-1 ${
-                        form.txn_type === val
-                          ? val === 'sale'    ? 'bg-violet-600 border-violet-500 text-white'
-                          : val === 'auction' ? 'bg-red-500 border-red-500 text-white'
-                                              : 'bg-blue-500 border-blue-500 text-white'
-                          : 'bg-[#26213d] border-white/10 text-gray-500 hover:border-white/20 hover:text-white'
-                      }`}>
-                      <span className="text-xl">{ico}</span>
-                      <span>{lbl}</span>
-                    </button>
-                  ))}
+                  {([['sale','🛒','Vender','bg-violet-600 border-violet-500'],['auction','🔨','Subastar','bg-red-500 border-red-500'],['trade','🔄','Tradear','bg-blue-500 border-blue-500']] as const).map(([val, ico, lbl, active]) => {
+                    const on = form.txn_types.includes(val)
+                    return (
+                      <button key={val} type="button" onClick={() => toggleTxn(val)}
+                        className={`py-3 rounded-xl text-sm font-black border transition-all flex flex-col items-center gap-1 relative ${
+                          on ? `${active} text-white` : 'bg-[#26213d] border-white/10 text-gray-500 hover:border-white/20 hover:text-white'
+                        }`}>
+                        {on && <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-white/20 rounded-full text-[9px] flex items-center justify-center">✓</span>}
+                        <span className="text-xl">{ico}</span>
+                        <span>{lbl}</span>
+                      </button>
+                    )
+                  })}
                 </div>
               </div>
 
@@ -427,7 +431,7 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
                 </div>
 
                 {/* Precio */}
-                {form.txn_type === 'sale' && (
+                {form.txn_types.includes('sale') && (
                   <div>
                     <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1 block">Precio MXN *</label>
                     <div className="relative">
@@ -440,7 +444,7 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
                 )}
 
                 {/* Puja inicial */}
-                {form.txn_type === 'auction' && (
+                {form.txn_types.includes('auction') && (
                   <div>
                     <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1 block">Puja inicial MXN *</label>
                     <div className="relative">
@@ -454,7 +458,7 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
                 )}
 
                 {/* Precio de reserva */}
-                {form.txn_type === 'auction' && (
+                {form.txn_types.includes('auction') && (
                   <div>
                     <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1 block">Precio de reserva MXN</label>
                     <div className="relative">
@@ -468,7 +472,7 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
                 )}
 
                 {/* Duración subasta */}
-                {form.txn_type === 'auction' && (
+                {form.txn_types.includes('auction') && (
                   <div className="col-span-2">
                     <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-2 block">Duración de la subasta</label>
                     <div className="grid grid-cols-4 gap-2">
@@ -786,7 +790,8 @@ export default function Marketplace() {
   const filteredListings = listings.filter(l => {
     const ms = sport === 'Todos' || l.sport === sport || l.sport === 'General'
     const mk = kind  === 'all'   || l.kind === kind
-    const mt = txn   === 'Todos' || (txn === 'Venta' && l.txn_type === 'sale') || (txn === 'Subasta' && l.txn_type === 'auction') || (txn === 'Trading' && l.txn_type === 'trade')
+    const types = l.txn_type.split(',')
+    const mt = txn === 'Todos' || (txn === 'Venta' && types.includes('sale')) || (txn === 'Subasta' && types.includes('auction')) || (txn === 'Trading' && types.includes('trade'))
     const mq = !query || l.title.toLowerCase().includes(query.toLowerCase()) || (l.description || '').toLowerCase().includes(query.toLowerCase())
     const p  = parsePrice(l.price || l.min_bid || '0')
     const mpMin = minP === null || p >= minP
@@ -1080,9 +1085,8 @@ export default function Marketplace() {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
               {filteredListings.map(listing => {
-                const txnLabel = listing.txn_type === 'sale' ? 'Venta' : listing.txn_type === 'auction' ? 'Subasta' : 'Trade'
-                const txnColor = listing.txn_type === 'sale' ? 'bg-green-500/10 text-green-400 border-green-500/30' : listing.txn_type === 'auction' ? 'bg-red-500/10 text-red-400 border-red-500/30' : 'bg-blue-500/10 text-blue-400 border-blue-500/30'
-                const displayListing = listing.price || listing.min_bid || (listing.txn_type === 'trade' ? 'A convenir' : '—')
+                const listingTypes = listing.txn_type.split(',')
+                const displayListing = listing.price || listing.min_bid || (listingTypes.every(t => t === 'trade') ? 'A convenir' : '—')
                 const isOwner = user?.id === listing.user_id
                 return (
                   <div key={listing.id} onClick={() => navigate(`/listing/${listing.id}`)}
@@ -1110,7 +1114,11 @@ export default function Marketplace() {
                         <span className="bg-violet-600/90 text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase">Particular</span>
                         {listing.grade && <span className="bg-black/70 backdrop-blur text-violet-400 text-[9px] font-bold px-2 py-0.5 rounded-full border border-violet-500/30">{listing.grade}</span>}
                       </div>
-                      <div className={`absolute top-3 right-3 text-[10px] font-black px-2 py-0.5 rounded-full border uppercase ${txnColor}`}>{txnLabel}</div>
+                      <div className="absolute top-3 right-3 flex flex-col gap-1 items-end">
+                        {listingTypes.map(t => (
+                          <span key={t} className={`text-[9px] font-black px-2 py-0.5 rounded-full border uppercase ${txnCss[t] || 'bg-white/10 text-gray-400 border-white/20'}`}>{txnMap[t] || t}</span>
+                        ))}
+                      </div>
                       <div className="absolute bottom-2 left-3 right-3 flex items-center justify-between">
                         <span className="text-[10px] text-gray-500">{LISTING_SPORT_ICON[listing.sport]} {listing.sport}</span>
                         <span className="text-[10px] text-gray-600">{listing.kind === 'card' ? '🃏' : listing.kind === 'box' ? '📦' : '🛡️'}</span>
@@ -1126,7 +1134,7 @@ export default function Marketplace() {
                       <div className="flex items-end justify-between gap-2 mb-3">
                         <div>
                           <p className="text-white font-black text-lg leading-none">{displayListing}</p>
-                          {listing.txn_type === 'auction' && listing.min_bid && <p className="text-gray-600 text-[10px]">Puja mín.</p>}
+                          {listingTypes.includes('auction') && listing.min_bid && <p className="text-gray-600 text-[10px]">Puja mín.</p>}
                           {listing.condition && listing.grade && <p className="text-gray-500 text-[10px]">{listing.condition}</p>}
                         </div>
                         {isOwner && (
@@ -1144,18 +1152,18 @@ export default function Marketplace() {
                       {listing.kind === 'card' ? (
                         <div className="grid grid-cols-3 gap-1.5">
                           <button
-                            onClick={e => { e.stopPropagation(); if (!user) { navigate('/login'); return }; if (listing.txn_type === 'sale') setCheckoutModal(listing); else navigate(`/listing/${listing.id}`) }}
-                            className={`py-2 rounded-lg text-[11px] font-bold transition-all text-center ${listing.txn_type === 'sale' ? 'bg-violet-600 hover:bg-violet-500 text-white' : 'bg-[#26213d] border border-white/10 text-gray-500 hover:border-violet-500/30 hover:text-violet-400'}`}>
+                            onClick={e => { e.stopPropagation(); if (!user) { navigate('/login'); return }; if (listingTypes.includes('sale')) setCheckoutModal(listing); else navigate(`/listing/${listing.id}`) }}
+                            className={`py-2 rounded-lg text-[11px] font-bold transition-all text-center ${listingTypes.includes('sale') ? 'bg-violet-600 hover:bg-violet-500 text-white' : 'bg-[#26213d] border border-white/10 text-gray-500 hover:border-violet-500/30 hover:text-violet-400'}`}>
                             🛒 Comprar
                           </button>
                           <button
                             onClick={e => { e.stopPropagation(); navigate(`/listing/${listing.id}`) }}
-                            className={`py-2 rounded-lg text-[11px] font-bold transition-all text-center ${listing.txn_type === 'auction' ? 'bg-red-500/80 hover:bg-red-500 text-white' : 'bg-[#26213d] border border-white/10 text-gray-500 hover:border-red-500/30 hover:text-red-400'}`}>
+                            className={`py-2 rounded-lg text-[11px] font-bold transition-all text-center ${listingTypes.includes('auction') ? 'bg-red-500/80 hover:bg-red-500 text-white' : 'bg-[#26213d] border border-white/10 text-gray-500 hover:border-red-500/30 hover:text-red-400'}`}>
                             🔨 Pujar
                           </button>
                           <button
                             onClick={e => { e.stopPropagation(); navigate(`/listing/${listing.id}`) }}
-                            className={`py-2 rounded-lg text-[11px] font-bold transition-all text-center ${listing.txn_type === 'trade' ? 'bg-blue-500/80 hover:bg-blue-500 text-white' : 'bg-[#26213d] border border-white/10 text-gray-500 hover:border-blue-500/30 hover:text-blue-400'}`}>
+                            className={`py-2 rounded-lg text-[11px] font-bold transition-all text-center ${listingTypes.includes('trade') ? 'bg-blue-500/80 hover:bg-blue-500 text-white' : 'bg-[#26213d] border border-white/10 text-gray-500 hover:border-blue-500/30 hover:text-blue-400'}`}>
                             🔄 Trade
                           </button>
                         </div>
