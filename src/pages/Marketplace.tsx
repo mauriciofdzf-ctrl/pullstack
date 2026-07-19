@@ -1051,24 +1051,12 @@ export default function Marketplace() {
                   <div key={listing.id} onClick={() => navigate(`/listing/${listing.id}`)}
                     className="group relative rounded-2xl overflow-hidden transition-all hover:-translate-y-1 cursor-pointer"
                     style={{
-                      backgroundImage: 'linear-gradient(#1c1835,#1c1835), linear-gradient(135deg,rgba(249,115,22,0.7) 0%,rgba(139,92,246,0.7) 50%,rgba(249,115,22,0.5) 100%)',
-                      backgroundOrigin: 'border-box',
-                      backgroundClip: 'padding-box, border-box',
-                      border: '1.5px solid transparent',
-                      boxShadow: '0 0 10px rgba(249,115,22,0.08), 0 0 18px rgba(139,92,246,0.06)',
+                      padding: '3px',
+                      background: 'linear-gradient(135deg, #f97316 0%, #a855f7 40%, #f97316 70%, #7c3aed 100%)',
+                      boxShadow: '0 0 18px rgba(249,115,22,0.25), 0 0 32px rgba(139,92,246,0.2)',
                     }}>
-                    {/* Corner lightning — top-right naranja */}
-                    <div className="absolute top-0 right-0 w-10 h-14 pointer-events-none select-none z-10">
-                      <svg viewBox="0 0 40 55" className="w-full h-full" fill="none" style={{filter:'drop-shadow(0 0 4px #f97316)'}}>
-                        <path d="M32,0 L20,22 L27,22 L14,55 L28,30 L21,30 L32,0Z" fill="#f97316" opacity="0.65"/>
-                      </svg>
-                    </div>
-                    {/* Corner lightning — bottom-left morado */}
-                    <div className="absolute bottom-0 left-0 w-10 h-14 pointer-events-none select-none z-10">
-                      <svg viewBox="0 0 40 55" className="w-full h-full" fill="none" style={{filter:'drop-shadow(0 0 4px #8b5cf6)', transform:'rotate(180deg)'}}>
-                        <path d="M32,0 L20,22 L27,22 L14,55 L28,30 L21,30 L32,0Z" fill="#8b5cf6" opacity="0.65"/>
-                      </svg>
-                    </div>
+                    {/* Inner card surface */}
+                    <div className="relative bg-[#1c1835] rounded-xl overflow-hidden h-full">
                     {/* Visual header */}
                     <div className="relative bg-[#08061a] flex items-center justify-center overflow-hidden" style={{ aspectRatio: '5/7' }}>
                       {listing.image_url
@@ -1141,6 +1129,7 @@ export default function Marketplace() {
                         </button>
                       )}
                     </div>
+                    </div>{/* /inner card surface */}
                   </div>
                 )
               })}
@@ -1281,24 +1270,11 @@ export default function Marketplace() {
               <div key={item.id}
                 className="group relative rounded-2xl overflow-hidden cursor-pointer transition-all hover:-translate-y-1"
                 style={{
-                  backgroundImage: 'linear-gradient(#1c1835,#1c1835), linear-gradient(135deg,rgba(139,92,246,0.7) 0%,rgba(249,115,22,0.7) 50%,rgba(139,92,246,0.5) 100%)',
-                  backgroundOrigin: 'border-box',
-                  backgroundClip: 'padding-box, border-box',
-                  border: '1.5px solid transparent',
-                  boxShadow: '0 0 10px rgba(139,92,246,0.08), 0 0 18px rgba(249,115,22,0.06)',
+                  padding: '2px',
+                  background: 'linear-gradient(135deg, #7c3aed 0%, #f97316 50%, #7c3aed 100%)',
+                  boxShadow: '0 0 14px rgba(139,92,246,0.2), 0 0 28px rgba(249,115,22,0.12)',
                 }}>
-                {/* Corner lightning — top-right morado */}
-                <div className="absolute top-0 right-0 w-10 h-14 pointer-events-none select-none z-10">
-                  <svg viewBox="0 0 40 55" className="w-full h-full" fill="none" style={{filter:'drop-shadow(0 0 4px #8b5cf6)'}}>
-                    <path d="M32,0 L20,22 L27,22 L14,55 L28,30 L21,30 L32,0Z" fill="#8b5cf6" opacity="0.65"/>
-                  </svg>
-                </div>
-                {/* Corner lightning — bottom-left naranja */}
-                <div className="absolute bottom-0 left-0 w-10 h-14 pointer-events-none select-none z-10">
-                  <svg viewBox="0 0 40 55" className="w-full h-full" fill="none" style={{filter:'drop-shadow(0 0 4px #f97316)', transform:'rotate(180deg)'}}>
-                    <path d="M32,0 L20,22 L27,22 L14,55 L28,30 L21,30 L32,0Z" fill="#f97316" opacity="0.65"/>
-                  </svg>
-                </div>
+                <div className="bg-[#1c1835] rounded-xl overflow-hidden h-full">
                 {/* Imagen */}
                 {(() => { const { isRC, isAuto, is1of1, numbered, gradeCo, gradeNum } = cardAttrs(item); return (
                 <div className="relative h-48 overflow-hidden">
@@ -1402,6 +1378,7 @@ export default function Marketplace() {
                     </button>
                   )}
                 </div>
+                </div>{/* /inner catalog surface */}
               </div>
             ))}
           </div>
