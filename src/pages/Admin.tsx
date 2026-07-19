@@ -8,7 +8,7 @@ import { DEFAULT_SECTIONS, type SectionKey, type SectionsConfig } from '../conte
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 type AdminUser    = { id: string; display_name: string | null; role: string; created_at: string }
-type AdminListing = { id: number; user_id: string; display_name: string; title: string; sport: string; txn_type: string; price: string | null; active: boolean; created_at: string }
+type AdminListing = { id: number; user_id: string; display_name: string; title: string; description: string | null; sport: string; txn_type: string; price: string | null; image_url: string | null; active: boolean; created_at: string }
 type AdminOrder   = { id: number; contact_name: string; total: string; status: string; created_at: string }
 type AdminTxn     = { id: number; buyer_name: string; seller_name: string; listing_title: string; sale_price: string; commission_pct: number; commission_amt: number; total_paid: number; payment_method: string; payment_reference: string; status: string; created_at: string; tracking_number: string | null; tracking_carrier: string | null; tracking_url: string | null; estimated_delivery: string | null }
 type AdminMessage = { id: number; user_id: string; content: string; from_admin: boolean; created_at: string }
@@ -83,8 +83,10 @@ export default function Admin() {
   const [userSearch, setUserSearch] = useState('')
 
   // Listings
-  const [listings, setListings]     = useState<AdminListing[]>([])
-  const [listingsLoading, setLL]    = useState(false)
+  const [listings, setListings]         = useState<AdminListing[]>([])
+  const [listingsLoading, setLL]        = useState(false)
+  const [listingFilter, setListingFilter] = useState<'all' | 'active' | 'paused'>('all')
+  const [listingSearch, setListingSearch] = useState('')
 
   // Orders
   const [orders, setOrders]         = useState<AdminOrder[]>([])
@@ -215,15 +217,20 @@ export default function Admin() {
 
   const loadListings = async () => {
     setLL(true)
-    const { data } = await supabase.from('listings').select('id, user_id, display_name, title, sport, txn_type, price, active, created_at').order('created_at', { ascending: false }).limit(300)
+    const { data } = await supabase.from('listings').select('id, user_id, display_name, title, description, sport, txn_type, price, image_url, active, created_at').order('created_at', { ascending: false }).limit(300)
     setListings((data || []) as AdminListing[])
     setLL(false)
   }
 
   const deleteListing = async (id: number) => {
-    if (!confirm('¿Eliminar este anuncio?')) return
+    if (!confirm('¿Eliminar este anuncio permanentemente?')) return
     await supabase.from('listings').delete().eq('id', id)
     setListings(prev => prev.filter(l => l.id !== id))
+  }
+
+  const toggleListing = async (id: number, currentActive: boolean) => {
+    await supabase.from('listings').update({ active: !currentActive }).eq('id', id)
+    setListings(prev => prev.map(l => l.id === id ? { ...l, active: !currentActive } : l))
   }
 
 
@@ -612,36 +619,70 @@ export default function Admin() {
         {/* ── ANUNCIOS ── */}
         {tab === 'listings' && (
           <div>
-            <p className="text-gray-600 text-sm mb-5">{listings.length} anuncios cargados</p>
+            {/* Filtros */}
+            <div className="flex flex-wrap items-center gap-3 mb-5">
+              <input value={listingSearch} onChange={e => setListingSearch(e.target.value)}
+                placeholder="Buscar por título o usuario..."
+                className="flex-1 min-w-[180px] bg-[#1c1835] border border-white/10 text-white rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-violet-500/50" />
+              {(['all','active','paused'] as const).map(f => (
+                <button key={f} onClick={() => setListingFilter(f)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${listingFilter === f ? 'bg-violet-500/20 border border-violet-500/40 text-violet-300' : 'bg-[#1c1835] border border-white/10 text-gray-500 hover:text-gray-300'}`}>
+                  {f === 'all' ? `Todos (${listings.length})` : f === 'active' ? `Activos (${listings.filter(l=>l.active).length})` : `Pausados (${listings.filter(l=>!l.active).length})`}
+                </button>
+              ))}
+            </div>
+
             {listingsLoading
               ? <div className="flex justify-center py-20"><div className="w-8 h-8 border-2 border-violet-500 border-t-transparent rounded-full animate-spin"/></div>
               : listings.length === 0
-              ? <div className="text-center py-16"><p className="text-5xl mb-3">🏷️</p><p className="text-gray-500 text-sm">Sin datos — ejecuta el SQL de configuración primero</p></div>
-              : (
-                <div className="space-y-2">
-                  {listings.map(l => (
-                    <div key={l.id} className="flex items-center gap-3 bg-[#1c1835] border border-white/5 rounded-xl px-4 py-3 hover:border-white/10 transition-all">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-white text-sm font-medium truncate">{l.title}</p>
-                        <p className="text-gray-600 text-[10px] mt-0.5">
-                          {l.display_name} · {l.sport} ·
-                          <span className={`font-bold ml-1 ${TXN_CSS[l.txn_type] || 'text-gray-400'}`}>{l.txn_type}</span>
-                          {l.price && <span className="text-emerald-400 font-bold ml-2">{l.price}</span>}
-                        </p>
+              ? <div className="text-center py-16"><p className="text-5xl mb-3">🏷️</p><p className="text-gray-500 text-sm">Sin anuncios todavía</p></div>
+              : (() => {
+                  const filtered = listings.filter(l => {
+                    const matchFilter = listingFilter === 'all' || (listingFilter === 'active' ? l.active : !l.active)
+                    const matchSearch = !listingSearch || l.title.toLowerCase().includes(listingSearch.toLowerCase()) || l.display_name.toLowerCase().includes(listingSearch.toLowerCase())
+                    return matchFilter && matchSearch
+                  })
+                  return filtered.length === 0
+                    ? <div className="text-center py-10"><p className="text-gray-600 text-sm">Sin resultados</p></div>
+                    : (
+                      <div className="space-y-2">
+                        {filtered.map(l => (
+                          <div key={l.id} className={`flex items-center gap-3 bg-[#1c1835] border rounded-xl px-4 py-3 transition-all ${l.active ? 'border-white/5 hover:border-white/10' : 'border-red-500/10 opacity-60'}`}>
+                            {/* Thumbnail */}
+                            {l.image_url
+                              ? <img src={l.image_url} alt="" className="w-12 h-12 rounded-lg object-cover shrink-0 border border-white/10" onError={e => { (e.target as HTMLImageElement).style.display='none' }} />
+                              : <div className="w-12 h-12 rounded-lg bg-[#26213d] border border-white/5 flex items-center justify-center text-2xl shrink-0">🃏</div>
+                            }
+                            {/* Info */}
+                            <div className="flex-1 min-w-0">
+                              <p className="text-white text-sm font-bold truncate">{l.title}</p>
+                              {l.description && <p className="text-gray-500 text-[10px] truncate mt-0.5">{l.description}</p>}
+                              <p className="text-gray-600 text-[10px] mt-0.5">
+                                👤 {l.display_name} · {l.sport} ·
+                                <span className={`font-bold ml-1 ${TXN_CSS[l.txn_type] || 'text-gray-400'}`}>{l.txn_type}</span>
+                                {l.price && <span className="text-emerald-400 font-bold ml-2">{l.price}</span>}
+                                <span className="text-gray-700 ml-2">#{l.id}</span>
+                              </p>
+                            </div>
+                            {/* Acciones */}
+                            <div className="flex items-center gap-2 shrink-0">
+                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${l.active ? 'bg-emerald-500/15 text-emerald-400' : 'bg-red-500/15 text-red-400'}`}>
+                                {l.active ? '● Activo' : '○ Pausado'}
+                              </span>
+                              <button onClick={() => toggleListing(l.id, l.active)}
+                                className={`text-xs font-bold px-3 py-1.5 rounded-lg border transition-all ${l.active ? 'bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20' : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20'}`}>
+                                {l.active ? '⏸ Pausar' : '▶ Activar'}
+                              </button>
+                              <button onClick={() => deleteListing(l.id)}
+                                className="text-xs font-bold px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 transition-all">
+                                🗑️
+                              </button>
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${l.active ? 'bg-emerald-500/15 text-emerald-400' : 'bg-red-500/15 text-red-400'}`}>
-                          {l.active ? '● Activo' : '○ Pausado'}
-                        </span>
-                        <button onClick={() => deleteListing(l.id)}
-                          className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 hover:border-red-500/50 transition-all">
-                          🗑️ Eliminar
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )
+                    )
+                })()
             }
           </div>
         )}
