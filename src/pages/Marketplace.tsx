@@ -941,39 +941,70 @@ export default function Marketplace() {
         {/* ── Área de productos con decoración ── */}
         <div className="relative">
 
-          {/* Truenos decorativos */}
-          {/* Top-left — naranja */}
-          <svg className="absolute -top-6 -left-4 w-10 h-10 text-amber-500/30 pointer-events-none select-none" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M13 2L4.5 13.5H11L10 22l8.5-11.5H13L13 2z"/>
-          </svg>
-          {/* Top-left 2 — morado */}
-          <svg className="absolute top-6 -left-2 w-6 h-6 text-violet-500/25 pointer-events-none select-none" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M13 2L4.5 13.5H11L10 22l8.5-11.5H13L13 2z"/>
-          </svg>
-          {/* Top-right — morado */}
-          <svg className="absolute -top-6 -right-4 w-10 h-10 text-violet-500/30 pointer-events-none select-none" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M13 2L4.5 13.5H11L10 22l8.5-11.5H13L13 2z"/>
-          </svg>
-          {/* Top-right 2 — naranja */}
-          <svg className="absolute top-6 -right-2 w-6 h-6 text-amber-500/25 pointer-events-none select-none" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M13 2L4.5 13.5H11L10 22l8.5-11.5H13L13 2z"/>
-          </svg>
-          {/* Middle-left — naranja pequeño */}
-          <svg className="absolute top-1/3 -left-5 w-8 h-8 text-amber-500/20 pointer-events-none select-none" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M13 2L4.5 13.5H11L10 22l8.5-11.5H13L13 2z"/>
-          </svg>
-          {/* Middle-right — morado pequeño */}
-          <svg className="absolute top-1/2 -right-5 w-8 h-8 text-violet-500/20 pointer-events-none select-none" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M13 2L4.5 13.5H11L10 22l8.5-11.5H13L13 2z"/>
-          </svg>
-          {/* Bottom-left — morado */}
-          <svg className="absolute -bottom-4 -left-3 w-9 h-9 text-violet-500/25 pointer-events-none select-none" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M13 2L4.5 13.5H11L10 22l8.5-11.5H13L13 2z"/>
-          </svg>
-          {/* Bottom-right — naranja */}
-          <svg className="absolute -bottom-4 -right-3 w-9 h-9 text-amber-500/25 pointer-events-none select-none" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M13 2L4.5 13.5H11L10 22l8.5-11.5H13L13 2z"/>
-          </svg>
+          {/* ── Rayos eléctricos decorativos ── */}
+
+          {/* ESQUINA INFERIOR-IZQUIERDA — naranja */}
+          <div className="absolute -bottom-6 -left-5 w-36 h-52 pointer-events-none select-none">
+            <div className="absolute bottom-0 left-0 w-28 h-28 rounded-full" style={{background:'radial-gradient(circle, rgba(249,115,22,0.25) 0%, transparent 70%)'}}/>
+            <svg viewBox="0 0 90 130" className="absolute inset-0 w-full h-full" fill="none" style={{filter:'drop-shadow(0 0 4px #f97316) drop-shadow(0 0 12px #ea580c) drop-shadow(0 0 22px #c2410c)'}}>
+              <path d="M22,130 L36,78 L23,68 L46,12 L40,48 L60,42 L42,94 L55,90 L25,130Z" fill="#f97316" opacity="0.75"/>
+              <path d="M24,130 L37,80 L25,71 L47,16 L41,50 L59,45 L43,95 L54,91 L27,130Z" fill="#fed7aa" opacity="0.45"/>
+              <line x1="46" y1="12" x2="66" y2="2" stroke="#fbbf24" strokeWidth="1.5" opacity="0.6" strokeLinecap="round"/>
+              <line x1="60" y1="42" x2="78" y2="32" stroke="#f97316" strokeWidth="1.2" opacity="0.5" strokeLinecap="round"/>
+              <line x1="55" y1="90" x2="70" y2="82" stroke="#fb923c" strokeWidth="1" opacity="0.4" strokeLinecap="round"/>
+              {/* rayo secundario */}
+              <path d="M58,130 L65,100 L59,95 L70,70" stroke="#f97316" strokeWidth="1.5" opacity="0.35" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
+
+          {/* ESQUINA INFERIOR-DERECHA — naranja */}
+          <div className="absolute -bottom-6 -right-5 w-36 h-52 pointer-events-none select-none" style={{transform:'scaleX(-1)'}}>
+            <div className="absolute bottom-0 left-0 w-28 h-28 rounded-full" style={{background:'radial-gradient(circle, rgba(249,115,22,0.25) 0%, transparent 70%)'}}/>
+            <svg viewBox="0 0 90 130" className="absolute inset-0 w-full h-full" fill="none" style={{filter:'drop-shadow(0 0 4px #f97316) drop-shadow(0 0 12px #ea580c) drop-shadow(0 0 22px #c2410c)'}}>
+              <path d="M22,130 L36,78 L23,68 L46,12 L40,48 L60,42 L42,94 L55,90 L25,130Z" fill="#f97316" opacity="0.75"/>
+              <path d="M24,130 L37,80 L25,71 L47,16 L41,50 L59,45 L43,95 L54,91 L27,130Z" fill="#fed7aa" opacity="0.45"/>
+              <line x1="46" y1="12" x2="66" y2="2" stroke="#fbbf24" strokeWidth="1.5" opacity="0.6" strokeLinecap="round"/>
+              <line x1="60" y1="42" x2="78" y2="32" stroke="#f97316" strokeWidth="1.2" opacity="0.5" strokeLinecap="round"/>
+              <line x1="55" y1="90" x2="70" y2="82" stroke="#fb923c" strokeWidth="1" opacity="0.4" strokeLinecap="round"/>
+              <path d="M58,130 L65,100 L59,95 L70,70" stroke="#f97316" strokeWidth="1.5" opacity="0.35" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
+
+          {/* ESQUINA SUPERIOR-IZQUIERDA — morado */}
+          <div className="absolute -top-6 -left-5 w-32 h-44 pointer-events-none select-none" style={{transform:'rotate(180deg)'}}>
+            <div className="absolute bottom-0 left-0 w-24 h-24 rounded-full" style={{background:'radial-gradient(circle, rgba(139,92,246,0.22) 0%, transparent 70%)'}}/>
+            <svg viewBox="0 0 80 110" className="absolute inset-0 w-full h-full" fill="none" style={{filter:'drop-shadow(0 0 4px #7c3aed) drop-shadow(0 0 10px #6d28d9) drop-shadow(0 0 20px #4c1d95)'}}>
+              <path d="M18,110 L30,64 L19,56 L38,8 L33,40 L50,35 L35,78 L46,74 L20,110Z" fill="#8b5cf6" opacity="0.75"/>
+              <path d="M20,110 L31,66 L21,58 L39,10 L34,42 L49,37 L36,79 L45,75 L22,110Z" fill="#ddd6fe" opacity="0.4"/>
+              <line x1="38" y1="8" x2="56" y2="0" stroke="#c4b5fd" strokeWidth="1.5" opacity="0.55" strokeLinecap="round"/>
+              <line x1="50" y1="35" x2="65" y2="26" stroke="#7c3aed" strokeWidth="1" opacity="0.45" strokeLinecap="round"/>
+            </svg>
+          </div>
+
+          {/* ESQUINA SUPERIOR-DERECHA — morado */}
+          <div className="absolute -top-6 -right-5 w-32 h-44 pointer-events-none select-none" style={{transform:'rotate(180deg) scaleX(-1)'}}>
+            <div className="absolute bottom-0 left-0 w-24 h-24 rounded-full" style={{background:'radial-gradient(circle, rgba(139,92,246,0.22) 0%, transparent 70%)'}}/>
+            <svg viewBox="0 0 80 110" className="absolute inset-0 w-full h-full" fill="none" style={{filter:'drop-shadow(0 0 4px #7c3aed) drop-shadow(0 0 10px #6d28d9) drop-shadow(0 0 20px #4c1d95)'}}>
+              <path d="M18,110 L30,64 L19,56 L38,8 L33,40 L50,35 L35,78 L46,74 L20,110Z" fill="#8b5cf6" opacity="0.75"/>
+              <path d="M20,110 L31,66 L21,58 L39,10 L34,42 L49,37 L36,79 L45,75 L22,110Z" fill="#ddd6fe" opacity="0.4"/>
+              <line x1="38" y1="8" x2="56" y2="0" stroke="#c4b5fd" strokeWidth="1.5" opacity="0.55" strokeLinecap="round"/>
+              <line x1="50" y1="35" x2="65" y2="26" stroke="#7c3aed" strokeWidth="1" opacity="0.45" strokeLinecap="round"/>
+            </svg>
+          </div>
+
+          {/* LADO IZQUIERDO — rayo morado pequeño */}
+          <div className="absolute top-1/3 -left-4 w-20 h-32 pointer-events-none select-none">
+            <svg viewBox="0 0 50 80" className="w-full h-full" fill="none" style={{filter:'drop-shadow(0 0 3px #7c3aed) drop-shadow(0 0 8px #6d28d9)'}}>
+              <path d="M12,80 L20,50 L13,44 L26,8 L22,30 L34,26 L24,56 L31,53 L14,80Z" fill="#8b5cf6" opacity="0.6"/>
+            </svg>
+          </div>
+
+          {/* LADO DERECHO — rayo naranja pequeño */}
+          <div className="absolute top-2/3 -right-4 w-20 h-32 pointer-events-none select-none" style={{transform:'scaleX(-1)'}}>
+            <svg viewBox="0 0 50 80" className="w-full h-full" fill="none" style={{filter:'drop-shadow(0 0 3px #f97316) drop-shadow(0 0 8px #ea580c)'}}>
+              <path d="M12,80 L20,50 L13,44 L26,8 L22,30 L34,26 L24,56 L31,53 L14,80Z" fill="#f97316" opacity="0.55"/>
+            </svg>
+          </div>
 
         {/* ── Anuncios de usuarios ────────────────────────────── */}
         {filteredListings.length > 0 && (
