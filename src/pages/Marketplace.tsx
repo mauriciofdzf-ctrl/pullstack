@@ -911,8 +911,7 @@ export default function Marketplace() {
               }`}>
               <p className="text-2xl mb-1.5">{s.icon}</p>
               <p className={`font-black text-sm ${kind === s.k ? 'text-white' : 'text-gray-300 group-hover:text-white'}`}>{s.label}</p>
-              <p className={`text-[10px] mt-0.5 ${kind === s.k ? 'text-gray-300' : 'text-gray-600'}`}>{s.sub}</p>
-            </button>
+                    </button>
           ))}
         </div>
 
