@@ -970,9 +970,10 @@ export default function Marketplace() {
         </div>
 
         {/* ── Área de productos con decoración ── */}
-        <div className="relative">
+        <div className="relative overflow-hidden" style={{isolation: 'isolate'}}>
 
           {/* ── Rayos eléctricos decorativos ── */}
+          <div className="absolute inset-0 pointer-events-none select-none" style={{zIndex: 0}}>
 
           {/* ESQUINA INFERIOR-IZQUIERDA — naranja */}
           <div className="absolute -bottom-6 -left-5 w-36 h-52 pointer-events-none select-none">
@@ -1063,6 +1064,11 @@ export default function Marketplace() {
               <path d="M55,38 L75,24 L70,20 L95,10 L88,20 L105,16" stroke="#a78bfa" strokeWidth="1.2" opacity="0.35" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </div>
+
+          </div>{/* /rayos */}
+
+        {/* ── Contenido sobre los rayos ── */}
+        <div className="relative" style={{zIndex: 1}}>
 
         {/* ── Anuncios de usuarios ────────────────────────────── */}
         {filteredListings.length > 0 && (
@@ -1416,6 +1422,7 @@ export default function Marketplace() {
           )}
           </>
         )}
+        </div>{/* /contenido */}
         </div>{/* /productos wrapper */}
       </div>
 
