@@ -992,17 +992,44 @@ export default function Marketplace() {
             </svg>
           </div>
 
-          {/* LADO IZQUIERDO — rayo morado pequeño */}
-          <div className="absolute top-1/3 -left-4 w-20 h-32 pointer-events-none select-none">
+          {/* LADO IZQUIERDO superior — morado */}
+          <div className="absolute top-1/4 -left-5 w-20 h-32 pointer-events-none select-none">
             <svg viewBox="0 0 50 80" className="w-full h-full" fill="none" style={{filter:'drop-shadow(0 0 3px #7c3aed) drop-shadow(0 0 8px #6d28d9)'}}>
               <path d="M12,80 L20,50 L13,44 L26,8 L22,30 L34,26 L24,56 L31,53 L14,80Z" fill="#8b5cf6" opacity="0.6"/>
             </svg>
           </div>
+          {/* LADO IZQUIERDO inferior — naranja */}
+          <div className="absolute top-2/3 -left-4 w-14 h-24 pointer-events-none select-none">
+            <svg viewBox="0 0 40 60" className="w-full h-full" fill="none" style={{filter:'drop-shadow(0 0 3px #f97316) drop-shadow(0 0 7px #ea580c)'}}>
+              <path d="M8,60 L15,37 L9,32 L20,4 L17,22 L27,19 L18,42 L24,39 L10,60Z" fill="#f97316" opacity="0.5"/>
+            </svg>
+          </div>
 
-          {/* LADO DERECHO — rayo naranja pequeño */}
-          <div className="absolute top-2/3 -right-4 w-20 h-32 pointer-events-none select-none" style={{transform:'scaleX(-1)'}}>
+          {/* LADO DERECHO superior — naranja */}
+          <div className="absolute top-1/4 -right-5 w-20 h-32 pointer-events-none select-none" style={{transform:'scaleX(-1)'}}>
             <svg viewBox="0 0 50 80" className="w-full h-full" fill="none" style={{filter:'drop-shadow(0 0 3px #f97316) drop-shadow(0 0 8px #ea580c)'}}>
               <path d="M12,80 L20,50 L13,44 L26,8 L22,30 L34,26 L24,56 L31,53 L14,80Z" fill="#f97316" opacity="0.55"/>
+            </svg>
+          </div>
+          {/* LADO DERECHO inferior — morado */}
+          <div className="absolute top-2/3 -right-4 w-14 h-24 pointer-events-none select-none" style={{transform:'scaleX(-1)'}}>
+            <svg viewBox="0 0 40 60" className="w-full h-full" fill="none" style={{filter:'drop-shadow(0 0 3px #7c3aed) drop-shadow(0 0 7px #6d28d9)'}}>
+              <path d="M8,60 L15,37 L9,32 L20,4 L17,22 L27,19 L18,42 L24,39 L10,60Z" fill="#8b5cf6" opacity="0.5"/>
+            </svg>
+          </div>
+
+          {/* CENTRO TOP — rayo horizontal naranja */}
+          <div className="absolute -top-4 left-1/4 w-28 h-10 pointer-events-none select-none">
+            <svg viewBox="0 0 110 40" className="w-full h-full" fill="none" style={{filter:'drop-shadow(0 0 3px #f97316) drop-shadow(0 0 8px #ea580c)'}}>
+              <path d="M0,30 L25,18 L20,14 L50,2 L42,12 L60,8 L38,22 L48,18 L25,32 Z" fill="#f97316" opacity="0.5"/>
+              <path d="M55,38 L75,24 L70,20 L95,10 L88,20 L105,16" stroke="#fb923c" strokeWidth="1.2" opacity="0.35" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
+          {/* CENTRO TOP — rayo horizontal morado */}
+          <div className="absolute -top-4 right-1/4 w-28 h-10 pointer-events-none select-none" style={{transform:'scaleX(-1)'}}>
+            <svg viewBox="0 0 110 40" className="w-full h-full" fill="none" style={{filter:'drop-shadow(0 0 3px #7c3aed) drop-shadow(0 0 8px #6d28d9)'}}>
+              <path d="M0,30 L25,18 L20,14 L50,2 L42,12 L60,8 L38,22 L48,18 L25,32 Z" fill="#8b5cf6" opacity="0.5"/>
+              <path d="M55,38 L75,24 L70,20 L95,10 L88,20 L105,16" stroke="#a78bfa" strokeWidth="1.2" opacity="0.35" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </div>
 
@@ -1021,7 +1048,27 @@ export default function Marketplace() {
                 const displayListing = listing.price || listing.min_bid || (listing.txn_type === 'trade' ? 'A convenir' : '—')
                 const isOwner = user?.id === listing.user_id
                 return (
-                  <div key={listing.id} onClick={() => navigate(`/listing/${listing.id}`)} className="group bg-[#1c1835] border border-white/5 hover:border-violet-500/30 rounded-2xl overflow-hidden transition-all hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(139,92,246,0.15)] cursor-pointer">
+                  <div key={listing.id} onClick={() => navigate(`/listing/${listing.id}`)}
+                    className="group relative rounded-2xl overflow-hidden transition-all hover:-translate-y-1 cursor-pointer"
+                    style={{
+                      backgroundImage: 'linear-gradient(#1c1835,#1c1835), linear-gradient(135deg,rgba(249,115,22,0.7) 0%,rgba(139,92,246,0.7) 50%,rgba(249,115,22,0.5) 100%)',
+                      backgroundOrigin: 'border-box',
+                      backgroundClip: 'padding-box, border-box',
+                      border: '1.5px solid transparent',
+                      boxShadow: '0 0 10px rgba(249,115,22,0.08), 0 0 18px rgba(139,92,246,0.06)',
+                    }}>
+                    {/* Corner lightning — top-right naranja */}
+                    <div className="absolute top-0 right-0 w-10 h-14 pointer-events-none select-none z-10">
+                      <svg viewBox="0 0 40 55" className="w-full h-full" fill="none" style={{filter:'drop-shadow(0 0 4px #f97316)'}}>
+                        <path d="M32,0 L20,22 L27,22 L14,55 L28,30 L21,30 L32,0Z" fill="#f97316" opacity="0.65"/>
+                      </svg>
+                    </div>
+                    {/* Corner lightning — bottom-left morado */}
+                    <div className="absolute bottom-0 left-0 w-10 h-14 pointer-events-none select-none z-10">
+                      <svg viewBox="0 0 40 55" className="w-full h-full" fill="none" style={{filter:'drop-shadow(0 0 4px #8b5cf6)', transform:'rotate(180deg)'}}>
+                        <path d="M32,0 L20,22 L27,22 L14,55 L28,30 L21,30 L32,0Z" fill="#8b5cf6" opacity="0.65"/>
+                      </svg>
+                    </div>
                     {/* Visual header */}
                     <div className="relative bg-[#08061a] flex items-center justify-center overflow-hidden" style={{ aspectRatio: '5/7' }}>
                       {listing.image_url
@@ -1232,7 +1279,26 @@ export default function Marketplace() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {results.map((item) => (
               <div key={item.id}
-                className="group bg-[#1c1835] border border-white/5 hover:border-violet-500/30 rounded-2xl overflow-hidden cursor-pointer transition-all hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(139,92,246,0.15)]">
+                className="group relative rounded-2xl overflow-hidden cursor-pointer transition-all hover:-translate-y-1"
+                style={{
+                  backgroundImage: 'linear-gradient(#1c1835,#1c1835), linear-gradient(135deg,rgba(139,92,246,0.7) 0%,rgba(249,115,22,0.7) 50%,rgba(139,92,246,0.5) 100%)',
+                  backgroundOrigin: 'border-box',
+                  backgroundClip: 'padding-box, border-box',
+                  border: '1.5px solid transparent',
+                  boxShadow: '0 0 10px rgba(139,92,246,0.08), 0 0 18px rgba(249,115,22,0.06)',
+                }}>
+                {/* Corner lightning — top-right morado */}
+                <div className="absolute top-0 right-0 w-10 h-14 pointer-events-none select-none z-10">
+                  <svg viewBox="0 0 40 55" className="w-full h-full" fill="none" style={{filter:'drop-shadow(0 0 4px #8b5cf6)'}}>
+                    <path d="M32,0 L20,22 L27,22 L14,55 L28,30 L21,30 L32,0Z" fill="#8b5cf6" opacity="0.65"/>
+                  </svg>
+                </div>
+                {/* Corner lightning — bottom-left naranja */}
+                <div className="absolute bottom-0 left-0 w-10 h-14 pointer-events-none select-none z-10">
+                  <svg viewBox="0 0 40 55" className="w-full h-full" fill="none" style={{filter:'drop-shadow(0 0 4px #f97316)', transform:'rotate(180deg)'}}>
+                    <path d="M32,0 L20,22 L27,22 L14,55 L28,30 L21,30 L32,0Z" fill="#f97316" opacity="0.65"/>
+                  </svg>
+                </div>
                 {/* Imagen */}
                 {(() => { const { isRC, isAuto, is1of1, numbered, gradeCo, gradeNum } = cardAttrs(item); return (
                 <div className="relative h-48 overflow-hidden">
