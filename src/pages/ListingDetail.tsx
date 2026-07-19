@@ -15,6 +15,7 @@ type Listing = {
   txn_type: 'sale' | 'auction' | 'trade'
   price: string | null
   min_bid: string | null
+  reserve_price: number | null
   grade: string | null
   condition: string | null
   image_url: string | null
@@ -211,16 +212,22 @@ export default function ListingDetail() {
   const TXN_LABEL = { sale: 'Venta', auction: 'Subasta', trade: 'Trade' }
   const isOwner = user?.id === listing.user_id
 
+  const reserveMet = listing.reserve_price != null && topBid != null && topBid.amount >= listing.reserve_price
+
   return (
     <div className="min-h-screen bg-[#0c0a1e] pt-20 pb-16 px-4">
       <div className="max-w-5xl mx-auto">
 
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-sm text-gray-600 mb-6">
-          <button onClick={() => navigate('/marketplace')} className="hover:text-violet-400 transition-colors">Mercado</button>
-          <span>›</span>
-          <span className="text-gray-400 truncate max-w-[200px]">{listing.title}</span>
-        </div>
+        {/* Back button */}
+        <button onClick={() => navigate(-1)}
+          className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-6 group">
+          <div className="w-8 h-8 rounded-xl bg-[#1c1835] border border-white/10 group-hover:border-violet-500/30 flex items-center justify-center transition-all">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </div>
+          <span className="text-sm font-bold">Volver</span>
+        </button>
 
         <div className="grid lg:grid-cols-2 gap-8">
 
@@ -361,6 +368,24 @@ export default function ListingDetail() {
                     <span className="text-gray-600 text-xs shrink-0">Sin pujas aún</span>
                   )}
                 </div>
+
+                {/* Precio de reserva */}
+                {listing.reserve_price != null && (
+                  <div className={`px-5 py-3 border-b border-white/5 flex items-center justify-between ${reserveMet ? 'bg-emerald-500/5' : 'bg-amber-500/5'}`}>
+                    <div className="flex items-center gap-2">
+                      <span className={`w-2 h-2 rounded-full ${reserveMet ? 'bg-emerald-400' : 'bg-amber-400 animate-pulse'}`} />
+                      <span className={`text-xs font-bold ${reserveMet ? 'text-emerald-400' : 'text-amber-400'}`}>
+                        Precio de reserva
+                      </span>
+                    </div>
+                    <span className={`text-xs font-black px-2.5 py-1 rounded-full border ${reserveMet ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' : 'bg-amber-500/15 text-amber-400 border-amber-500/30'}`}>
+                      {reserveMet ? '✓ Alcanzado' : '⚠ No alcanzado'}
+                    </span>
+                    {isOwner && (
+                      <span className="text-gray-600 text-[10px] ml-2">Reserva: ${listing.reserve_price.toLocaleString('es-MX')}</span>
+                    )}
+                  </div>
+                )}
 
                 {/* Competidores activos */}
                 {!countdown.ended && bids.length > 0 && (() => {

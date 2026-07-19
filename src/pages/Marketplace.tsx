@@ -196,8 +196,8 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
     title: '', description: '',
     sport: 'NBA', kind: 'card' as 'card' | 'box' | 'accessory',
     txn_type: 'sale' as 'sale' | 'auction' | 'trade',
-    price: '', min_bid: '', grade: '', condition: 'Sin gradear (Raw)',
-    duration_days: '3',
+    price: '', min_bid: '', reserve_price: '', grade: '', condition: 'Sin gradear (Raw)',
+    duration_hours: '72',
   })
   const [imageFile,    setImageFile]    = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
@@ -261,23 +261,24 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
     }
 
     const ends_at = form.txn_type === 'auction'
-      ? new Date(Date.now() + parseInt(form.duration_days) * 86400000).toISOString()
+      ? new Date(Date.now() + parseInt(form.duration_hours) * 3600000).toISOString()
       : null
 
     const payload = {
-      user_id:      user.id,
-      display_name: profile?.display_name || user.id.slice(0, 8),
-      title:        form.title.trim(),
-      description:  form.description.trim() || null,
-      sport:        form.sport,
-      kind:         form.kind,
-      txn_type:     form.txn_type,
-      price:        form.price ? `$${form.price}` : null,
-      min_bid:      form.min_bid ? `$${form.min_bid}` : null,
-      grade:        form.grade.trim() || null,
-      condition:    form.condition,
+      user_id:       user.id,
+      display_name:  profile?.display_name || user.id.slice(0, 8),
+      title:         form.title.trim(),
+      description:   form.description.trim() || null,
+      sport:         form.sport,
+      kind:          form.kind,
+      txn_type:      form.txn_type,
+      price:         form.price ? `$${form.price}` : null,
+      min_bid:       form.min_bid ? `$${form.min_bid}` : null,
+      reserve_price: form.reserve_price ? parseFloat(form.reserve_price) : null,
+      grade:         form.grade.trim() || null,
+      condition:     form.condition,
       image_url,
-      active:       true,
+      active:        true,
       ends_at,
     }
     const { data, error: err } = await supabase.from('listings').insert(payload).select().single()
@@ -433,31 +434,59 @@ function PublishModal({ onClose, user, profile, onSuccess }: {
                   </div>
                 )}
 
-                {/* Puja mínima */}
+                {/* Puja inicial */}
                 {form.txn_type === 'auction' && (
                   <div>
-                    <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1 block">Puja mínima USD *</label>
+                    <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1 block">Puja inicial USD *</label>
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-bold">$</span>
                       <input type="number" value={form.min_bid} onChange={e => set('min_bid', e.target.value)}
-                        placeholder="100" min="0"
-                        className="w-full bg-[#26213d] border border-white/10 text-white rounded-xl pl-7 pr-4 py-2.5 text-sm focus:outline-none focus:border-red-500/50" />
+                        placeholder="50" min="0"
+                        className="w-full bg-[#26213d] border border-red-500/20 text-white rounded-xl pl-7 pr-4 py-2.5 text-sm focus:outline-none focus:border-red-500/50" />
                     </div>
+                    <p className="text-gray-700 text-[10px] mt-1">Con cuánto arranca la subasta</p>
+                  </div>
+                )}
+
+                {/* Precio de reserva */}
+                {form.txn_type === 'auction' && (
+                  <div>
+                    <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1 block">Precio de reserva USD</label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-bold">$</span>
+                      <input type="number" value={form.reserve_price} onChange={e => set('reserve_price', e.target.value)}
+                        placeholder="200" min="0"
+                        className="w-full bg-[#26213d] border border-amber-500/20 text-white rounded-xl pl-7 pr-4 py-2.5 text-sm focus:outline-none focus:border-amber-500/50" />
+                    </div>
+                    <p className="text-gray-700 text-[10px] mt-1">Mínimo para que la venta se concrete (oculto a compradores)</p>
                   </div>
                 )}
 
                 {/* Duración subasta */}
                 {form.txn_type === 'auction' && (
-                  <div>
-                    <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1 block">Duración de la subasta</label>
-                    <select value={form.duration_days} onChange={e => set('duration_days', e.target.value)}
-                      className="w-full bg-[#26213d] border border-red-500/20 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none">
-                      <option value="1">⏱ 1 día</option>
-                      <option value="3">⏱ 3 días</option>
-                      <option value="7">⏱ 7 días</option>
-                      <option value="14">⏱ 14 días</option>
-                      <option value="30">⏱ 30 días</option>
-                    </select>
+                  <div className="col-span-2">
+                    <label className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-2 block">Duración de la subasta</label>
+                    <div className="grid grid-cols-4 gap-2">
+                      {[
+                        { v: '1',   label: '1h'   },
+                        { v: '3',   label: '3h'   },
+                        { v: '6',   label: '6h'   },
+                        { v: '12',  label: '12h'  },
+                        { v: '24',  label: '1 día' },
+                        { v: '72',  label: '3 días'},
+                        { v: '168', label: '7 días'},
+                        { v: '336', label: '14 días'},
+                      ].map(({ v, label }) => (
+                        <button key={v} type="button" onClick={() => set('duration_hours', v)}
+                          className={`py-2 rounded-xl text-xs font-black border transition-all ${
+                            form.duration_hours === v
+                              ? 'bg-red-500/20 border-red-500/50 text-red-300'
+                              : 'bg-[#26213d] border-white/10 text-gray-500 hover:border-white/20 hover:text-white'
+                          }`}>
+                          {label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 )}
 
