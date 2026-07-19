@@ -938,6 +938,43 @@ export default function Marketplace() {
           )}
         </div>
 
+        {/* ── Área de productos con decoración ── */}
+        <div className="relative">
+
+          {/* Truenos decorativos */}
+          {/* Top-left — naranja */}
+          <svg className="absolute -top-6 -left-4 w-10 h-10 text-amber-500/30 pointer-events-none select-none" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M13 2L4.5 13.5H11L10 22l8.5-11.5H13L13 2z"/>
+          </svg>
+          {/* Top-left 2 — morado */}
+          <svg className="absolute top-6 -left-2 w-6 h-6 text-violet-500/25 pointer-events-none select-none" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M13 2L4.5 13.5H11L10 22l8.5-11.5H13L13 2z"/>
+          </svg>
+          {/* Top-right — morado */}
+          <svg className="absolute -top-6 -right-4 w-10 h-10 text-violet-500/30 pointer-events-none select-none" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M13 2L4.5 13.5H11L10 22l8.5-11.5H13L13 2z"/>
+          </svg>
+          {/* Top-right 2 — naranja */}
+          <svg className="absolute top-6 -right-2 w-6 h-6 text-amber-500/25 pointer-events-none select-none" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M13 2L4.5 13.5H11L10 22l8.5-11.5H13L13 2z"/>
+          </svg>
+          {/* Middle-left — naranja pequeño */}
+          <svg className="absolute top-1/3 -left-5 w-8 h-8 text-amber-500/20 pointer-events-none select-none" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M13 2L4.5 13.5H11L10 22l8.5-11.5H13L13 2z"/>
+          </svg>
+          {/* Middle-right — morado pequeño */}
+          <svg className="absolute top-1/2 -right-5 w-8 h-8 text-violet-500/20 pointer-events-none select-none" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M13 2L4.5 13.5H11L10 22l8.5-11.5H13L13 2z"/>
+          </svg>
+          {/* Bottom-left — morado */}
+          <svg className="absolute -bottom-4 -left-3 w-9 h-9 text-violet-500/25 pointer-events-none select-none" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M13 2L4.5 13.5H11L10 22l8.5-11.5H13L13 2z"/>
+          </svg>
+          {/* Bottom-right — naranja */}
+          <svg className="absolute -bottom-4 -right-3 w-9 h-9 text-amber-500/25 pointer-events-none select-none" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M13 2L4.5 13.5H11L10 22l8.5-11.5H13L13 2z"/>
+          </svg>
+
         {/* ── Anuncios de usuarios ────────────────────────────── */}
         {filteredListings.length > 0 && (
           <div className="mb-10">
@@ -1274,6 +1311,7 @@ export default function Marketplace() {
           )}
           </>
         )}
+        </div>{/* /productos wrapper */}
       </div>
 
       {cartOpen && (
