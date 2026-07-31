@@ -1,19 +1,24 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import MuxPlayer from '@mux/mux-player-react'
+import { useAuth } from '../contexts/AuthContext'
+import { supabase } from '../lib/supabase'
+import StreamChat from '../components/StreamChat'
+import StartStreamModal from '../components/StartStreamModal'
 
-const SCHEDULE = [
-  { id: 1, sport: 'NBA',      title: 'Topps Chrome Sapphire NBA 2023-24',          date: 'Hoy 8:00 PM',      status: 'live',    viewers: 47 },
-  { id: 2, sport: 'NFL',      title: 'Panini Prizm NFL 2024 Hobby Box x3',          date: 'Mañana 7:00 PM',   status: 'upcoming', viewers: 0 },
-  { id: 3, sport: 'Soccer',   title: 'Topps Chrome UEFA Champions League 2024-25',  date: 'Sáb 6:00 PM',      status: 'upcoming', viewers: 0 },
-  { id: 4, sport: 'Pokémon',  title: 'Scarlet & Violet Booster Box x2',             date: 'Dom 5:00 PM',      status: 'upcoming', viewers: 0 },
-  { id: 5, sport: 'MLB',      title: 'Bowman Chrome Jumbo Box Baseball 2024',       date: 'Lun 8:00 PM',      status: 'upcoming', viewers: 0 },
-]
-
-const PAST = [
-  { id: 1, title: 'Prizm NBA 2022-23 Hobby x2',       sport: 'NBA',    date: 'hace 2 días',   highlight: 'Wembanyama RC /99 🔥',   pulls: '6 hits' },
-  { id: 2, title: 'Chrome Mega Box Baseball x5',       sport: 'MLB',    date: 'hace 5 días',   highlight: 'Corbin Carroll Auto RC', pulls: '4 autos' },
-  { id: 3, title: 'Panini Immaculate NFL 2023',        sport: 'NFL',    date: 'hace 1 semana', highlight: 'CJ Stroud RPA /49',      pulls: '3 RPAs' },
-  { id: 4, title: 'Pokémon 151 ETB x4',               sport: 'Pokémon',date: 'hace 2 semanas',highlight: 'Charizard Illustration Rare', pulls: '2 SAR' },
-]
+type LiveStreamRow = {
+  id: number
+  host_id: string
+  host_display_name: string
+  title: string
+  sport: string
+  status: 'scheduled' | 'live' | 'ended'
+  mux_playback_id: string | null
+  mux_asset_playback_id: string | null
+  scheduled_at: string | null
+  started_at: string | null
+  ended_at: string | null
+  created_at: string
+}
 
 const SPORT_BADGE: Record<string, string> = {
   NBA:     'bg-orange-500/20 text-orange-400 border-orange-500/30',
@@ -30,95 +35,158 @@ const HOW_IT_WORKS = [
   { icon: '🚚', title: 'Envío', desc: 'Tu carta llega a tu puerta con seguro incluido' },
 ]
 
-export default function Live() {
-  const [notifiedIds, setNotifiedIds] = useState<Set<number>>(new Set())
+function formatDateTime(iso: string | null) {
+  if (!iso) return 'Sin fecha'
+  return new Date(iso).toLocaleString('es', { weekday: 'short', hour: '2-digit', minute: '2-digit' })
+}
 
-  const toggle = (id: number) =>
+export default function Live() {
+  const { user, canStream, isAdmin } = useAuth()
+
+  const [current, setCurrent]   = useState<LiveStreamRow | null>(null)
+  const [schedule, setSchedule] = useState<LiveStreamRow[]>([])
+  const [past, setPast]         = useState<LiveStreamRow[]>([])
+  const [notifiedIds, setNotifiedIds] = useState<Set<number>>(new Set())
+  const [showStartModal, setShowStartModal] = useState(false)
+  const [playingPast, setPlayingPast] = useState<LiveStreamRow | null>(null)
+
+  const loadStreams = useCallback(async () => {
+    const [{ data: liveData }, { data: schedData }, { data: pastData }] = await Promise.all([
+      supabase.from('live_streams').select('*').eq('status', 'live').order('started_at', { ascending: false }).limit(1).maybeSingle(),
+      supabase.from('live_streams').select('*').eq('status', 'scheduled').order('scheduled_at', { ascending: true }),
+      supabase.from('live_streams').select('*').eq('status', 'ended').not('mux_asset_playback_id', 'is', null).order('ended_at', { ascending: false }).limit(20),
+    ])
+    setCurrent((liveData as LiveStreamRow) ?? null)
+    setSchedule((schedData as LiveStreamRow[]) || [])
+    setPast((pastData as LiveStreamRow[]) || [])
+  }, [])
+
+  useEffect(() => {
+    loadStreams()
+    const ch = supabase
+      .channel('live-streams-page')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'live_streams' }, () => loadStreams())
+      .subscribe()
+    return () => { supabase.removeChannel(ch) }
+  }, [loadStreams])
+
+  const toggleNotify = (id: number) =>
     setNotifiedIds(prev => { const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s })
+
+  const handleEndStream = async () => {
+    if (!current || !confirm('¿Terminar la transmisión?')) return
+    await supabase.functions.invoke('end-stream', { body: { live_stream_id: current.id } })
+  }
 
   return (
     <div className="min-h-screen bg-[#0c0a1e] pt-24 pb-16 px-4">
       <div className="max-w-5xl mx-auto">
 
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-2 mb-3">
-            <span className="w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse" />
-            <span className="text-red-400 font-bold text-sm uppercase tracking-wider">En Vivo ahora</span>
+        <div className="mb-8 flex items-start justify-between gap-4 flex-wrap">
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <span className={`w-2.5 h-2.5 rounded-full ${current ? 'bg-red-500 animate-pulse' : 'bg-gray-600'}`} />
+              <span className={`font-bold text-sm uppercase tracking-wider ${current ? 'text-red-400' : 'text-gray-500'}`}>
+                {current ? 'En vivo ahora' : 'Sin transmisión'}
+              </span>
+            </div>
+            <h1 className="text-white text-3xl font-black mb-2">Breaks & Livestreams</h1>
+            <p className="text-gray-400">Aperturas en vivo de cajas con odds transparentes. Cada break es grabado y publicado.</p>
           </div>
-          <h1 className="text-white text-3xl font-black mb-2">Breaks & Livestreams</h1>
-          <p className="text-gray-400">Aperturas en vivo de cajas con odds transparentes. Cada break es grabado y publicado.</p>
+          {canStream && (
+            <button onClick={() => setShowStartModal(true)}
+              className="bg-red-500 hover:bg-red-400 text-white font-black px-4 py-2.5 rounded-xl text-sm transition-all shrink-0">
+              📡 Iniciar transmisión
+            </button>
+          )}
         </div>
 
         {/* Live stream player */}
-        <div className="bg-[#1c1835] border border-white/5 rounded-2xl overflow-hidden mb-8">
-          <div className="aspect-video bg-[#13102a] flex items-center justify-center relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-[#08061a] to-[#1c1835] flex items-center justify-center">
-              <div className="text-center">
-                <div className="w-20 h-20 rounded-full bg-red-500/20 border border-red-500/30 flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-10 h-10 text-red-400" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M8 5v14l11-7z" />
-                  </svg>
+        {current ? (
+          <div className="grid lg:grid-cols-3 gap-6 mb-10 items-stretch">
+            <div className="lg:col-span-2">
+              <div className="bg-[#1c1835] border border-white/5 rounded-2xl overflow-hidden h-full flex flex-col">
+                <div className="aspect-video bg-[#13102a] relative">
+                  {current.mux_playback_id ? (
+                    <MuxPlayer
+                      streamType="live"
+                      playbackId={current.mux_playback_id}
+                      metadata={{ video_title: current.title, viewer_user_id: user?.id }}
+                      autoPlay
+                      style={{ width: '100%', height: '100%' }}
+                    />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center text-gray-500 text-sm">
+                      Esperando señal de video...
+                    </div>
+                  )}
+                  <div className="absolute top-4 left-4 flex items-center gap-2 bg-red-500 px-3 py-1 rounded-lg pointer-events-none">
+                    <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
+                    <span className="text-white font-black text-xs">LIVE</span>
+                  </div>
                 </div>
-                <p className="text-white font-bold text-xl mb-1">Topps Chrome Sapphire NBA</p>
-                <p className="text-gray-500 text-sm">Abriendo ahora — 4 Hobby Boxes</p>
+                <div className="p-4 flex items-center justify-between gap-4">
+                  <div className="min-w-0">
+                    <h3 className="text-white font-bold truncate">{current.title}</h3>
+                    <p className="text-gray-500 text-sm">{current.host_display_name} · PullStackMX Live</p>
+                  </div>
+                  {(isAdmin || current.host_id === user?.id) && (
+                    <button onClick={handleEndStream}
+                      className="bg-[#26213d] hover:bg-red-500/20 border border-red-500/30 text-red-400 font-black px-4 py-2 rounded-xl text-sm transition-all shrink-0">
+                      Terminar
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
-            <div className="absolute top-4 left-4 flex items-center gap-2 bg-red-500 px-3 py-1 rounded-lg">
-              <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
-              <span className="text-white font-black text-xs">LIVE</span>
-            </div>
-            <div className="absolute top-4 right-4 bg-black/70 backdrop-blur px-3 py-1 rounded-lg text-gray-300 text-xs font-bold">
-              👁 {SCHEDULE[0].viewers} viendo
+            <div className="h-[420px] lg:h-full">
+              <StreamChat room={`live-${current.id}`} />
             </div>
           </div>
-          <div className="p-4 flex items-center justify-between gap-4">
-            <div className="min-w-0">
-              <h3 className="text-white font-bold truncate">{SCHEDULE[0].title}</h3>
-              <p className="text-gray-500 text-sm">PullStackMX Live · Comenzó hace 12 min</p>
+        ) : (
+          <div className="bg-[#1c1835] border border-white/5 rounded-2xl overflow-hidden mb-10">
+            <div className="aspect-video bg-[#13102a] flex items-center justify-center relative">
+              <div className="text-center px-6">
+                <div className="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-4">
+                  <span className="text-3xl">📡</span>
+                </div>
+                <p className="text-white font-bold text-lg mb-1">No hay transmisión en este momento</p>
+                <p className="text-gray-500 text-sm">Revisa los próximos breaks programados abajo</p>
+              </div>
             </div>
-            <a href="https://youtube.com" target="_blank" rel="noopener noreferrer"
-              className="bg-red-500 hover:bg-red-400 text-white font-black px-4 py-2 rounded-xl text-sm transition-all shrink-0">
-              Unirme al chat →
-            </a>
           </div>
-        </div>
+        )}
 
         <div className="grid lg:grid-cols-3 gap-6 mb-10">
           {/* Schedule */}
           <div className="lg:col-span-2">
             <h2 className="text-white font-bold text-lg mb-4">Próximos breaks</h2>
-            <div className="space-y-3">
-              {SCHEDULE.map(ev => (
-                <div key={ev.id} className="bg-[#1c1835] border border-white/5 hover:border-white/10 rounded-2xl p-4 transition-all">
-                  <div className="flex items-center gap-3">
-                    {ev.status === 'live' ? (
-                      <div className="flex items-center gap-1.5 bg-red-500/20 border border-red-500/30 text-red-400 px-2.5 py-1 rounded-lg text-xs font-bold shrink-0">
-                        <span className="w-1.5 h-1.5 bg-red-400 rounded-full animate-pulse" /> LIVE
-                      </div>
-                    ) : (
+            {schedule.length === 0 ? (
+              <div className="bg-[#1c1835] border border-white/5 rounded-2xl p-6 text-center text-gray-500 text-sm">
+                No hay breaks programados todavía.
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {schedule.map(ev => (
+                  <div key={ev.id} className="bg-[#1c1835] border border-white/5 hover:border-white/10 rounded-2xl p-4 transition-all">
+                    <div className="flex items-center gap-3">
                       <span className={`px-2.5 py-1 rounded-lg text-xs font-bold border shrink-0 ${SPORT_BADGE[ev.sport] || 'bg-gray-500/20 text-gray-400 border-gray-500/30'}`}>
                         {ev.sport}
                       </span>
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <p className="text-white font-bold text-sm truncate">{ev.title}</p>
-                      <p className="text-gray-600 text-xs">{ev.date}</p>
-                    </div>
-                    {ev.status === 'live' ? (
-                      <button className="bg-red-500 hover:bg-red-400 text-white font-black px-3 py-1.5 rounded-lg text-xs shrink-0 transition-all">
-                        Ver
-                      </button>
-                    ) : (
-                      <button onClick={() => toggle(ev.id)}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white font-bold text-sm truncate">{ev.title}</p>
+                        <p className="text-gray-600 text-xs">{formatDateTime(ev.scheduled_at)} · {ev.host_display_name}</p>
+                      </div>
+                      <button onClick={() => toggleNotify(ev.id)}
                         className={`px-3 py-1.5 rounded-lg text-xs font-bold shrink-0 border transition-all ${notifiedIds.has(ev.id) ? 'bg-violet-500/20 border-violet-500/40 text-violet-400' : 'bg-[#26213d] border-white/10 text-gray-400 hover:border-white/20'}`}>
                         {notifiedIds.has(ev.id) ? '✓ Anotado' : 'Notificarme'}
                       </button>
-                    )}
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
 
             <div className="mt-4 bg-[#1c1835] border border-white/5 rounded-2xl p-4 text-center">
               <p className="text-gray-500 text-sm mb-3">¿Quieres entrar a un break grupal?</p>
@@ -132,21 +200,27 @@ export default function Live() {
           {/* Past breaks */}
           <div>
             <h2 className="text-white font-bold text-lg mb-4">Breaks anteriores</h2>
-            <div className="space-y-3">
-              {PAST.map(p => (
-                <div key={p.id} className="bg-[#1c1835] border border-white/5 rounded-2xl p-4">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${SPORT_BADGE[p.sport] || ''}`}>{p.sport}</span>
-                    <span className="text-gray-600 text-[10px]">{p.date}</span>
-                  </div>
-                  <p className="text-white font-bold text-sm mb-1">{p.title}</p>
-                  <p className="text-gray-600 text-xs mb-2">{p.pulls}</p>
-                  <div className="bg-violet-500/10 border border-violet-500/20 rounded-lg px-2.5 py-1.5 text-violet-400 text-xs font-bold">
-                    🔥 {p.highlight}
-                  </div>
-                </div>
-              ))}
-            </div>
+            {past.length === 0 ? (
+              <div className="bg-[#1c1835] border border-white/5 rounded-2xl p-6 text-center text-gray-500 text-sm">
+                Aún no hay grabaciones publicadas.
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {past.map(p => (
+                  <button key={p.id} onClick={() => setPlayingPast(p)}
+                    className="w-full text-left bg-[#1c1835] border border-white/5 hover:border-violet-500/30 rounded-2xl p-4 transition-all">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${SPORT_BADGE[p.sport] || 'bg-gray-500/20 text-gray-400 border-gray-500/30'}`}>{p.sport}</span>
+                      <span className="text-gray-600 text-[10px]">{formatDateTime(p.ended_at)}</span>
+                    </div>
+                    <p className="text-white font-bold text-sm mb-1">{p.title}</p>
+                    <div className="bg-violet-500/10 border border-violet-500/20 rounded-lg px-2.5 py-1.5 text-violet-400 text-xs font-bold">
+                      ▶ Ver grabación
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -164,6 +238,30 @@ export default function Live() {
           </div>
         </div>
       </div>
+
+      {showStartModal && (
+        <StartStreamModal onClose={() => setShowStartModal(false)} onCreated={loadStreams} />
+      )}
+
+      {playingPast && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setPlayingPast(null)}>
+          <div className="max-w-3xl w-full" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-white font-bold">{playingPast.title}</h3>
+              <button onClick={() => setPlayingPast(null)} className="text-gray-400 hover:text-white text-sm font-bold">✕ Cerrar</button>
+            </div>
+            <div className="aspect-video bg-[#13102a] rounded-2xl overflow-hidden">
+              <MuxPlayer
+                streamType="on-demand"
+                playbackId={playingPast.mux_asset_playback_id ?? undefined}
+                metadata={{ video_title: playingPast.title }}
+                autoPlay
+                style={{ width: '100%', height: '100%' }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

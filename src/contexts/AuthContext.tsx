@@ -9,6 +9,7 @@ interface Profile {
   avatar_url: string | null
   bio: string | null
   role: 'user' | 'admin'
+  is_verified_seller: boolean
   created_at: string
 }
 
@@ -17,6 +18,7 @@ interface AuthContextType {
   session: Session | null
   profile: Profile | null
   isAdmin: boolean
+  canStream: boolean
   loading: boolean
   profileLoading: boolean
   signUp: (email: string, password: string, name: string) => Promise<{ data: any; error: Error | null }>
@@ -100,9 +102,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const isAdmin = profile?.role === 'admin'
+  const canStream = isAdmin || !!profile?.is_verified_seller
 
   return (
-    <AuthContext.Provider value={{ user, session, profile, isAdmin, loading, profileLoading, signUp, signIn, signInWithGoogle, signOut, refreshProfile }}>
+    <AuthContext.Provider value={{ user, session, profile, isAdmin, canStream, loading, profileLoading, signUp, signIn, signInWithGoogle, signOut, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   )

@@ -7,7 +7,7 @@ import { IMAGE_DEFAULTS, IMAGE_LABELS, IMAGE_SECTIONS, type ImageKey, loadImageO
 import { DEFAULT_SECTIONS, type SectionKey, type SectionsConfig } from '../contexts/SectionsContext'
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
-type AdminUser    = { id: string; display_name: string | null; role: string; created_at: string }
+type AdminUser    = { id: string; display_name: string | null; role: string; is_verified_seller: boolean; created_at: string }
 type AdminListing = { id: number; user_id: string; display_name: string; title: string; description: string | null; sport: string; txn_type: string; price: string | null; image_url: string | null; active: boolean; created_at: string }
 type AdminOrder   = { id: number; contact_name: string; total: string; status: string; created_at: string }
 type AdminTxn     = { id: number; buyer_name: string; seller_name: string; listing_title: string; sale_price: string; commission_pct: number; commission_amt: number; total_paid: number; payment_method: string; payment_reference: string; status: string; created_at: string; tracking_number: string | null; tracking_carrier: string | null; tracking_url: string | null; estimated_delivery: string | null }
@@ -197,7 +197,7 @@ export default function Admin() {
 
   const loadUsers = async () => {
     setUL(true)
-    const { data } = await supabase.from('profiles').select('id, display_name, role, created_at').order('created_at', { ascending: false }).limit(200)
+    const { data } = await supabase.from('profiles').select('id, display_name, role, is_verified_seller, created_at').order('created_at', { ascending: false }).limit(200)
     setUsers((data || []) as AdminUser[])
     setUL(false)
   }
@@ -206,6 +206,12 @@ export default function Admin() {
     const { error } = await supabase.rpc('set_user_role', { target_id: id, new_role: role })
     if (error) { alert('Error: ' + error.message); return }
     setUsers(prev => prev.map(u => u.id === id ? { ...u, role } : u))
+  }
+
+  const setVerifiedSeller = async (id: string, verified: boolean) => {
+    const { error } = await supabase.rpc('set_verified_seller', { target_id: id, verified })
+    if (error) { alert('Error: ' + error.message); return }
+    setUsers(prev => prev.map(u => u.id === id ? { ...u, is_verified_seller: verified } : u))
   }
 
   const deleteUser = async (id: string, name: string) => {
@@ -585,6 +591,7 @@ export default function Admin() {
                         <div className="flex items-center gap-2">
                           <p className="text-white text-sm font-bold truncate">{u.display_name || 'Sin nombre'}</p>
                           {u.role === 'admin' && <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 shrink-0">👑 Admin</span>}
+                          {u.is_verified_seller && <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-blue-500/15 border border-blue-500/30 text-blue-400 shrink-0">✓ Vendedor verificado</span>}
                           {u.id === user?.id && <span className="text-[10px] text-gray-600">(tú)</span>}
                         </div>
                         <p className="text-gray-700 text-[10px] font-mono">{u.id.slice(0, 18)}...</p>
@@ -600,6 +607,17 @@ export default function Admin() {
                             <button onClick={() => setUserRole(u.id, 'admin')}
                               className="text-[11px] font-bold px-3 py-1.5 rounded-lg border border-white/10 text-gray-400 hover:border-amber-500/30 hover:text-amber-400 transition-all">
                               👑 Hacer admin
+                            </button>
+                          )}
+                          {u.is_verified_seller ? (
+                            <button onClick={() => setVerifiedSeller(u.id, false)}
+                              className="text-[11px] font-bold px-3 py-1.5 rounded-lg border border-blue-500/30 text-blue-400 hover:bg-blue-500/10 transition-all">
+                              ↓ Quitar vendedor verificado
+                            </button>
+                          ) : (
+                            <button onClick={() => setVerifiedSeller(u.id, true)}
+                              className="text-[11px] font-bold px-3 py-1.5 rounded-lg border border-white/10 text-gray-400 hover:border-blue-500/30 hover:text-blue-400 transition-all">
+                              ✓ Verificar vendedor
                             </button>
                           )}
                           <button onClick={() => deleteUser(u.id, u.display_name || 'Sin nombre')}
