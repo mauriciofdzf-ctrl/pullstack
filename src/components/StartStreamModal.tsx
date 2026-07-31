@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 
 const SPORTS = ['NBA', 'NFL', 'Soccer', 'MLB', 'Pokémon', 'One Piece', 'General']
@@ -11,19 +11,30 @@ type CreateStreamResult = {
   reused: boolean
 }
 
-export default function StartStreamModal({ onClose, onCreated }: { onClose: () => void; onCreated: () => void }) {
+type Props = {
+  onClose: () => void
+  onCreated: () => void
+  // Si vienen, es un break ya programado — se saltan el formulario y solo se
+  // piden las credenciales para esa fila existente.
+  existingStreamId?: number
+  existingTitle?: string
+}
+
+export default function StartStreamModal({ onClose, onCreated, existingStreamId, existingTitle }: Props) {
   const [title, setTitle]   = useState('')
   const [sport, setSport]   = useState('NBA')
   const [loading, setLoading] = useState(false)
   const [error, setError]   = useState('')
   const [result, setResult] = useState<CreateStreamResult | null>(null)
 
-  const handleCreate = async () => {
-    if (!title.trim()) { setError('Ponle un título a tu transmisión'); return }
+  const handleCreate = async (titleOverride?: string) => {
+    if (!existingStreamId && !titleOverride && !title.trim()) { setError('Ponle un título a tu transmisión'); return }
     setLoading(true)
     setError('')
     const { data, error: fnError } = await supabase.functions.invoke('create-stream', {
-      body: { title: title.trim(), sport },
+      body: existingStreamId
+        ? { live_stream_id: existingStreamId }
+        : { title: (titleOverride ?? title).trim(), sport },
     })
     setLoading(false)
     if (fnError || data?.error) {
@@ -34,10 +45,26 @@ export default function StartStreamModal({ onClose, onCreated }: { onClose: () =
     onCreated()
   }
 
+  useEffect(() => {
+    if (existingStreamId) handleCreate()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [existingStreamId])
+
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div className="bg-[#1c1835] border border-white/10 rounded-2xl max-w-md w-full p-6">
-        {!result ? (
+        {existingStreamId && !result ? (
+          <div className="py-8 text-center">
+            {error ? (
+              <>
+                <p className="text-red-400 text-sm mb-4">{error}</p>
+                <button onClick={onClose} className="text-gray-400 hover:text-white text-sm font-bold">Cerrar</button>
+              </>
+            ) : (
+              <p className="text-gray-400 text-sm">Obteniendo tus credenciales de OBS{existingTitle ? ` para "${existingTitle}"` : ''}...</p>
+            )}
+          </div>
+        ) : !result ? (
           <>
             <h2 className="text-white font-black text-xl mb-1">Iniciar transmisión</h2>
             <p className="text-gray-500 text-sm mb-5">Configura tu break antes de conectar OBS.</p>
@@ -59,7 +86,7 @@ export default function StartStreamModal({ onClose, onCreated }: { onClose: () =
                 className="flex-1 border border-white/10 text-gray-400 hover:text-white font-bold rounded-xl py-2.5 text-sm transition-all">
                 Cancelar
               </button>
-              <button onClick={handleCreate} disabled={loading}
+              <button onClick={() => handleCreate()} disabled={loading}
                 className="flex-1 bg-red-500 hover:bg-red-400 disabled:opacity-50 text-white font-black rounded-xl py-2.5 text-sm transition-all">
                 {loading ? 'Creando...' : 'Crear transmisión'}
               </button>

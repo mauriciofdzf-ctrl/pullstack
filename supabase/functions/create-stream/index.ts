@@ -30,8 +30,26 @@ Deno.serve(async req => {
       return jsonResponse({ error: 'No tienes permiso para iniciar transmisiones' }, 403)
     }
 
-    const { title, sport } = await req.json()
-    if (!title || typeof title !== 'string') return jsonResponse({ error: 'Falta el título' }, 400)
+    const { title, sport, live_stream_id: existingStreamId } = await req.json()
+
+    // Si viene live_stream_id, es un break ya programado (con spots quizá ya
+    // vendidos) — solo se le entregan credenciales, sin insertar una fila
+    // nueva (eso huerfanaría los spots de la fila original).
+    let existingRow: { id: number; host_id: string } | null = null
+    if (existingStreamId) {
+      const { data } = await admin
+        .from('live_streams')
+        .select('id, host_id')
+        .eq('id', existingStreamId)
+        .eq('status', 'scheduled')
+        .maybeSingle()
+      if (!data || data.host_id !== user.id) {
+        return jsonResponse({ error: 'Break no encontrado o no te pertenece' }, 404)
+      }
+      existingRow = data
+    } else if (!title || typeof title !== 'string') {
+      return jsonResponse({ error: 'Falta el título' }, 400)
+    }
 
     // Cada host reutiliza el mismo Live Stream de Mux (y su stream key) para
     // siempre — Mux recomienda esto explícitamente, y evita que OBS haya que
@@ -81,27 +99,34 @@ Deno.serve(async req => {
       })
     }
 
-    const { data: row, error: insertError } = await admin
-      .from('live_streams')
-      .insert({
-        host_id: user.id,
-        host_display_name: profile.display_name || user.email?.split('@')[0] || 'Host',
-        title,
-        sport: sport || 'General',
-        status: 'scheduled',
-        mux_live_stream_id: muxLiveStreamId,
-        mux_playback_id: playbackId,
-      })
-      .select()
-      .single()
+    let liveStreamId: number
 
-    if (insertError || !row) {
-      console.error(insertError)
-      return jsonResponse({ error: 'No se pudo crear la transmisión' }, 500)
+    if (existingRow) {
+      liveStreamId = existingRow.id
+    } else {
+      const { data: row, error: insertError } = await admin
+        .from('live_streams')
+        .insert({
+          host_id: user.id,
+          host_display_name: profile.display_name || user.email?.split('@')[0] || 'Host',
+          title,
+          sport: sport || 'General',
+          status: 'scheduled',
+          mux_live_stream_id: muxLiveStreamId,
+          mux_playback_id: playbackId,
+        })
+        .select()
+        .single()
+
+      if (insertError || !row) {
+        console.error(insertError)
+        return jsonResponse({ error: 'No se pudo crear la transmisión' }, 500)
+      }
+      liveStreamId = row.id
     }
 
     return jsonResponse({
-      live_stream_id: row.id,
+      live_stream_id: liveStreamId,
       rtmp_url: 'rtmps://global-live.mux.com:443/app',
       stream_key: streamKey,
       playback_id: playbackId,

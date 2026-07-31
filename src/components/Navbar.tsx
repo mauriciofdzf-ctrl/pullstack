@@ -4,6 +4,21 @@ import { useAuth } from '../contexts/AuthContext'
 import { useSections, type SectionKey } from '../contexts/SectionsContext'
 import { supabase } from '../lib/supabase'
 import { LogoIcon, LogoWordmark } from './Logo'
+import CountBadge from './CountBadge'
+
+type NotifRow = {
+  id: number
+  type: 'break_scheduled' | 'break_starting'
+  live_stream_id: number | null
+  read: boolean
+  created_at: string
+  live_streams: { title: string } | null
+}
+
+const NOTIF_COPY: Record<NotifRow['type'], string> = {
+  break_scheduled: 'Nuevo break programado',
+  break_starting: 'Un break está por empezar',
+}
 
 const AVATAR_COLORS = [
   'from-violet-500 to-fuchsia-700',
@@ -21,11 +36,16 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen]     = useState(false)
   const [dropOpen, setDropOpen]     = useState(false)
   const [unreadDMs, setUnreadDMs]   = useState(0)
-  const dropRef = useRef<HTMLDivElement>(null)
+  const [notifs, setNotifs]         = useState<NotifRow[]>([])
+  const [notifOpen, setNotifOpen]   = useState(false)
+  const dropRef  = useRef<HTMLDivElement>(null)
+  const notifRef = useRef<HTMLDivElement>(null)
   const location = useLocation()
   const navigate = useNavigate()
   const { user, profile, isAdmin, signOut } = useAuth()
   const sections = useSections()
+
+  const unreadNotifs = notifs.filter(n => !n.read).length
 
   useEffect(() => {
     if (!user) { setUnreadDMs(0); return }
@@ -42,6 +62,33 @@ export default function Navbar() {
       .subscribe()
     return () => { supabase.removeChannel(ch) }
   }, [user])
+
+  useEffect(() => {
+    if (!user) { setNotifs([]); return }
+    const load = async () => {
+      const { data } = await supabase.from('notifications')
+        .select('*, live_streams(title)')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(20)
+      setNotifs((data as NotifRow[]) || [])
+    }
+    load()
+    const ch = supabase.channel('notif-badge')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` },
+        () => load())
+      .subscribe()
+    return () => { supabase.removeChannel(ch) }
+  }, [user])
+
+  const markNotifRead = async (n: NotifRow) => {
+    setNotifOpen(false)
+    if (!n.read) {
+      setNotifs(prev => prev.map(x => x.id === n.id ? { ...x, read: true } : x))
+      await supabase.from('notifications').update({ read: true }).eq('id', n.id)
+    }
+    navigate('/live')
+  }
 
   type NavLink = { to: string; label: string; section?: SectionKey; grading?: boolean; live?: boolean; chat?: boolean; badge?: number }
   const links: NavLink[] = ([
@@ -60,10 +107,13 @@ export default function Navbar() {
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (dropRef.current && !dropRef.current.contains(e.target as Node)) setDropOpen(false)
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) setNotifOpen(false)
     }
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
   }, [])
+
+  const timeLabel = (iso: string) => new Date(iso).toLocaleString('es', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
 
   const handleSignOut = async () => {
     setDropOpen(false)
@@ -113,6 +163,34 @@ export default function Navbar() {
 
           {/* Right: auth */}
           <div className="hidden lg:flex items-center gap-3 shrink-0">
+            {user && (
+              <div className="relative" ref={notifRef}>
+                <button onClick={() => setNotifOpen(!notifOpen)}
+                  className="relative w-9 h-9 flex items-center justify-center rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-all">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.4-1.4a2 2 0 01-.6-1.4V11a6 6 0 10-12 0v3.2a2 2 0 01-.6 1.4L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                  </svg>
+                  <CountBadge n={unreadNotifs} />
+                </button>
+                {notifOpen && (
+                  <div className="absolute right-0 mt-2 w-72 bg-[#1c1835] border border-white/10 rounded-xl shadow-2xl py-1 overflow-hidden z-50 max-h-96 overflow-y-auto">
+                    <div className="px-4 py-3 border-b border-white/5">
+                      <p className="text-white font-bold text-sm">Notificaciones</p>
+                    </div>
+                    {notifs.length === 0 ? (
+                      <p className="px-4 py-6 text-center text-gray-500 text-xs">Sin notificaciones todavía</p>
+                    ) : notifs.map(n => (
+                      <button key={n.id} onClick={() => markNotifRead(n)}
+                        className={`w-full text-left px-4 py-3 text-sm transition-colors border-b border-white/5 last:border-0 ${n.read ? 'text-gray-400 hover:bg-white/5' : 'text-white bg-violet-500/5 hover:bg-violet-500/10'}`}>
+                        <p className="font-bold text-xs">{NOTIF_COPY[n.type]}</p>
+                        {n.live_streams?.title && <p className="text-gray-400 text-xs truncate mt-0.5">{n.live_streams.title}</p>}
+                        <p className="text-gray-600 text-[10px] mt-1">{timeLabel(n.created_at)}</p>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
             {user ? (
               <div className="relative" ref={dropRef}>
                 <button onClick={() => setDropOpen(!dropOpen)}
@@ -205,6 +283,31 @@ export default function Navbar() {
                 {link.label}
               </Link>
             ))}
+            {user && (
+              <div className="px-1">
+                <button onClick={() => setNotifOpen(!notifOpen)}
+                  className="relative w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:text-white">
+                  <span className="relative">
+                    🔔
+                    <CountBadge n={unreadNotifs} />
+                  </span>
+                  Notificaciones
+                </button>
+                {notifOpen && (
+                  <div className="bg-[#1c1835] border border-white/10 rounded-xl overflow-hidden mb-2">
+                    {notifs.length === 0 ? (
+                      <p className="px-4 py-4 text-center text-gray-500 text-xs">Sin notificaciones todavía</p>
+                    ) : notifs.map(n => (
+                      <button key={n.id} onClick={() => { markNotifRead(n); setMenuOpen(false) }}
+                        className={`w-full text-left px-4 py-3 text-sm border-b border-white/5 last:border-0 ${n.read ? 'text-gray-400' : 'text-white bg-violet-500/5'}`}>
+                        <p className="font-bold text-xs">{NOTIF_COPY[n.type]}</p>
+                        {n.live_streams?.title && <p className="text-gray-400 text-xs truncate mt-0.5">{n.live_streams.title}</p>}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
             <div className="flex gap-3 pt-3 mt-1 border-t border-white/5">
               {user ? (
                 <>

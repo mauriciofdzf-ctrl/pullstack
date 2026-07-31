@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
 import StreamChat from '../components/StreamChat'
 import StartStreamModal from '../components/StartStreamModal'
+import ScheduleBreakModal from '../components/ScheduleBreakModal'
 
 type LiveStreamRow = {
   id: number
@@ -18,6 +19,19 @@ type LiveStreamRow = {
   started_at: string | null
   ended_at: string | null
   created_at: string
+  spot_mode: 'fixed' | 'raffle' | null
+  randomizer_run_at: string | null
+}
+
+type BreakSpot = {
+  id: number
+  live_stream_id: number
+  position: number
+  label: string
+  price: number
+  status: 'available' | 'pending_payment' | 'sold'
+  buyer_id: string | null
+  assigned_team: string | null
 }
 
 const SPORT_BADGE: Record<string, string> = {
@@ -40,15 +54,22 @@ function formatDateTime(iso: string | null) {
   return new Date(iso).toLocaleString('es', { weekday: 'short', hour: '2-digit', minute: '2-digit' })
 }
 
+function money(n: number) {
+  return `$${n.toLocaleString('es-MX')}`
+}
+
 export default function Live() {
   const { user, canStream, isAdmin } = useAuth()
 
   const [current, setCurrent]   = useState<LiveStreamRow | null>(null)
   const [schedule, setSchedule] = useState<LiveStreamRow[]>([])
   const [past, setPast]         = useState<LiveStreamRow[]>([])
-  const [notifiedIds, setNotifiedIds] = useState<Set<number>>(new Set())
-  const [showStartModal, setShowStartModal] = useState(false)
+  const [spotsByStream, setSpotsByStream] = useState<Record<number, BreakSpot[]>>({})
+  const [showScheduleModal, setShowScheduleModal] = useState(false)
+  const [goLiveFor, setGoLiveFor] = useState<LiveStreamRow | null>(null)
   const [playingPast, setPlayingPast] = useState<LiveStreamRow | null>(null)
+  const [buyingSpotId, setBuyingSpotId] = useState<number | null>(null)
+  const [runningRandomizer, setRunningRandomizer] = useState(false)
 
   const loadStreams = useCallback(async () => {
     const [{ data: liveData }, { data: schedData }, { data: pastData }] = await Promise.all([
@@ -56,9 +77,24 @@ export default function Live() {
       supabase.from('live_streams').select('*').eq('status', 'scheduled').order('scheduled_at', { ascending: true }),
       supabase.from('live_streams').select('*').eq('status', 'ended').not('mux_asset_playback_id', 'is', null).order('ended_at', { ascending: false }).limit(20),
     ])
-    setCurrent((liveData as LiveStreamRow) ?? null)
-    setSchedule((schedData as LiveStreamRow[]) || [])
-    setPast((pastData as LiveStreamRow[]) || [])
+    const live = (liveData as LiveStreamRow) ?? null
+    const sched = (schedData as LiveStreamRow[]) || []
+    const pastRows = (pastData as LiveStreamRow[]) || []
+    setCurrent(live)
+    setSchedule(sched)
+    setPast(pastRows)
+
+    const streamIds = [live?.id, ...sched.map(s => s.id)].filter((id): id is number => !!id)
+    if (streamIds.length > 0) {
+      const { data: spots } = await supabase.from('break_spots').select('*').in('live_stream_id', streamIds).order('position', { ascending: true })
+      const grouped: Record<number, BreakSpot[]> = {}
+      for (const s of (spots as BreakSpot[]) || []) {
+        (grouped[s.live_stream_id] ||= []).push(s)
+      }
+      setSpotsByStream(grouped)
+    } else {
+      setSpotsByStream({})
+    }
   }, [])
 
   useEffect(() => {
@@ -66,16 +102,81 @@ export default function Live() {
     const ch = supabase
       .channel('live-streams-page')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'live_streams' }, () => loadStreams())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'break_spots' }, () => loadStreams())
       .subscribe()
     return () => { supabase.removeChannel(ch) }
   }, [loadStreams])
 
-  const toggleNotify = (id: number) =>
-    setNotifiedIds(prev => { const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s })
-
   const handleEndStream = async () => {
     if (!current || !confirm('¿Terminar la transmisión?')) return
     await supabase.functions.invoke('end-stream', { body: { live_stream_id: current.id } })
+  }
+
+  const buySpot = async (spot: BreakSpot) => {
+    if (!user) { window.location.href = '/login'; return }
+    setBuyingSpotId(spot.id)
+    const { data, error } = await supabase.functions.invoke('create-spot-checkout', { body: { spot_id: spot.id } })
+    setBuyingSpotId(null)
+    if (error || data?.error) {
+      alert(data?.error || error?.message || 'Error al comprar el spot')
+      loadStreams()
+      return
+    }
+    window.location.href = data.checkout_url
+  }
+
+  const runRandomizer = async (streamId: number) => {
+    if (!confirm('¿Correr el randomizer? Esto asigna los equipos y no se puede repetir.')) return
+    setRunningRandomizer(true)
+    const { error } = await supabase.rpc('run_break_randomizer', { p_live_stream_id: streamId })
+    setRunningRandomizer(false)
+    if (error) alert(error.message)
+  }
+
+  const renderSpotGrid = (stream: LiveStreamRow) => {
+    const spots = spotsByStream[stream.id]
+    if (!stream.spot_mode || !spots || spots.length === 0) return null
+    const allSold = spots.every(s => s.status === 'sold')
+    const canRunRandomizer = stream.spot_mode === 'raffle' && !stream.randomizer_run_at && allSold
+      && stream.status === 'live' && (isAdmin || stream.host_id === user?.id)
+
+    return (
+      <div className="mt-3 pt-3 border-t border-white/5">
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-gray-500 text-[10px] font-bold uppercase tracking-wide">
+            {stream.spot_mode === 'raffle' ? 'Spots (rifa)' : 'Equipos disponibles'}
+          </p>
+          {canRunRandomizer && (
+            <button onClick={() => runRandomizer(stream.id)} disabled={runningRandomizer}
+              className="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-black transition-all">
+              🎲 Correr randomizer
+            </button>
+          )}
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          {spots.map(s => {
+            const sold = s.status === 'sold'
+            const pending = s.status === 'pending_payment'
+            const label = stream.spot_mode === 'raffle' && s.assigned_team ? `${s.label}: ${s.assigned_team}` : s.label
+            return (
+              <div key={s.id} className={`rounded-lg px-2.5 py-2 border text-xs ${sold ? 'bg-white/5 border-white/5 text-gray-600' : pending ? 'bg-amber-500/5 border-amber-500/20 text-amber-500' : 'bg-[#26213d] border-white/10 text-gray-200'}`}>
+                <p className="font-bold truncate">{label}</p>
+                {sold ? (
+                  <p className="text-[10px] mt-0.5">Vendido</p>
+                ) : pending ? (
+                  <p className="text-[10px] mt-0.5">Reservado</p>
+                ) : (
+                  <button onClick={() => buySpot(s)} disabled={buyingSpotId === s.id}
+                    className="mt-1 w-full text-[10px] font-black bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-black rounded px-2 py-1 transition-all">
+                    {buyingSpotId === s.id ? '...' : `Comprar ${money(s.price)}`}
+                  </button>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -95,9 +196,9 @@ export default function Live() {
             <p className="text-gray-400">Aperturas en vivo de cajas con odds transparentes. Cada break es grabado y publicado.</p>
           </div>
           {canStream && (
-            <button onClick={() => setShowStartModal(true)}
-              className="bg-red-500 hover:bg-red-400 text-white font-black px-4 py-2.5 rounded-xl text-sm transition-all shrink-0">
-              📡 Iniciar transmisión
+            <button onClick={() => setShowScheduleModal(true)}
+              className="bg-amber-500 hover:bg-amber-400 text-black font-black px-4 py-2.5 rounded-xl text-sm transition-all shrink-0">
+              + Programar break
             </button>
           )}
         </div>
@@ -126,17 +227,20 @@ export default function Live() {
                     <span className="text-white font-black text-xs">LIVE</span>
                   </div>
                 </div>
-                <div className="p-4 flex items-center justify-between gap-4">
-                  <div className="min-w-0">
-                    <h3 className="text-white font-bold truncate">{current.title}</h3>
-                    <p className="text-gray-500 text-sm">{current.host_display_name} · PullStackMX Live</p>
+                <div className="p-4">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="min-w-0">
+                      <h3 className="text-white font-bold truncate">{current.title}</h3>
+                      <p className="text-gray-500 text-sm">{current.host_display_name} · PullStackMX Live</p>
+                    </div>
+                    {(isAdmin || current.host_id === user?.id) && (
+                      <button onClick={handleEndStream}
+                        className="bg-[#26213d] hover:bg-red-500/20 border border-red-500/30 text-red-400 font-black px-4 py-2 rounded-xl text-sm transition-all shrink-0">
+                        Terminar
+                      </button>
+                    )}
                   </div>
-                  {(isAdmin || current.host_id === user?.id) && (
-                    <button onClick={handleEndStream}
-                      className="bg-[#26213d] hover:bg-red-500/20 border border-red-500/30 text-red-400 font-black px-4 py-2 rounded-xl text-sm transition-all shrink-0">
-                      Terminar
-                    </button>
-                  )}
+                  {renderSpotGrid(current)}
                 </div>
               </div>
             </div>
@@ -178,11 +282,14 @@ export default function Live() {
                         <p className="text-white font-bold text-sm truncate">{ev.title}</p>
                         <p className="text-gray-600 text-xs">{formatDateTime(ev.scheduled_at)} · {ev.host_display_name}</p>
                       </div>
-                      <button onClick={() => toggleNotify(ev.id)}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-bold shrink-0 border transition-all ${notifiedIds.has(ev.id) ? 'bg-violet-500/20 border-violet-500/40 text-violet-400' : 'bg-[#26213d] border-white/10 text-gray-400 hover:border-white/20'}`}>
-                        {notifiedIds.has(ev.id) ? '✓ Anotado' : 'Notificarme'}
-                      </button>
+                      {ev.host_id === user?.id && (
+                        <button onClick={() => setGoLiveFor(ev)}
+                          className="px-3 py-1.5 rounded-lg text-xs font-bold shrink-0 border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-all">
+                          🎥 Conectar OBS
+                        </button>
+                      )}
                     </div>
+                    {renderSpotGrid(ev)}
                   </div>
                 ))}
               </div>
@@ -239,8 +346,17 @@ export default function Live() {
         </div>
       </div>
 
-      {showStartModal && (
-        <StartStreamModal onClose={() => setShowStartModal(false)} onCreated={loadStreams} />
+      {showScheduleModal && (
+        <ScheduleBreakModal onClose={() => setShowScheduleModal(false)} onCreated={loadStreams} />
+      )}
+
+      {goLiveFor && (
+        <StartStreamModal
+          onClose={() => setGoLiveFor(null)}
+          onCreated={loadStreams}
+          existingStreamId={goLiveFor.id}
+          existingTitle={goLiveFor.title}
+        />
       )}
 
       {playingPast && (
